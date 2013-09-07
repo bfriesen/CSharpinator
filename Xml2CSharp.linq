@@ -7,103 +7,194 @@
 #define NONEST
 void Main()
 {
-    var xmlDocument = XDocument.Load(@"C:\Temp\xml_to_classes\test.xml");
+    var xmlDocument = XDocument.Load(@"C:\Temp\Xml2CSharp\test.xml");    
+    xmlDocument.ToString().Dump("xml");
+    var domElement = new XmlDomElement(xmlDocument.Root);
     
-    Traverse(xmlDocument.Root, null);
-    string.Join(
-        "\r\n\r\n/**********************************************************/\r\n\r\n",
-        UserDefinedClass.GetAllUsedClasses().Select(x => x.GenerateCSharpCode("Test"))).Dump();
+    var classRepository = new ClassRepository();
+    
+    var domVisitor = new DomVisitor(classRepository);
+    domVisitor.Visit(domElement);
+    
+    string
+        .Join(
+            "\r\n\r\n/**********************************************************/\r\n\r\n",
+            classRepository.GetAll().Select(x => x.GenerateCSharpCode("Test")))
+        .Dump("classes");
 }
 
-public void Traverse(XElement element, UserDefinedClass currentClass)
+public class DomVisitor
 {
-    if (!element.HasElements && !element.HasAttributes)
-    {
-        if (string.IsNullOrEmpty(element.Value))
-        {
-            if (currentClass == null)
-            {
-                currentClass = UserDefinedClass.Create(element.Name);
-            }
-            else
-            {
-                var property = new Property(element.Name);
-                property.AddPotentialPropertyDefinitions(BclClass.GetAll().Select(x =>
-                    new PropertyDefinition(x, element.Name)
-                    {
-                        XmlElement = new XmlElementAttribute(element.Name.ToString())
-                    }));
-                property.AddPotentialPropertyDefinition(
-                    new PropertyDefinition(UserDefinedClass.Create(element.Name), element.Name)
-                    {
-                        XmlElement = new XmlElementAttribute(element.Name.ToString())
-                    });
-                currentClass.AddProperty(property);
-            }
-        }
-        else
-        {
-            if (currentClass == null)
-            {
-                currentClass = UserDefinedClass.Create(element.Name);
-            }
-            
-            var property = new Property(element.Name);
-            property.AddPotentialPropertyDefinition(
-                new PropertyDefinition(BclClass.FromValue(element.Value), element.Name)
-                {
-                    XmlElement = new XmlElementAttribute(element.Name.ToString())
-                });
-            currentClass.AddProperty(property);
-        }
-    }
-    else
-    {
-        if (currentClass != null)
-        {
-            var property = new Property(element.Name);
-            property.AddPotentialPropertyDefinition(
-                new PropertyDefinition(UserDefinedClass.Create(element.Name), element.Name)
-                {
-                    XmlElement = new XmlElementAttribute(element.Name.ToString())
-                });
-            currentClass.AddProperty(property);
-        }
+    private IClassRepository _classRepository;
     
-        currentClass = UserDefinedClass.Create(element.Name);
-                
-        if (element.HasAttributes)
+    public DomVisitor(IClassRepository classRepository)
+    {
+        _classRepository = classRepository;
+    }
+
+    public bool ExcludeNamespace { get; set; }
+
+    public void Visit(IDomElement element)
+    {
+        Visit(element, null);
+    }
+
+    private void Visit(IDomElement element, UserDefinedClass currentClass)
+    {
+        if (element.HasElements) // if element has child elements
         {
-            foreach (var attribute in element.Attributes())
+            if (currentClass != null) // if this is the root element
             {
-                var property = new Property(attribute.Name);
-                property.AddPotentialPropertyDefinition(
-                    new PropertyDefinition(BclClass.FromValue(attribute.Value), attribute.Name)
-                    {
-                        XmlAttribute = new XmlAttributeAttribute(attribute.Name.ToString())
-                    });
+                var property = element.CreateProperty();
                 currentClass.AddProperty(property);
             }
-            
-            if (!element.HasElements && !string.IsNullOrEmpty(element.Value))
-            {
-                var property = new Property("Value");
-                property.AddPotentialPropertyDefinition(
-                    new PropertyDefinition(BclClass.FromValue(element.Value), "Value")
-                    {
-                        XmlText = new XmlTextAttribute()
-                    });
-                currentClass.AddProperty(property);
-            }
-        }
         
-        if (element.HasElements)
-        {
+            currentClass = new UserDefinedClass(element.Name);
+            _classRepository.AddOrUpdate(currentClass);
+            
             foreach (var childElement in element.Elements())
             {
-                Traverse(childElement, currentClass);
+                Visit(childElement, currentClass);
             }
         }
+        else // if element has no child elements
+        {
+            if (currentClass == null) // if this is the root element
+            {
+                currentClass = new UserDefinedClass(element.Name);
+                _classRepository.AddOrUpdate(currentClass);
+            }
+            else // if this is not the root element
+            {
+                var property = element.CreateProperty();
+                currentClass.AddProperty(property);
+            }
+        }
+    }
+}
+
+public interface IDomElement
+{
+    bool HasElements { get; }
+    string Value { get; }
+    string Name { get; }
+    IEnumerable<IDomElement> Elements();
+    Property CreateProperty();
+}
+
+public class XmlDomElement : IDomElement
+{
+    private readonly XElement _element;
+
+    public XmlDomElement(XElement element)
+    {
+        _element = element;
+    }
+    
+    public bool HasElements
+    {
+        get { return _element.HasElements || _element.HasAttributes; }
+    }
+    
+    public string Value
+    {
+        get { return _element.Value; }
+    }
+    
+    public string Name
+    {
+        get { return _element.Name.ToString(); }
+    }
+    
+    public IEnumerable<IDomElement> Elements()
+    {
+        return _element.Attributes().Select(x => (IDomElement)new XmlDomAttribute(x))
+            .Concat(_element.Elements().Select(x => new XmlDomElement(x)));
+    }
+    
+    public Property CreateProperty()
+    {
+        var property = new Property(_element.Name);
+        property.AddPotentialPropertyDefinition(
+            new PropertyDefinition(BclClass.FromValue(_element.Value), _element.Name)
+            {
+                XmlElement = new XmlElementAttribute(_element.Name.ToString())
+            });
+        return property;
+    }
+}
+
+public class XmlDomAttribute : IDomElement
+{
+    private readonly XAttribute _attribute;
+
+    public XmlDomAttribute(XAttribute attribute)
+    {
+        _attribute = attribute;
+    }
+    
+    public bool HasElements
+    {
+        get { return false; }
+    }
+    
+    public string Value
+    {
+        get { return _attribute.Value; }
+    }
+    
+    public string Name
+    {
+        get { return _attribute.Name.ToString(); }
+    }
+    
+    public IEnumerable<IDomElement> Elements()
+    {
+        yield break;
+    }
+    
+    public Property CreateProperty()
+    {
+        var property = new Property(_attribute.Name);
+        property.AddPotentialPropertyDefinition(
+            new PropertyDefinition(BclClass.FromValue(_attribute.Value), _attribute.Name)
+            {
+                XmlAttribute = new XmlAttributeAttribute(_attribute.Name.ToString())
+            });
+        return property;
+    }
+}
+
+public interface IClassRepository
+{
+    IEnumerable<UserDefinedClass> GetAll();
+    void AddOrUpdate(UserDefinedClass @class);
+    UserDefinedClass GetOrCreate(string typeName);
+}
+
+public class ClassRepository : IClassRepository
+{
+    private static readonly ConcurrentDictionary<string, UserDefinedClass> _classes
+        = new ConcurrentDictionary<string, UserDefinedClass>();
+
+    public IEnumerable<UserDefinedClass> GetAll()
+    {
+        return _classes.Values;
+    }
+    
+    public void AddOrUpdate(UserDefinedClass @class)
+    {
+        _classes.AddOrUpdate(
+            @class.TypeName,
+            typeName => @class,
+            (typeName, potentialClass) => GetOrCreate(typeName).MergeWith(@class));
+    }
+    
+    public UserDefinedClass GetOrCreate(string typeName)
+    {
+        return _classes.GetOrAdd(
+            typeName,
+            x => new UserDefinedClass(typeName));
     }
 }
 
@@ -114,29 +205,14 @@ public abstract class Class
 
 public class UserDefinedClass : Class
 {
-    private static readonly ConcurrentDictionary<string, UserDefinedClass> _classes = new ConcurrentDictionary<string, UserDefinedClass>();
-    
     private readonly Dictionary<string, Property> _properties = new Dictionary<string, Property>();
     private readonly string _typeName;
 
-    private UserDefinedClass(string typeName)
+    public UserDefinedClass(string typeName)
     {
         _typeName = typeName;
     }
 
-    public static UserDefinedClass Create(XName typeName)
-    {
-        return _classes.GetOrAdd(typeName.ToString(), x => new UserDefinedClass(x));
-    }
-    
-    public static IEnumerable<UserDefinedClass> GetAllUsedClasses()
-    {
-        return _classes.Values.Where(x =>
-        {
-            return true;
-        });
-    }
-    
     public string TypeName
     {
         get { return _typeName; }
@@ -157,6 +233,22 @@ public class UserDefinedClass : Class
         }
         
         foundProperty.AddPotentialPropertyDefinitions(property.PotentialPropertyDefinitions);
+    }
+    
+    public UserDefinedClass MergeWith(UserDefinedClass other)
+    {
+        if (TypeName != other.TypeName)
+        {
+            // We shouldn't hit this situation, but just in case, bail.
+            return this;
+        }
+    
+        foreach (var otherProperty in other.Properties)
+        {
+            AddProperty(otherProperty);
+        }
+        
+        return this;
     }
     
     public string GenerateCSharpCode(string @namespace)
