@@ -130,11 +130,30 @@ public class XmlDomElement : IDomElement
     public Property CreateProperty()
     {
         var property = new Property(_element.Name);
-        property.AddPotentialPropertyDefinition(
-            new PropertyDefinition(BclClass.FromValue(_element.Value), _element.Name)
-            {
-                XmlElement = new XmlElementAttribute(_element.Name.ToString())
-            });
+        
+		property.AddPotentialPropertyDefinitions(
+			BclClass.GetLegalClassesFromValue(_element.Value)
+				.Select(bclClass =>
+					new PropertyDefinition(bclClass, _element.Name)
+					{
+						XmlElement = new XmlElementAttribute(_element.Name.ToString())
+					}));
+		
+		var userDefinedClassPropertyDefinition =
+			new PropertyDefinition(new UserDefinedClass(_element.Name.ToString()), _element.Name)
+			{
+				XmlElement = new XmlElementAttribute(_element.Name.ToString())
+			};
+		
+		if (HasElements)
+		{
+			property.PrependPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
+		}
+		else
+		{
+			property.AppendPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
+		}
+		
         return property;
     }
 }
@@ -171,11 +190,13 @@ public class XmlDomAttribute : IDomElement
     public Property CreateProperty()
     {
         var property = new Property(_attribute.Name);
-        property.AddPotentialPropertyDefinition(
-            new PropertyDefinition(BclClass.FromValue(_attribute.Value), _attribute.Name)
-            {
-                XmlAttribute = new XmlAttributeAttribute(_attribute.Name.ToString())
-            });
+        property.AddPotentialPropertyDefinitions(
+			BclClass.GetLegalClassesFromValue(_attribute.Value)
+				.Select(bclClass =>
+					new PropertyDefinition(bclClass, _attribute.Name)
+					{
+						XmlAttribute = new XmlAttributeAttribute(_attribute.Name.ToString())
+					}));
         return property;
     }
 }
@@ -215,7 +236,7 @@ public class ClassRepository : IClassRepository
 
 public abstract class Class
 {
-    public abstract string GeneratePropertyCode(string propertyName);
+    public abstract string GeneratePropertyCode(string propertyName, Case classCase);
 }
 
 public class UserDefinedClass : Class
@@ -266,21 +287,22 @@ public class UserDefinedClass : Class
         return this;
     }
     
-    public string GenerateCSharpCode(string @namespace, Case classCase, Case propertyCase)
+    public string GenerateCSharpCode(Case classCase, Case propertyCase)
     {
         return string.Format(
-@"public class {1}
+@"[XmlRoot(""{0}"")]
+public class {1}
 {{
 {2}
 }}",
-            @namespace,
+            _typeName.Raw,
             _typeName.FormatAs(classCase),
             string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode(classCase, propertyCase))));
     }
     
-    public override string GeneratePropertyCode(string propertyName)
+    public override string GeneratePropertyCode(string propertyName, Case classCase)
     {
-        return string.Format("public {0} {1} {{ get; set; }}", _typeName, propertyName);
+        return string.Format("public {0} {1} {{ get; set; }}", _typeName.FormatAs(classCase), propertyName);
     }
 }
 
@@ -294,7 +316,7 @@ public class BclClass : Class
         _type = type;
     }
 
-    public override string GeneratePropertyCode(string propertyName)
+    public override string GeneratePropertyCode(string propertyName, Case classCase)
     {
         return string.Format("public {0} {1} {{ get; set; }}", _type.Name, propertyName);
     }
@@ -341,44 +363,45 @@ public class BclClass : Class
         yield return Guid;
     }
     
-    public static BclClass FromValue(string value)
+    public static IEnumerable<BclClass> GetLegalClassesFromValue(string value)
     {
         if (string.IsNullOrEmpty(value))
         {
-            return String;
+            yield return String;
+			yield break;
         }
         
         int tempInt;
         if (int.TryParse(value, out tempInt))
         {
-            return Int32;
-        }
-        
-        bool tempBool;
-        if (bool.TryParse(value, out tempBool))
-        {
-            return Boolean;
+            yield return Int32;
         }
         
         decimal tempDecimal;
         if (decimal.TryParse(value, out tempDecimal))
         {
-            return Decimal;
+            yield return Decimal;
+        }
+        
+        bool tempBool;
+        if (bool.TryParse(value, out tempBool))
+        {
+            yield return Boolean;
         }
         
         System.Guid tempGuid;
         if (System.Guid.TryParse(value, out tempGuid))
         {
-            return Guid;
+            yield return Guid;
         }
         
         System.DateTime tempDateTime;
         if (System.DateTime.TryParse(value, out tempDateTime))
         {
-            return DateTime;
+            yield return DateTime;
         }
         
-        return String;
+        yield return String;
     }
 }
 
@@ -398,21 +421,36 @@ public class Property
         get { return _potentialPropertyDefinitions; }
     }
     
-    public void AddPotentialPropertyDefinition(PropertyDefinition potentialPropertyDefinition)
+    public void PrependPotentialPropertyDefinition(PropertyDefinition potentialPropertyDefinition)
     {
         if (_potentialPropertyDefinitions.Any(x => x.Class == potentialPropertyDefinition.Class))
         {
             return;
         }
         
-        _potentialPropertyDefinitions.Add(potentialPropertyDefinition);
+        InsertPotentialPropertyDefinition(0, potentialPropertyDefinition);
+    }
+    
+    public void AppendPotentialPropertyDefinition(PropertyDefinition potentialPropertyDefinition)
+    {
+        InsertPotentialPropertyDefinition(_potentialPropertyDefinitions.Count, potentialPropertyDefinition);
+    }
+    
+    private void InsertPotentialPropertyDefinition(int index, PropertyDefinition potentialPropertyDefinition)
+    {
+        if (_potentialPropertyDefinitions.Any(x => x.Class == potentialPropertyDefinition.Class))
+        {
+            return;
+        }
+        
+        _potentialPropertyDefinitions.Insert(index, potentialPropertyDefinition);
     }
     
     public void AddPotentialPropertyDefinitions(IEnumerable<PropertyDefinition> otherPotentialPropertyDefinitions)
     {
         foreach (var otherPotentialPropertyDefinition in otherPotentialPropertyDefinitions)
         {
-            AddPotentialPropertyDefinition(otherPotentialPropertyDefinition);
+            AppendPotentialPropertyDefinition(otherPotentialPropertyDefinition);
         }
     }
     
@@ -455,7 +493,7 @@ public class PropertyDefinition
             sb.AppendLine("        [XmlText]");
         }
         
-        sb.AppendFormat("        {0}", Class.GeneratePropertyCode(Name.FormatAs(propertyCase)));
+        sb.AppendFormat("        {0}", Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase));
         
         return sb.ToString();
     }
@@ -472,8 +510,10 @@ public class ClassGenerator
         
     public void Write(Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
     {
-        _repository.GetAll().Select(x => x.GenerateCSharpCode("Test", classCase, propertyCase))
-            .Dump("classes");
+		writer.Write(
+			string.Join(
+				"\r\n\r\n",
+				_repository.GetAll().Select(x => x.GenerateCSharpCode(classCase, propertyCase))));
     }
 }
 
