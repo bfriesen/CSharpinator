@@ -5,31 +5,52 @@
 </Query>
 
 #define NONEST
-void Main()
+void Main(string[] args)
 {
-    var xml = @"
-<FooThis>
+	XDocument xDocument;
+
+	if (args == null)
+    {
+        xDocument = XDocument.Parse(
+@"<FooThis>
   <BarThat>
     <BazOther BazValue=""123"" />
     <BoomIt>abc</BoomIt>
   </BarThat>
-</FooThis>";
-//    var xml = @"
-//<foo_this>
-//  <bar_that>
-//    <baz_other baz_value=""123"" />
-//    <boom_it>abc</boom_it>
-//  </bar_that>
-//</foo_this>";
+</FooThis>");
+    }
+	else
+	{
+		if (args.Length == 0)
+		{
+			Console.WriteLine("Must include path to document as first argument.");
+			return;
+		}
+		
+		if (!File.Exists(args[0]))
+		{
+			Console.WriteLine("No file exists at: " + args[0]);
+			return;
+		}
+		
+		try
+		{	        
+		    xDocument = XDocument.Load(args[0]);
+		}
+		catch
+		{
+			Console.WriteLine("Error reading into XDocument for file: " + args[0]);
+		    return;
+		}
+	}
 
-    var xmlDocument = XDocument.Parse(xml);
-    var domElement = new XmlDomElement(xmlDocument.Root);
+    var domElement = new XmlDomElement(xDocument.Root);
     
     var classRepository = new ClassRepository();
     
     var domVisitor = new DomVisitor(classRepository);
     domVisitor.Visit(domElement);
-    
+	
     var classGenerator = new ClassGenerator(classRepository);
     classGenerator.Write(
         Case.PascalCase,
