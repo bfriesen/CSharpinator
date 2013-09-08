@@ -242,7 +242,7 @@ public class ClassRepository : IClassRepository
 
     public IEnumerable<UserDefinedClass> GetAll()
     {
-        return _classes.Values;
+        return _classes.Values.OrderBy(x => x.Order);
     }
     
     public void AddOrUpdate(UserDefinedClass @class)
@@ -268,17 +268,26 @@ public abstract class Class
 
 public class UserDefinedClass : Class
 {
+    private static int _orderSeed;
+
     private readonly Dictionary<string, Property> _properties = new Dictionary<string, Property>();
     private readonly IdentifierName _typeName;
+    private readonly int _order;
 
     public UserDefinedClass(string typeName)
     {
         _typeName = new IdentifierName(typeName);
+        _order = _orderSeed++;
     }
 
     public IdentifierName TypeName
     {
         get { return _typeName; }
+    }
+	
+    public int Order
+    {
+        get { return _order; }
     }
     
     public IEnumerable<Property> Properties
