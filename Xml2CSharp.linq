@@ -32,8 +32,8 @@ void Main()
     
     var classGenerator = new ClassGenerator(classRepository);
     classGenerator.Write(
-		Case.PascalCase,
-		Case.PascalCase,
+        Case.PascalCase,
+        Case.PascalCase,
         PropertyAttributes.XmlSerializer | PropertyAttributes.Json,
         Console.Out);
 }
@@ -131,29 +131,29 @@ public class XmlDomElement : IDomElement
     {
         var property = new Property(_element.Name);
         
-		property.AddPotentialPropertyDefinitions(
-			BclClass.GetLegalClassesFromValue(_element.Value)
-				.Select(bclClass =>
-					new PropertyDefinition(bclClass, _element.Name)
-					{
-						XmlElement = new XmlElementAttribute(_element.Name.ToString())
-					}));
-		
-		var userDefinedClassPropertyDefinition =
-			new PropertyDefinition(new UserDefinedClass(_element.Name.ToString()), _element.Name)
-			{
-				XmlElement = new XmlElementAttribute(_element.Name.ToString())
-			};
-		
-		if (HasElements)
-		{
-			property.PrependPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
-		}
-		else
-		{
-			property.AppendPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
-		}
-		
+        property.AddPotentialPropertyDefinitions(
+            BclClass.GetLegalClassesFromValue(_element.Value)
+                .Select(bclClass =>
+                    new PropertyDefinition(bclClass, _element.Name)
+                    {
+                        XmlElement = new XmlElementAttribute(_element.Name.ToString())
+                    }));
+        
+        var userDefinedClassPropertyDefinition =
+            new PropertyDefinition(new UserDefinedClass(_element.Name.ToString()), _element.Name)
+            {
+                XmlElement = new XmlElementAttribute(_element.Name.ToString())
+            };
+        
+        if (HasElements)
+        {
+            property.PrependPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
+        }
+        else
+        {
+            property.AppendPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
+        }
+        
         return property;
     }
 }
@@ -191,12 +191,12 @@ public class XmlDomAttribute : IDomElement
     {
         var property = new Property(_attribute.Name);
         property.AddPotentialPropertyDefinitions(
-			BclClass.GetLegalClassesFromValue(_attribute.Value)
-				.Select(bclClass =>
-					new PropertyDefinition(bclClass, _attribute.Name)
-					{
-						XmlAttribute = new XmlAttributeAttribute(_attribute.Name.ToString())
-					}));
+            BclClass.GetLegalClassesFromValue(_attribute.Value)
+                .Select(bclClass =>
+                    new PropertyDefinition(bclClass, _attribute.Name)
+                    {
+                        XmlAttribute = new XmlAttributeAttribute(_attribute.Name.ToString())
+                    }));
         return property;
     }
 }
@@ -368,7 +368,7 @@ public class BclClass : Class
         if (string.IsNullOrEmpty(value))
         {
             yield return String;
-			yield break;
+            yield break;
         }
         
         int tempInt;
@@ -510,10 +510,10 @@ public class ClassGenerator
         
     public void Write(Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
     {
-		writer.Write(
-			string.Join(
-				"\r\n\r\n",
-				_repository.GetAll().Select(x => x.GenerateCSharpCode(classCase, propertyCase))));
+        writer.Write(
+            string.Join(
+                "\r\n\r\n",
+                _repository.GetAll().Select(x => x.GenerateCSharpCode(classCase, propertyCase))));
     }
 }
 
@@ -526,96 +526,96 @@ public enum PropertyAttributes
 
 public enum Case
 {
-	PascalCase,
-	camelCase,
-	snake_case
+    PascalCase,
+    camelCase,
+    snake_case
 }
 
 public class IdentifierName
 {
-	private readonly string _rawIdentifierName;
-	private readonly IList<string> _words;
-	
-	private readonly Lazy<string> _pascalCase;
-	private readonly Lazy<string> _camelCase;
-	private readonly Lazy<string> _snakeCase;
+    private readonly string _rawIdentifierName;
+    private readonly IList<string> _words;
+    
+    private readonly Lazy<string> _pascalCase;
+    private readonly Lazy<string> _camelCase;
+    private readonly Lazy<string> _snakeCase;
 
-	public IdentifierName(string rawIdentifierName)
-	{
-		_rawIdentifierName = rawIdentifierName;
-		
-		_words = 
-			Regex.Split(
-				Regex.Replace(
-					rawIdentifierName.Replace(' ', '_'),
-					@"([A-Z])",
-					match => "_" + match.Value.ToLowerInvariant()),
-				@"(?:_(?=[a-zA-Z]))|(?:^_$)")
-			.Select(x => x.Trim().Trim('_'))
-			.Where(x => !string.IsNullOrEmpty(x) && x.Length > 0)
-			.ToList();
-		
-		_pascalCase = new Lazy<string>(
-			() =>
-			_words.Aggregate(
-				"",
-				(acc, n) =>
-					acc
-					+ char.ToUpper(n[0]).ToString()
-					+ (n.Length > 1 ? n.Substring(1) : "")));
-					
-		_camelCase = new Lazy<string>(
-			() =>
-			_words.First()
-			+ _words.Skip(1).Aggregate(
-				"",
-				(acc, n) =>
-				acc
-				+ char.ToUpper(n[0]).ToString()
-				+ (n.Length > 1 ? n.Substring(1) : "")));
-				
-		_snakeCase = new Lazy<string>(
-			() =>
-			string.Join("_", _words));
-	}
-	
-	public string Raw
-	{
-		get { return _rawIdentifierName; }
-	}
-	
-	private IList<string> Words
-	{
-		get { return _words; }
-	}
-	
-	public string PascalCase
-	{
-		get { return _pascalCase.Value; }
-	}
-	
-	public string camelCase
-	{
-		get { return _camelCase.Value; }
-	}
-	
-	public string snake_case
-	{
-		get { return _snakeCase.Value; }
-	}
-	
-	public string FormatAs(Case propertyCase)
-	{
-		switch (propertyCase)
-		{
-			case Case.PascalCase:
-				return PascalCase;
-			case Case.camelCase:
-				return camelCase;
-			case Case.snake_case:
-				return snake_case;
-			default:
-				throw new InvalidOperationException("Invalid value for Case: " + (int)propertyCase);
-		}
-	}
+    public IdentifierName(string rawIdentifierName)
+    {
+        _rawIdentifierName = rawIdentifierName;
+        
+        _words = 
+            Regex.Split(
+                Regex.Replace(
+                    rawIdentifierName.Replace(' ', '_'),
+                    @"([A-Z])",
+                    match => "_" + match.Value.ToLowerInvariant()),
+                @"(?:_(?=[a-zA-Z]))|(?:^_$)")
+            .Select(x => x.Trim().Trim('_'))
+            .Where(x => !string.IsNullOrEmpty(x) && x.Length > 0)
+            .ToList();
+        
+        _pascalCase = new Lazy<string>(
+            () =>
+            _words.Aggregate(
+                "",
+                (acc, n) =>
+                    acc
+                    + char.ToUpper(n[0]).ToString()
+                    + (n.Length > 1 ? n.Substring(1) : "")));
+                    
+        _camelCase = new Lazy<string>(
+            () =>
+            _words.First()
+            + _words.Skip(1).Aggregate(
+                "",
+                (acc, n) =>
+                acc
+                + char.ToUpper(n[0]).ToString()
+                + (n.Length > 1 ? n.Substring(1) : "")));
+                
+        _snakeCase = new Lazy<string>(
+            () =>
+            string.Join("_", _words));
+    }
+    
+    public string Raw
+    {
+        get { return _rawIdentifierName; }
+    }
+    
+    private IList<string> Words
+    {
+        get { return _words; }
+    }
+    
+    public string PascalCase
+    {
+        get { return _pascalCase.Value; }
+    }
+    
+    public string camelCase
+    {
+        get { return _camelCase.Value; }
+    }
+    
+    public string snake_case
+    {
+        get { return _snakeCase.Value; }
+    }
+    
+    public string FormatAs(Case propertyCase)
+    {
+        switch (propertyCase)
+        {
+            case Case.PascalCase:
+                return PascalCase;
+            case Case.camelCase:
+                return camelCase;
+            case Case.snake_case:
+                return snake_case;
+            default:
+                throw new InvalidOperationException("Invalid value for Case: " + (int)propertyCase);
+        }
+    }
 }
