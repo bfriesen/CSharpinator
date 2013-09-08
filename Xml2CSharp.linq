@@ -310,47 +310,49 @@ public class BclClass : Class
 {
     private static readonly ConcurrentDictionary<Type, BclClass> _classes = new ConcurrentDictionary<Type, BclClass>();
     private readonly Type _type;
+	private readonly string _typeName;
 
-    private BclClass(Type type)
+    private BclClass(Type type, string typeName)
     {
         _type = type;
+		_typeName = typeName;
     }
 
     public override string GeneratePropertyCode(string propertyName, Case classCase)
     {
-        return string.Format("public {0} {1} {{ get; set; }}", _type.Name, propertyName);
+        return string.Format("public {0} {1} {{ get; set; }}", _typeName, propertyName);
     }
     
     public string TypeName { get { return _type.Name; } }
     
     public static BclClass String
     {
-        get { return _classes.GetOrAdd(typeof(string), type => new BclClass(type)); }
+        get { return _classes.GetOrAdd(typeof(string), type => new BclClass(type, "string")); }
     }
     
     public static BclClass Boolean
     {
-        get { return new BclClass(typeof(bool)); }
+        get { return _classes.GetOrAdd(typeof(bool), type => new BclClass(type, "bool")); }
     }
     
     public static BclClass Int32
     {
-        get { return new BclClass(typeof(int)); }
+        get { return _classes.GetOrAdd(typeof(int), type => new BclClass(type, "int")); }
     }
     
     public static BclClass Decimal
     {
-        get { return _classes.GetOrAdd(typeof(decimal), type => new BclClass(type)); }
+        get { return _classes.GetOrAdd(typeof(decimal), type => new BclClass(type, "decimal")); }
     }
     
     public static BclClass DateTime
     {
-        get { return _classes.GetOrAdd(typeof(DateTime), type => new BclClass(type)); }
+        get { return _classes.GetOrAdd(typeof(DateTime), type => new BclClass(type, "DateTime")); }
     }
     
     public static BclClass Guid
     {
-        get { return _classes.GetOrAdd(typeof(Guid), type => new BclClass(type)); }
+        get { return _classes.GetOrAdd(typeof(Guid), type => new BclClass(type, "Guid")); }
     }
     
     public static IEnumerable<BclClass> GetAll()
