@@ -7,9 +7,9 @@
 #define NONEST
 void Main(string[] args)
 {
-	XDocument xDocument;
+    XDocument xDocument;
 
-	if (args == null)
+    if (args == null)
     {
         xDocument = XDocument.Parse(
 @"<FooThis>
@@ -19,30 +19,30 @@ void Main(string[] args)
   </BarThat>
 </FooThis>");
     }
-	else
-	{
-		if (args.Length == 0)
-		{
-			Console.WriteLine("Must include path to document as first argument.");
-			return;
-		}
-		
-		if (!File.Exists(args[0]))
-		{
-			Console.WriteLine("No file exists at: " + args[0]);
-			return;
-		}
-		
-		try
-		{	        
-		    xDocument = XDocument.Load(args[0]);
-		}
-		catch
-		{
-			Console.WriteLine("Error reading into XDocument for file: " + args[0]);
-		    return;
-		}
-	}
+    else
+    {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Must include path to document as first argument.");
+            return;
+        }
+        
+        if (!File.Exists(args[0]))
+        {
+            Console.WriteLine("No file exists at: " + args[0]);
+            return;
+        }
+        
+        try
+        {            
+            xDocument = XDocument.Load(args[0]);
+        }
+        catch
+        {
+            Console.WriteLine("Error reading into XDocument for file: " + args[0]);
+            return;
+        }
+    }
 
     var domElement = new XmlDomElement(xDocument.Root);
     
@@ -50,7 +50,7 @@ void Main(string[] args)
     
     var domVisitor = new DomVisitor(classRepository);
     domVisitor.Visit(domElement);
-	
+    
     var classGenerator = new ClassGenerator(classRepository);
     classGenerator.Write(
         Case.PascalCase,
@@ -144,11 +144,11 @@ public class XmlDomElement : IDomElement
     
     public IEnumerable<IDomElement> Elements
     {
-		get
-		{
-			return _element.Attributes().Select(x => (IDomElement)new XmlDomAttribute(x))
-			   .Concat(_element.Elements().Select(x => new XmlDomElement(x)));
-		}
+        get
+        {
+            return _element.Attributes().Select(x => (IDomElement)new XmlDomAttribute(x))
+               .Concat(_element.Elements().Select(x => new XmlDomElement(x)));
+        }
     }
     
     public Property CreateProperty()
@@ -208,10 +208,10 @@ public class XmlDomAttribute : IDomElement
     
     public IEnumerable<IDomElement> Elements
     {
-		get
-		{
-        	yield break;
-		}
+        get
+        {
+            yield break;
+        }
     }
     
     public Property CreateProperty()
@@ -284,7 +284,7 @@ public class UserDefinedClass : Class
     {
         get { return _typeName; }
     }
-	
+    
     public int Order
     {
         get { return _order; }
@@ -346,12 +346,12 @@ public class BclClass : Class
 {
     private static readonly ConcurrentDictionary<Type, BclClass> _classes = new ConcurrentDictionary<Type, BclClass>();
     private readonly Type _type;
-	private readonly string _typeName;
+    private readonly string _typeName;
 
     private BclClass(Type type, string typeName)
     {
         _type = type;
-		_typeName = typeName;
+        _typeName = typeName;
     }
 
     public override string GeneratePropertyCode(string propertyName, Case classCase)
@@ -548,18 +548,18 @@ public class ClassGenerator
         
     public void Write(Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
     {
-		writer.WriteLine("using System;");
-		writer.WriteLine("using System.Serialization.Xml;");
-		writer.WriteLine();
-		writer.WriteLine("namespace YourNamespaceHere");
-		writer.WriteLine("{");
-	
+        writer.WriteLine("using System;");
+        writer.WriteLine("using System.Serialization.Xml;");
+        writer.WriteLine();
+        writer.WriteLine("namespace YourNamespaceHere");
+        writer.WriteLine("{");
+    
         writer.WriteLine(
             string.Join(
                 "\r\n\r\n",
                 _repository.GetAll().Select(x => x.GenerateCSharpCode(classCase, propertyCase))));
-		
-		writer.WriteLine("}");
+        
+        writer.WriteLine("}");
     }
 }
 
