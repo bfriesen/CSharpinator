@@ -7,8 +7,14 @@
 #define NONEST
 void Main()
 {
-    var xmlDocument = XDocument.Load(@"C:\Temp\Xml2CSharp\test.xml");    
-    xmlDocument.ToString().Dump("xml");
+    var xml = @"<foo>
+  <bar>
+    <baz baz_value=""123"" />
+    <bang>abc</bang>
+  </bar>
+</foo>";
+
+    var xmlDocument = XDocument.Parse(xml);
     var domElement = new XmlDomElement(xmlDocument.Root);
     
     var classRepository = new ClassRepository();
@@ -16,11 +22,10 @@ void Main()
     var domVisitor = new DomVisitor(classRepository);
     domVisitor.Visit(domElement);
     
-    string
-        .Join(
-            "\r\n\r\n/**********************************************************/\r\n\r\n",
-            classRepository.GetAll().Select(x => x.GenerateCSharpCode("Test")))
-        .Dump("classes");
+    var classGenerator = new ClassGenerator(classRepository);
+    classGenerator.Write(
+        PropertyAttributes.XmlSerializer | PropertyAttributes.Json,
+        Console.Out);
 }
 
 public class DomVisitor
@@ -450,4 +455,27 @@ public class PropertyDefinition
         
         return sb.ToString();
     }
+}
+
+public class ClassGenerator
+{
+    private readonly IClassRepository _repository;
+
+    public ClassGenerator(IClassRepository repository)
+    {
+        _repository = repository;
+    }
+        
+    public void Write(PropertyAttributes propertyAttributes, TextWriter writer)
+    {
+        _repository.GetAll().Select(x => x.GenerateCSharpCode("Test"))
+            .Dump("classes");
+    }
+}
+
+[Flags]
+public enum PropertyAttributes
+{
+    XmlSerializer,
+    Json
 }
