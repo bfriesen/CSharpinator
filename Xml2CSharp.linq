@@ -7,12 +7,20 @@
 #define NONEST
 void Main()
 {
-    var xml = @"<foo>
-  <bar>
-    <baz baz_value=""123"" />
-    <bang>abc</bang>
-  </bar>
-</foo>";
+    var xml = @"
+<FooThis>
+  <BarThat>
+    <BazOther BazValue=""123"" />
+    <BoomIt>abc</BoomIt>
+  </BarThat>
+</FooThis>";
+//    var xml = @"
+//<foo_this>
+//  <bar_that>
+//    <baz_other baz_value=""123"" />
+//    <boom_it>abc</boom_it>
+//  </bar_that>
+//</foo_this>";
 
     var xmlDocument = XDocument.Parse(xml);
     var domElement = new XmlDomElement(xmlDocument.Root);
@@ -24,6 +32,8 @@ void Main()
     
     var classGenerator = new ClassGenerator(classRepository);
     classGenerator.Write(
+		Case.PascalCase,
+		Case.PascalCase,
         PropertyAttributes.XmlSerializer | PropertyAttributes.Json,
         Console.Out);
 }
@@ -190,7 +200,7 @@ public class ClassRepository : IClassRepository
     public void AddOrUpdate(UserDefinedClass @class)
     {
         _classes.AddOrUpdate(
-            @class.TypeName,
+            @class.TypeName.Raw,
             typeName => @class,
             (typeName, potentialClass) => GetOrCreate(typeName).MergeWith(@class));
     }
@@ -211,14 +221,14 @@ public abstract class Class
 public class UserDefinedClass : Class
 {
     private readonly Dictionary<string, Property> _properties = new Dictionary<string, Property>();
-    private readonly string _typeName;
+    private readonly IdentifierName _typeName;
 
     public UserDefinedClass(string typeName)
     {
-        _typeName = typeName;
+        _typeName = new IdentifierName(typeName);
     }
 
-    public string TypeName
+    public IdentifierName TypeName
     {
         get { return _typeName; }
     }
@@ -231,9 +241,9 @@ public class UserDefinedClass : Class
     public void AddProperty(Property property)
     {
         Property foundProperty;
-        if (!_properties.TryGetValue(property.Name, out foundProperty))
+        if (!_properties.TryGetValue(property.Name.Raw, out foundProperty))
         {
-            _properties.Add(property.Name, property);
+            _properties.Add(property.Name.Raw, property);
             return;
         }
         
@@ -256,22 +266,16 @@ public class UserDefinedClass : Class
         return this;
     }
     
-    public string GenerateCSharpCode(string @namespace)
+    public string GenerateCSharpCode(string @namespace, Case classCase, Case propertyCase)
     {
         return string.Format(
-@"using System;
-using System.Xml.Serialization;
-
-namespace {0}
+@"public class {1}
 {{
-    public class {1}
-    {{
 {2}
-    }}
 }}",
             @namespace,
-            _typeName,
-            string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode())));
+            _typeName.FormatAs(classCase),
+            string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode(classCase, propertyCase))));
     }
     
     public override string GeneratePropertyCode(string propertyName)
@@ -384,10 +388,10 @@ public class Property
 
     public Property(XName propertyName)
     {
-        Name = propertyName.ToString();
+        Name = new IdentifierName(propertyName.ToString());
     }
 
-    public string Name { get; set; }
+    public IdentifierName Name { get; set; }
     
     public IEnumerable<PropertyDefinition> PotentialPropertyDefinitions
     {
@@ -412,9 +416,9 @@ public class Property
         }
     }
     
-    public string GeneratePropertyCode()
+    public string GeneratePropertyCode(Case classCase, Case propertyCase)
     {
-        return PotentialPropertyDefinitions.First().GeneratePropertyCode();
+        return PotentialPropertyDefinitions.First().GeneratePropertyCode(classCase, propertyCase);
     }
 }
 
@@ -423,27 +427,27 @@ public class PropertyDefinition
     public PropertyDefinition(Class @class, XName propertyName)
     {
         Class = @class;
-        Name = propertyName.ToString();
+        Name = new IdentifierName(propertyName.ToString());
     }
 
     public Class Class { get; set; }
-    public string Name { get; set; }
+    public IdentifierName Name { get; set; }
     public XmlElementAttribute XmlElement { get; set; }
     public XmlAttributeAttribute XmlAttribute { get; set; }
     public XmlTextAttribute XmlText { get; set; }
     
-    public string GeneratePropertyCode()
+    public string GeneratePropertyCode(Case classCase, Case propertyCase)
     {
         var sb = new StringBuilder();
         
         if (XmlElement != null)
         {
-            sb.AppendLine(string.Format("        [XmlElement(\"{0}\")]", Name));
+            sb.AppendLine(string.Format("        [XmlElement(\"{0}\")]", Name.Raw));
         }
         
         if (XmlAttribute != null)
         {
-            sb.AppendLine(string.Format("        [XmlAttribute(\"{0}\")]", Name));
+            sb.AppendLine(string.Format("        [XmlAttribute(\"{0}\")]", Name.Raw));
         }
         
         if (XmlText != null)
@@ -451,7 +455,7 @@ public class PropertyDefinition
             sb.AppendLine("        [XmlText]");
         }
         
-        sb.AppendFormat("        {0}", Class.GeneratePropertyCode(Name));
+        sb.AppendFormat("        {0}", Class.GeneratePropertyCode(Name.FormatAs(propertyCase)));
         
         return sb.ToString();
     }
@@ -466,9 +470,9 @@ public class ClassGenerator
         _repository = repository;
     }
         
-    public void Write(PropertyAttributes propertyAttributes, TextWriter writer)
+    public void Write(Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
     {
-        _repository.GetAll().Select(x => x.GenerateCSharpCode("Test"))
+        _repository.GetAll().Select(x => x.GenerateCSharpCode("Test", classCase, propertyCase))
             .Dump("classes");
     }
 }
@@ -478,4 +482,100 @@ public enum PropertyAttributes
 {
     XmlSerializer,
     Json
+}
+
+public enum Case
+{
+	PascalCase,
+	camelCase,
+	snake_case
+}
+
+public class IdentifierName
+{
+	private readonly string _rawIdentifierName;
+	private readonly IList<string> _words;
+	
+	private readonly Lazy<string> _pascalCase;
+	private readonly Lazy<string> _camelCase;
+	private readonly Lazy<string> _snakeCase;
+
+	public IdentifierName(string rawIdentifierName)
+	{
+		_rawIdentifierName = rawIdentifierName;
+		
+		_words = 
+			Regex.Split(
+				Regex.Replace(
+					rawIdentifierName.Replace(' ', '_'),
+					@"([A-Z])",
+					match => "_" + match.Value.ToLowerInvariant()),
+				@"(?:_(?=[a-zA-Z]))|(?:^_$)")
+			.Select(x => x.Trim().Trim('_'))
+			.Where(x => !string.IsNullOrEmpty(x) && x.Length > 0)
+			.ToList();
+		
+		_pascalCase = new Lazy<string>(
+			() =>
+			_words.Aggregate(
+				"",
+				(acc, n) =>
+					acc
+					+ char.ToUpper(n[0]).ToString()
+					+ (n.Length > 1 ? n.Substring(1) : "")));
+					
+		_camelCase = new Lazy<string>(
+			() =>
+			_words.First()
+			+ _words.Skip(1).Aggregate(
+				"",
+				(acc, n) =>
+				acc
+				+ char.ToUpper(n[0]).ToString()
+				+ (n.Length > 1 ? n.Substring(1) : "")));
+				
+		_snakeCase = new Lazy<string>(
+			() =>
+			string.Join("_", _words));
+	}
+	
+	public string Raw
+	{
+		get { return _rawIdentifierName; }
+	}
+	
+	private IList<string> Words
+	{
+		get { return _words; }
+	}
+	
+	public string PascalCase
+	{
+		get { return _pascalCase.Value; }
+	}
+	
+	public string camelCase
+	{
+		get { return _camelCase.Value; }
+	}
+	
+	public string snake_case
+	{
+		get { return _snakeCase.Value; }
+	}
+	
+	public string FormatAs(Case propertyCase)
+	{
+		switch (propertyCase)
+		{
+			case Case.PascalCase:
+				return PascalCase;
+			case Case.camelCase:
+				return camelCase;
+			case Case.snake_case:
+				return snake_case;
+			default:
+				throw new InvalidOperationException("Invalid value for Case: " + (int)propertyCase);
+		}
+	}
 }
