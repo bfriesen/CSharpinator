@@ -317,11 +317,11 @@ public class UserDefinedClass : Class
     public string GenerateCSharpCode(Case classCase, Case propertyCase)
     {
         return string.Format(
-@"[XmlRoot(""{0}"")]
-public class {1}
-{{
+@"    [XmlRoot(""{0}"")]
+    public class {1}
+    {{
 {2}
-}}",
+    }}",
             _typeName.Raw,
             _typeName.FormatAs(classCase),
             string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode(classCase, propertyCase))));
@@ -539,10 +539,18 @@ public class ClassGenerator
         
     public void Write(Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
     {
-        writer.Write(
+		writer.WriteLine("using System;");
+		writer.WriteLine("using System.Serialization.Xml;");
+		writer.WriteLine();
+		writer.WriteLine("namespace YourNamespaceHere");
+		writer.WriteLine("{");
+	
+        writer.WriteLine(
             string.Join(
                 "\r\n\r\n",
                 _repository.GetAll().Select(x => x.GenerateCSharpCode(classCase, propertyCase))));
+		
+		writer.WriteLine("}");
     }
 }
 
