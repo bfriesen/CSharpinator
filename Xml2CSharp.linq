@@ -34,7 +34,7 @@ void Main()
     classGenerator.Write(
         Case.PascalCase,
         Case.PascalCase,
-        PropertyAttributes.XmlSerializer | PropertyAttributes.Json,
+        PropertyAttributes.XmlSerializion | PropertyAttributes.DataContract,
         Console.Out);
 }
 
@@ -67,7 +67,7 @@ public class DomVisitor
             currentClass = new UserDefinedClass(element.Name);
             _classRepository.AddOrUpdate(currentClass);
             
-            foreach (var childElement in element.Elements())
+            foreach (var childElement in element.Elements)
             {
                 Visit(childElement, currentClass);
             }
@@ -93,7 +93,7 @@ public interface IDomElement
     bool HasElements { get; }
     string Value { get; }
     string Name { get; }
-    IEnumerable<IDomElement> Elements();
+    IEnumerable<IDomElement> Elements { get; }
     Property CreateProperty();
 }
 
@@ -121,10 +121,13 @@ public class XmlDomElement : IDomElement
         get { return _element.Name.ToString(); }
     }
     
-    public IEnumerable<IDomElement> Elements()
+    public IEnumerable<IDomElement> Elements
     {
-        return _element.Attributes().Select(x => (IDomElement)new XmlDomAttribute(x))
-            .Concat(_element.Elements().Select(x => new XmlDomElement(x)));
+		get
+		{
+			return _element.Attributes().Select(x => (IDomElement)new XmlDomAttribute(x))
+			   .Concat(_element.Elements().Select(x => new XmlDomElement(x)));
+		}
     }
     
     public Property CreateProperty()
@@ -182,9 +185,12 @@ public class XmlDomAttribute : IDomElement
         get { return _attribute.Name.ToString(); }
     }
     
-    public IEnumerable<IDomElement> Elements()
+    public IEnumerable<IDomElement> Elements
     {
-        yield break;
+		get
+		{
+        	yield break;
+		}
     }
     
     public Property CreateProperty()
@@ -522,8 +528,8 @@ public class ClassGenerator
 [Flags]
 public enum PropertyAttributes
 {
-    XmlSerializer,
-    Json
+    XmlSerializion,
+    DataContract
 }
 
 public enum Case
