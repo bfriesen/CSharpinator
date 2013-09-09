@@ -51,6 +51,17 @@ void Main(string[] args)
     var domVisitor = new DomVisitor(classRepository);
     domVisitor.Visit(domElement);
     
+    var classes = classRepository.GetAll();
+    classes.Dump();    
+    
+    var classDefinitions = ClassDefinitions.FromClasses(classes);
+    classDefinitions.Dump();
+    
+    var loadedClasses = classDefinitions.ToClasses(classRepository);
+    loadedClasses.Dump();
+    
+    return;
+    
     var classGenerator = new ClassGenerator(classRepository);
     classGenerator.Write(
         Case.PascalCase,
@@ -160,13 +171,13 @@ public class XmlDomElement : IDomElement
                 .Select(bclClass =>
                     new PropertyDefinition(bclClass, _element.Name)
                     {
-                        XmlElement = new XmlElementAttribute(_element.Name.ToString())
+                        Attributes = new List<AttributeProxy>{ AttributeProxy.XmlElement(_element.Name.ToString()) }
                     }));
         
         var userDefinedClassPropertyDefinition =
             new PropertyDefinition(new UserDefinedClass(_element.Name.ToString()), _element.Name)
             {
-                XmlElement = new XmlElementAttribute(_element.Name.ToString())
+                Attributes = new List<AttributeProxy>{ AttributeProxy.XmlElement(_element.Name.ToString()) }
             };
         
         if (HasElements)
@@ -222,7 +233,7 @@ public class XmlDomAttribute : IDomElement
                 .Select(bclClass =>
                     new PropertyDefinition(bclClass, _attribute.Name)
                     {
-                        XmlAttribute = new XmlAttributeAttribute(_attribute.Name.ToString())
+                        Attributes = new List<AttributeProxy>{ AttributeProxy.XmlAttribute(_attribute.Name.ToString()) }
                     }));
         return property;
     }
@@ -348,7 +359,7 @@ public class BclClass : Class
     private readonly Type _type;
     private readonly string _typeName;
 
-    private BclClass(Type type, string typeName)
+    public BclClass(Type type, string typeName)
     {
         _type = type;
         _typeName = typeName;
@@ -359,7 +370,8 @@ public class BclClass : Class
         return string.Format("public {0} {1} {{ get; set; }}", _typeName, propertyName);
     }
     
-    public string TypeName { get { return _type.Name; } }
+    public Type Type { get { return _type; } }
+    public string TypeName { get { return _typeName; } }
     
     public static BclClass String
     {
@@ -504,31 +516,20 @@ public class PropertyDefinition
     {
         Class = @class;
         Name = new IdentifierName(propertyName.ToString());
+        Attributes = new List<AttributeProxy>();
     }
 
     public Class Class { get; set; }
     public IdentifierName Name { get; set; }
-    public XmlElementAttribute XmlElement { get; set; }
-    public XmlAttributeAttribute XmlAttribute { get; set; }
-    public XmlTextAttribute XmlText { get; set; }
+    public List<AttributeProxy> Attributes { get; set; }
     
     public string GeneratePropertyCode(Case classCase, Case propertyCase)
     {
         var sb = new StringBuilder();
         
-        if (XmlElement != null)
+        foreach (var attribute in Attributes)
         {
-            sb.AppendLine(string.Format("        [XmlElement(\"{0}\")]", Name.Raw));
-        }
-        
-        if (XmlAttribute != null)
-        {
-            sb.AppendLine(string.Format("        [XmlAttribute(\"{0}\")]", Name.Raw));
-        }
-        
-        if (XmlText != null)
-        {
-            sb.AppendLine("        [XmlText]");
+            sb.AppendLine(string.Format("        {0}", attribute.ToCode()));
         }
         
         sb.AppendFormat("        {0}", Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase));
@@ -663,5 +664,180 @@ public class IdentifierName
             default:
                 throw new InvalidOperationException("Invalid value for Case: " + (int)propertyCase);
         }
+    }
+}
+
+public class ClassDefinitions
+{
+    public List<UserDefinedClassProxy> Classes { get; set; }
+    
+    public static ClassDefinitions FromClasses(IEnumerable<UserDefinedClass> classes)
+    {
+        var classDefinitions = new ClassDefinitions();
+        classDefinitions.Classes =
+            classes.Select(x => UserDefinedClassProxy.FromUserDefinedClass(x)).ToList();
+        return classDefinitions;
+    }
+    
+    public IEnumerable<UserDefinedClass> ToClasses(IClassRepository classRepository)
+    {
+        return Classes.Select(x => x.ToUserDefinedClass(classRepository)).ToList();
+    }
+}
+
+[XmlRoot("Class")]
+[XmlInclude(typeof(UserDefinedClassProxy))]
+[XmlInclude(typeof(BclClassProxy))]
+public class ClassProxy
+{
+    public string TypeName { get; set; }
+    
+    public static ClassProxy FromClass(Class @class)
+    {
+        if (@class is UserDefinedClass)
+        {
+            return UserDefinedClassProxy.FromUserDefinedClass((UserDefinedClass)@class);
+        }
+        else
+        {
+            return BclClassProxy.FromBclClass((BclClass)@class);
+        }
+    }
+    
+    public Class ToClass(IClassRepository classRepository)
+    {
+        if (this is UserDefinedClassProxy)
+        {
+            return classRepository.GetOrCreate(TypeName);
+        }
+        else
+        {
+            return BclClassProxy.ToBclClass((BclClassProxy)this);
+        }
+    }
+}
+
+[XmlRoot("UserDefinedClass")]
+public class UserDefinedClassProxy : ClassProxy
+{
+    public List<PropertyProxy> Properties { get; set; }
+    
+    public static UserDefinedClassProxy FromUserDefinedClass(UserDefinedClass userDefinedClass)
+    {
+        return new UserDefinedClassProxy
+        {
+            TypeName = userDefinedClass.TypeName.Raw,
+            Properties = userDefinedClass.Properties.Select(x => PropertyProxy.FromProperty(x)).ToList()
+        };
+    }
+    
+    public UserDefinedClass ToUserDefinedClass(IClassRepository classRepository)
+    {
+        var userDefinedClass = classRepository.GetOrCreate(TypeName);
+        
+        foreach (var propertyProxy in Properties)
+        {
+            userDefinedClass.AddProperty(propertyProxy.ToProperty(classRepository));
+        }
+        
+        return userDefinedClass;
+    }
+}
+
+[XmlRoot("BclClass")]
+public class BclClassProxy : ClassProxy
+{
+    public string TypeFullName { get; set; }
+    
+    public static BclClassProxy FromBclClass(BclClass bclClass)
+    {
+        return new BclClassProxy
+        {
+            TypeName = bclClass.TypeName,
+            TypeFullName = bclClass.Type.FullName
+        };
+    }
+    
+    public static BclClass ToBclClass(BclClassProxy bclClassProxy)
+    {
+        return new BclClass(Type.GetType(bclClassProxy.TypeFullName), bclClassProxy.TypeName);
+    }
+}
+
+[XmlRoot("Property")]
+public class PropertyProxy
+{
+    public string Name { get; set; }
+    public List<PropertyDefinitionProxy> PotentialPropertyDefinitions { get; set; }
+    
+    public static PropertyProxy FromProperty(Property property)
+    {
+        return new PropertyProxy
+        {
+            Name = property.Name.Raw,
+            PotentialPropertyDefinitions = property.PotentialPropertyDefinitions.Select(x => PropertyDefinitionProxy.FromPropertyDefinition(x)).ToList()
+        };
+    }
+    
+    public Property ToProperty(IClassRepository classRepository)
+    {
+        var property = new Property(XName.Get(Name));
+        property.AddPotentialPropertyDefinitions(PotentialPropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository)));
+        return property;
+    }
+}
+
+[XmlRoot("PropertyDefinition")]
+public class PropertyDefinitionProxy
+{
+    public string Name { get; set; }
+    public ClassProxy Class { get; set; }
+    public List<AttributeProxy> Attributes { get; set; }
+    
+    public static PropertyDefinitionProxy FromPropertyDefinition(PropertyDefinition propertyDefinition)
+    {
+        return new PropertyDefinitionProxy
+        {
+            Name = propertyDefinition.Name.Raw,
+            Class = ClassProxy.FromClass(propertyDefinition.Class),
+            Attributes = new List<AttributeProxy>(propertyDefinition.Attributes)
+        };
+    }
+    
+    public PropertyDefinition ToPropertyDefinition(IClassRepository classRepository)
+    {
+        var @class = Class.ToClass(classRepository);
+        var propertyDefinition = new PropertyDefinition(@class, XName.Get(Name));
+        propertyDefinition.Attributes = new List<AttributeProxy>(Attributes);
+        return propertyDefinition;
+    }
+}
+
+[XmlRoot("Attribute")]
+public class AttributeProxy
+{
+    public string AttributeTypeName { get; set; }
+    public string ElementNameSetter { get; set; }
+    
+    public static AttributeProxy XmlElement(string elementName)
+    {
+        return new AttributeProxy { AttributeTypeName = "XmlElement", ElementNameSetter = elementName };
+    }
+    
+    public static AttributeProxy XmlAttribute(string attributeName)
+    {
+        return new AttributeProxy { AttributeTypeName = "XmlAttribute", ElementNameSetter = attributeName };
+    }
+    
+    public static AttributeProxy XmlText()
+    {
+        return new AttributeProxy { AttributeTypeName = "XmlText" };
+    }
+    
+    public string ToCode()
+    {
+        return ElementNameSetter != null
+            ? string.Format("[{0}({1})]", AttributeTypeName, ElementNameSetter)
+            : string.Format("[{0}]", AttributeTypeName);
     }
 }
