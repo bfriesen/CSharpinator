@@ -465,7 +465,7 @@ public class BclClass : Class
     private readonly Type _type;
     private readonly string _typeName;
 
-    public BclClass(Type type, string typeName)
+    private BclClass(Type type, string typeName)
     {
         _type = type;
         _typeName = typeName;
@@ -520,14 +520,34 @@ public class BclClass : Class
         get { return _classes.GetOrAdd(typeof(Guid), type => new BclClass(type, "Guid")); }
     }
     
-    public static IEnumerable<BclClass> GetAll()
+    public static BclClass FromType(Type type)
     {
-        yield return String;
-        yield return Boolean;
-        yield return Int32;
-        yield return Decimal;
-        yield return DateTime;
-        yield return Guid;
+        if (type == typeof(string))
+        {
+            return String;
+        }
+        if (type == typeof(bool))
+        {
+            return Boolean;
+        }
+        if (type == typeof(int))
+        {
+            return Int32;
+        }
+        if (type == typeof(decimal))
+        {
+            return Decimal;
+        }
+        if (type == typeof(DateTime))
+        {
+            return DateTime;
+        }
+        if (type == typeof(Guid))
+        {
+            return Guid;
+        }
+
+        throw new InvalidOperationException("Invalid type for BclClass: " + type);
     }
     
     public static IEnumerable<BclClass> GetLegalClassesFromValue(string value)
@@ -885,7 +905,7 @@ public class BclClassProxy : ClassProxy
     
     public static BclClass ToBclClass(BclClassProxy bclClassProxy)
     {
-        return new BclClass(Type.GetType(bclClassProxy.TypeFullName), bclClassProxy.TypeName);
+        return BclClass.FromType(Type.GetType(bclClassProxy.TypeFullName));
     }
 }
 
