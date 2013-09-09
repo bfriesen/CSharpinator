@@ -12,10 +12,10 @@ void Main(string[] args)
     if (args == null)
     {
         xDocument = XDocument.Parse(
-@"<Foo>
-  <Bar>abc</Bar>
-  <Bar>xyz</Bar>
-</Foo>");
+@"<foo foo_value=""true"">
+  <bar bar_value=""123"">abc</bar>
+  <bar bar_value=""456"">xyz</bar>
+</foo>");
     }
     else
     {
@@ -60,12 +60,12 @@ void Main(string[] args)
 //    var loadedClasses = classDefinitions.ToClasses(classRepository);
 //    loadedClasses.Dump();
     
-//    var classGenerator = new ClassGenerator(classRepository);
-//    classGenerator.Write(
-//        Case.PascalCase,
-//        Case.PascalCase,
-//        PropertyAttributes.XmlSerializion | PropertyAttributes.DataContract,
-//        Console.Out);
+    var classGenerator = new ClassGenerator(classRepository);
+    classGenerator.Write(
+        Case.PascalCase,
+        Case.PascalCase,
+        PropertyAttributes.XmlSerializion | PropertyAttributes.DataContract,
+        Console.Out);
 }
 
 public class DomVisitor
@@ -227,14 +227,26 @@ public class XmlDomElement : IDomElement
             (_element.Name + ": no potential XmlArray/XmlArrayItem list").Dump();
         }
         
+        var listPropertyDefinitions = property.PotentialPropertyDefinitions
+            .Select(x => 
+                new PropertyDefinition(ListClass.FromClass(x.Class), _element.Name)
+                {
+                    Attributes = new List<AttributeProxy>{ AttributeProxy.XmlElement(_element.Name.ToString()) }
+                }
+            ).ToList();
+        
         if (_element.Parent.Elements(_element.Name).Count() > 1)
         {
+            property.PrependPotentialPropertyDefinitions(listPropertyDefinitions);
             (_element.Name + ": potential high-priority XmlElement list").Dump();
         }
         else
         {
+            property.AppendPotentialPropertyDefinitions(listPropertyDefinitions);
             (_element.Name + ": potential low-priority XmlElement list").Dump();
         }
+        
+        "".Dump().Dump();
         
         return property;
     }
@@ -457,6 +469,11 @@ public class UserDefinedClass : Class
         
         return _typeName.Raw == otherUserDefinedClass._typeName.Raw;
     }
+    
+    public override int GetHashCode()
+    {
+        return _typeName.Raw.GetHashCode();
+    }
 }
 
 public class BclClass : Class
@@ -485,6 +502,11 @@ public class BclClass : Class
         }
         
         return _type == otherBclClass._type;
+    }
+    
+    public override int GetHashCode()
+    {
+        return _type.GetHashCode();
     }
     
     public Type Type { get { return _type; } }
@@ -546,7 +568,7 @@ public class BclClass : Class
         {
             return Guid;
         }
-
+        
         throw new InvalidOperationException("Invalid type for BclClass: " + type);
     }
     
@@ -589,6 +611,58 @@ public class BclClass : Class
         }
         
         yield return String;
+    }
+}
+
+public class ListClass : Class
+{
+    private static readonly ConcurrentDictionary<Class, ListClass> _classes
+        = new ConcurrentDictionary<Class, ListClass>();
+    private readonly Class _class;
+
+    private ListClass(Class @class)
+    {
+        _class = @class;
+    }
+    
+    public static ListClass FromClass(Class @class)
+    {
+        return _classes.GetOrAdd(@class, x => new ListClass(x));
+    }
+    
+    public Class Class
+    {
+        get { return _class; }
+    }
+
+    public override string GeneratePropertyCode(string propertyName, Case classCase)
+    {
+        var typeName =
+            _class is UserDefinedClass
+                ? ((UserDefinedClass)_class).TypeName.FormatAs(classCase)
+                : ((BclClass)_class).TypeName;
+        return string.Format("public List<{0}> {1} {{ get; set; }}", typeName, propertyName);
+    }
+
+    public override bool Equals(object other)
+    {
+        var otherListClass = other as ListClass;
+        if (otherListClass == null)
+        {
+            return false;
+        }
+        
+        return Equals(_class, otherListClass._class);
+    }
+    
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            int result = "ListClass".GetHashCode();
+            result = (result * 397) ^ (_class.GetHashCode());
+            return result;
+        }
     }
 }
 
@@ -643,7 +717,7 @@ public class Property
     
     public void PrependPotentialPropertyDefinitions(IEnumerable<PropertyDefinition> otherPotentialPropertyDefinitions)
     {
-        foreach (var otherPotentialPropertyDefinition in otherPotentialPropertyDefinitions)
+        foreach (var otherPotentialPropertyDefinition in otherPotentialPropertyDefinitions.Reverse())
         {
             PrependPotentialPropertyDefinition(otherPotentialPropertyDefinition);
         }
@@ -833,19 +907,22 @@ public class ClassDefinitions
 [XmlRoot("Class")]
 [XmlInclude(typeof(UserDefinedClassProxy))]
 [XmlInclude(typeof(BclClassProxy))]
+[XmlInclude(typeof(ListClassProxy))]
 public class ClassProxy
 {
-    public string TypeName { get; set; }
-    
     public static ClassProxy FromClass(Class @class)
     {
         if (@class is UserDefinedClass)
         {
             return UserDefinedClassProxy.FromUserDefinedClass((UserDefinedClass)@class);
         }
-        else
+        else if (@class is BclClass)
         {
             return BclClassProxy.FromBclClass((BclClass)@class);
+        }
+        else
+        {
+            return ListClassProxy.FromListClass((ListClass)@class);
         }
     }
     
@@ -853,11 +930,15 @@ public class ClassProxy
     {
         if (this is UserDefinedClassProxy)
         {
-            return classRepository.GetOrCreate(TypeName);
+            return classRepository.GetOrCreate(((UserDefinedClassProxy)this).TypeName);
+        }
+        else if (this is BclClassProxy)
+        {
+            return BclClassProxy.ToBclClass((BclClassProxy)this);
         }
         else
         {
-            return BclClassProxy.ToBclClass((BclClassProxy)this);
+            return ListClassProxy.ToListClass((ListClassProxy)this, classRepository);
         }
     }
 }
@@ -865,6 +946,7 @@ public class ClassProxy
 [XmlRoot("UserDefinedClass")]
 public class UserDefinedClassProxy : ClassProxy
 {
+    public string TypeName { get; set; }
     public List<PropertyProxy> Properties { get; set; }
     
     public static UserDefinedClassProxy FromUserDefinedClass(UserDefinedClass userDefinedClass)
@@ -892,6 +974,7 @@ public class UserDefinedClassProxy : ClassProxy
 [XmlRoot("BclClass")]
 public class BclClassProxy : ClassProxy
 {
+    public string TypeName { get; set; }
     public string TypeFullName { get; set; }
     
     public static BclClassProxy FromBclClass(BclClass bclClass)
@@ -906,6 +989,24 @@ public class BclClassProxy : ClassProxy
     public static BclClass ToBclClass(BclClassProxy bclClassProxy)
     {
         return BclClass.FromType(Type.GetType(bclClassProxy.TypeFullName));
+    }
+}
+
+public class ListClassProxy : ClassProxy
+{
+    public ClassProxy Class { get; set; }
+    
+    public static ListClassProxy FromListClass(ListClass listClass)
+    {
+        return new ListClassProxy
+        {
+            Class = ClassProxy.FromClass(listClass.Class)
+        };
+    }
+    
+    public static ListClass ToListClass(ListClassProxy listClassProxy, IClassRepository classRepository)
+    {
+        return ListClass.FromClass(listClassProxy.Class.ToClass(classRepository));
     }
 }
 
