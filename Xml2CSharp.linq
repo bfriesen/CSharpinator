@@ -12,12 +12,12 @@ void Main(string[] args)
     if (args == null)
     {
         xDocument = XDocument.Parse(
-@"<FooThis>
-  <BarThat>
-    <BazOther BazValue=""123"" />
-    <BoomIt>abc</BoomIt>
-  </BarThat>
-</FooThis>");
+@"<Foo>
+  <Bar>
+    <Baz baz_value=""123"" />
+    <Boom>abc</Boom>
+  </Bar>
+</Foo>");
     }
     else
     {
@@ -51,16 +51,14 @@ void Main(string[] args)
     var domVisitor = new DomVisitor(classRepository);
     domVisitor.Visit(domElement);
     
-    var classes = classRepository.GetAll();
-    classes.Dump();    
-    
-    var classDefinitions = ClassDefinitions.FromClasses(classes);
-    classDefinitions.Dump();
-    
-    var loadedClasses = classDefinitions.ToClasses(classRepository);
-    loadedClasses.Dump();
-    
-    return;
+//    var classes = classRepository.GetAll();
+//    classes.Dump();
+//    
+//    var classDefinitions = ClassDefinitions.FromClasses(classes);
+//    classDefinitions.Dump();
+//    
+//    var loadedClasses = classDefinitions.ToClasses(classRepository);
+//    loadedClasses.Dump();
     
     var classGenerator = new ClassGenerator(classRepository);
     classGenerator.Write(
@@ -351,6 +349,17 @@ public class UserDefinedClass : Class
     {
         return string.Format("public {0} {1} {{ get; set; }}", _typeName.FormatAs(classCase), propertyName);
     }
+    
+    public override bool Equals(object other)
+    {
+        var otherUserDefinedClass = other as UserDefinedClass;
+        if (otherUserDefinedClass == null)
+        {
+            return false;
+        }
+        
+        return _typeName.Raw == otherUserDefinedClass._typeName.Raw;
+    }
 }
 
 public class BclClass : Class
@@ -368,6 +377,17 @@ public class BclClass : Class
     public override string GeneratePropertyCode(string propertyName, Case classCase)
     {
         return string.Format("public {0} {1} {{ get; set; }}", _typeName, propertyName);
+    }
+    
+    public override bool Equals(object other)
+    {
+        var otherBclClass = other as BclClass;
+        if (otherBclClass == null)
+        {
+            return false;
+        }
+        
+        return _type == otherBclClass._type;
     }
     
     public Type Type { get { return _type; } }
@@ -488,7 +508,7 @@ public class Property
     
     private void InsertPotentialPropertyDefinition(int index, PropertyDefinition potentialPropertyDefinition)
     {
-        if (_potentialPropertyDefinitions.Any(x => x.Class == potentialPropertyDefinition.Class))
+        if (_potentialPropertyDefinitions.Any(x => Equals(x.Class, potentialPropertyDefinition.Class)))
         {
             return;
         }
