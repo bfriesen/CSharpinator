@@ -94,8 +94,7 @@ public class DomVisitor
                 currentClass.AddProperty(property);
             }
         
-            currentClass = new UserDefinedClass(element.Name);
-            _classRepository.AddOrUpdate(currentClass);
+            currentClass = _classRepository.GetOrCreate(element.Name);
             
             foreach (var childElement in element.Elements)
             {
@@ -106,8 +105,7 @@ public class DomVisitor
         {
             if (currentClass == null) // if this is the root element
             {
-                currentClass = new UserDefinedClass(element.Name);
-                _classRepository.AddOrUpdate(currentClass);
+                currentClass = _classRepository.GetOrCreate(element.Name);
             }
             else // if this is not the root element
             {
@@ -992,6 +990,7 @@ public class BclClassProxy : ClassProxy
     }
 }
 
+[XmlRoot("ListClass")]
 public class ListClassProxy : ClassProxy
 {
     public ClassProxy Class { get; set; }
