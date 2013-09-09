@@ -171,13 +171,16 @@ public class XmlDomElement : IDomElement
     {
         var property = new Property(_element.Name);
         
-        property.AddPotentialPropertyDefinitions(
-            BclClass.GetLegalClassesFromValue(_element.Value)
-                .Select(bclClass =>
-                    new PropertyDefinition(bclClass, _element.Name)
-                    {
-                        Attributes = new List<AttributeProxy>{ AttributeProxy.XmlElement(_element.Name.ToString()) }
-                    }));
+        if (!_element.HasElements && !_element.HasAttributes)
+        {
+            property.AddPotentialPropertyDefinitions(
+                BclClass.GetLegalClassesFromValue(_element.Value)
+                    .Select(bclClass =>
+                        new PropertyDefinition(bclClass, _element.Name)
+                        {
+                            Attributes = new List<AttributeProxy>{ AttributeProxy.XmlElement(_element.Name.ToString()) }
+                        }));
+        }
         
         var userDefinedClassPropertyDefinition =
             new PropertyDefinition(new UserDefinedClass(_element.Name.ToString()), _element.Name)
