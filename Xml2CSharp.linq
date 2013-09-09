@@ -13,12 +13,8 @@ void Main(string[] args)
     {
         xDocument = XDocument.Parse(
 @"<Foo>
-  <Bar>
-    <Baz baz_value=""123"">1.23</Baz>
-    <Boom>abc</Boom>
-    <Bang something=""1978-01-29"">94e0131b-10ef-461d-b52c-045552dcc78f</Bang>
-    <Fail />
-  </Bar>
+  <Bar>abc</Bar>
+  <Bar>xyz</Bar>
 </Foo>");
     }
     else
@@ -46,6 +42,8 @@ void Main(string[] args)
         }
     }
 
+    xDocument.Root.ToString().Dump();"".Dump();
+    
     var domElement = new XmlDomElement(xDocument.Root);
     
     var classRepository = new ClassRepository();
@@ -62,12 +60,12 @@ void Main(string[] args)
 //    var loadedClasses = classDefinitions.ToClasses(classRepository);
 //    loadedClasses.Dump();
     
-    var classGenerator = new ClassGenerator(classRepository);
-    classGenerator.Write(
-        Case.PascalCase,
-        Case.PascalCase,
-        PropertyAttributes.XmlSerializion | PropertyAttributes.DataContract,
-        Console.Out);
+//    var classGenerator = new ClassGenerator(classRepository);
+//    classGenerator.Write(
+//        Case.PascalCase,
+//        Case.PascalCase,
+//        PropertyAttributes.XmlSerializion | PropertyAttributes.DataContract,
+//        Console.Out);
 }
 
 public class DomVisitor
@@ -173,13 +171,19 @@ public class XmlDomElement : IDomElement
         
         if (!_element.HasElements && !_element.HasAttributes)
         {
-            property.AddPotentialPropertyDefinitions(
+            (_element.Name + ": potential bcl properties").Dump();
+            
+            property.AppendPotentialPropertyDefinitions(
                 BclClass.GetLegalClassesFromValue(_element.Value)
                     .Select(bclClass =>
                         new PropertyDefinition(bclClass, _element.Name)
                         {
                             Attributes = new List<AttributeProxy>{ AttributeProxy.XmlElement(_element.Name.ToString()) }
                         }));
+        }
+        else
+        {
+            (_element.Name + ": no potential bcl properties").Dump();
         }
         
         var userDefinedClassPropertyDefinition =
@@ -191,10 +195,45 @@ public class XmlDomElement : IDomElement
         if (HasElements)
         {
             property.PrependPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
+            (_element.Name + ": potential high-priority udc property").Dump();
         }
         else
         {
             property.AppendPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
+            (_element.Name + ": potential low-priority udc property").Dump();
+        }
+        
+        if (!_element.HasAttributes && _element.HasElements)
+        {
+            var first = _element.Elements().First();
+            if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
+            {
+                if (_element.Elements().Count() > 1)
+                {
+                    (_element.Name + ": potential high-priority XmlArray/XmlArrayItem list").Dump();
+                }
+                else
+                {
+                    (_element.Name + ": potential low-priority XmlArray/XmlArrayItem list").Dump();
+                }
+            }
+            else
+            {
+                (_element.Name + ": no potential XmlArray/XmlArrayItem list").Dump();
+            }
+        }
+        else
+        {
+            (_element.Name + ": no potential XmlArray/XmlArrayItem list").Dump();
+        }
+        
+        if (_element.Parent.Elements(_element.Name).Count() > 1)
+        {
+            (_element.Name + ": potential high-priority XmlElement list").Dump();
+        }
+        else
+        {
+            (_element.Name + ": potential low-priority XmlElement list").Dump();
         }
         
         return property;
@@ -236,7 +275,7 @@ public class XmlDomAttribute : IDomElement
     public Property CreateProperty()
     {
         var property = new Property(_attribute.Name);
-        property.AddPotentialPropertyDefinitions(
+        property.AppendPotentialPropertyDefinitions(
             BclClass.GetLegalClassesFromValue(_attribute.Value)
                 .Select(bclClass =>
                     new PropertyDefinition(bclClass, _attribute.Name)
@@ -283,7 +322,7 @@ public class XmlDomText : IDomElement
     {
         var property = new Property(XName.Get(Name));
         
-        property.AddPotentialPropertyDefinitions(
+        property.AppendPotentialPropertyDefinitions(
             BclClass.GetLegalClassesFromValue(_value)
                 .Select(bclClass =>
                     new PropertyDefinition(bclClass, Name)
@@ -371,7 +410,7 @@ public class UserDefinedClass : Class
             return;
         }
         
-        foundProperty.AddPotentialPropertyDefinitions(property.PotentialPropertyDefinitions);
+        foundProperty.AppendPotentialPropertyDefinitions(property.PotentialPropertyDefinitions);
     }
     
     public UserDefinedClass MergeWith(UserDefinedClass other)
@@ -574,11 +613,19 @@ public class Property
         _potentialPropertyDefinitions.Insert(index, potentialPropertyDefinition);
     }
     
-    public void AddPotentialPropertyDefinitions(IEnumerable<PropertyDefinition> otherPotentialPropertyDefinitions)
+    public void AppendPotentialPropertyDefinitions(IEnumerable<PropertyDefinition> otherPotentialPropertyDefinitions)
     {
         foreach (var otherPotentialPropertyDefinition in otherPotentialPropertyDefinitions)
         {
             AppendPotentialPropertyDefinition(otherPotentialPropertyDefinition);
+        }
+    }
+    
+    public void PrependPotentialPropertyDefinitions(IEnumerable<PropertyDefinition> otherPotentialPropertyDefinitions)
+    {
+        foreach (var otherPotentialPropertyDefinition in otherPotentialPropertyDefinitions)
+        {
+            PrependPotentialPropertyDefinition(otherPotentialPropertyDefinition);
         }
     }
     
@@ -860,7 +907,7 @@ public class PropertyProxy
     public Property ToProperty(IClassRepository classRepository)
     {
         var property = new Property(XName.Get(Name));
-        property.AddPotentialPropertyDefinitions(PotentialPropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository)));
+        property.AppendPotentialPropertyDefinitions(PotentialPropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository)));
         return property;
     }
 }
