@@ -14,8 +14,10 @@ void Main(string[] args)
         xDocument = XDocument.Parse(
 @"<Foo>
   <Bar>
-    <Baz baz_value=""123"" />
+    <Baz baz_value=""123"">1.23</Baz>
     <Boom>abc</Boom>
+    <Bang something=""1978-01-29"">94e0131b-10ef-461d-b52c-045552dcc78f</Bang>
+    <Fail />
   </Bar>
 </Foo>");
     }
@@ -155,8 +157,13 @@ public class XmlDomElement : IDomElement
     {
         get
         {
-            return _element.Attributes().Select(x => (IDomElement)new XmlDomAttribute(x))
-               .Concat(_element.Elements().Select(x => new XmlDomElement(x)));
+            return 
+                _element.Attributes().Select(x => (IDomElement)new XmlDomAttribute(x))
+                    .Concat(_element.Elements().Select(x => new XmlDomElement(x)))
+                    .Concat(
+                        !_element.HasElements && !string.IsNullOrEmpty(_element.Value)
+                            ? new[] { new XmlDomText(_element.Value) }
+                            : Enumerable.Empty<IDomElement>());
         }
     }
     
@@ -233,6 +240,54 @@ public class XmlDomAttribute : IDomElement
                     {
                         Attributes = new List<AttributeProxy>{ AttributeProxy.XmlAttribute(_attribute.Name.ToString()) }
                     }));
+        return property;
+    }
+}
+
+public class XmlDomText : IDomElement
+{
+    private readonly string _value;
+
+    public XmlDomText(string value)
+    {
+        _value = value;
+    }
+    
+    public bool HasElements
+    {
+        get { return false; }
+    }
+    
+    public string Value
+    {
+        get { return _value; }
+    }
+    
+    public string Name
+    {
+        get { return "Value"; }
+    }
+    
+    public IEnumerable<IDomElement> Elements
+    {
+        get
+        {
+            yield break;
+        }
+    }
+    
+    public Property CreateProperty()
+    {
+        var property = new Property(XName.Get(Name));
+        
+        property.AddPotentialPropertyDefinitions(
+            BclClass.GetLegalClassesFromValue(_value)
+                .Select(bclClass =>
+                    new PropertyDefinition(bclClass, Name)
+                    {
+                        Attributes = new List<AttributeProxy>{ AttributeProxy.XmlText() }
+                    }));
+        
         return property;
     }
 }
