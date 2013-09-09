@@ -391,7 +391,7 @@ public class UserDefinedClass : Class
     {
         return string.Format(
 @"    [XmlRoot(""{0}"")]
-    public class {1}
+    public partial class {1}
     {{
 {2}
     }}",
