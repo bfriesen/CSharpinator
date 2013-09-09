@@ -53,10 +53,10 @@ void Main(string[] args)
     
 //    var classes = classRepository.GetAll();
 //    classes.Dump();
-//    
+//
 //    var classDefinitions = ClassDefinitions.FromClasses(classes);
 //    classDefinitions.Dump();
-//    
+//
 //    var loadedClasses = classDefinitions.ToClasses(classRepository);
 //    loadedClasses.Dump();
     
@@ -90,7 +90,7 @@ public class DomVisitor
         {
             if (currentClass != null) // if this is the root element
             {
-                var property = element.CreateProperty();
+                var property = element.CreateProperty(_classRepository);
                 currentClass.AddProperty(property);
             }
         
@@ -111,7 +111,7 @@ public class DomVisitor
             }
             else // if this is not the root element
             {
-                var property = element.CreateProperty();
+                var property = element.CreateProperty(_classRepository);
                 currentClass.AddProperty(property);
             }
         }
@@ -124,7 +124,7 @@ public interface IDomElement
     string Value { get; }
     string Name { get; }
     IEnumerable<IDomElement> Elements { get; }
-    Property CreateProperty();
+    Property CreateProperty(IClassRepository classRepository);
 }
 
 public class XmlDomElement : IDomElement
@@ -165,7 +165,7 @@ public class XmlDomElement : IDomElement
         }
     }
     
-    public Property CreateProperty()
+    public Property CreateProperty(IClassRepository classRepository)
     {
         var property = new Property(_element.Name);
         
@@ -187,7 +187,7 @@ public class XmlDomElement : IDomElement
         }
         
         var userDefinedClassPropertyDefinition =
-            new PropertyDefinition(new UserDefinedClass(_element.Name.ToString()), _element.Name)
+            new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name)
             {
                 Attributes = new List<AttributeProxy>{ AttributeProxy.XmlElement(_element.Name.ToString()) }
             };
@@ -272,7 +272,7 @@ public class XmlDomAttribute : IDomElement
         }
     }
     
-    public Property CreateProperty()
+    public Property CreateProperty(IClassRepository classRepository)
     {
         var property = new Property(_attribute.Name);
         property.AppendPotentialPropertyDefinitions(
@@ -318,7 +318,7 @@ public class XmlDomText : IDomElement
         }
     }
     
-    public Property CreateProperty()
+    public Property CreateProperty(IClassRepository classRepository)
     {
         var property = new Property(XName.Get(Name));
         
