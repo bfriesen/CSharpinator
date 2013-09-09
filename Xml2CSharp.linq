@@ -570,7 +570,7 @@ public class ClassGenerator
     public void Write(Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
     {
         writer.WriteLine("using System;");
-        writer.WriteLine("using System.Serialization.Xml;");
+        writer.WriteLine("using System.Xml.Serialization;");
         writer.WriteLine();
         writer.WriteLine("namespace YourNamespaceHere");
         writer.WriteLine("{");
@@ -857,7 +857,7 @@ public class AttributeProxy
     public string ToCode()
     {
         return ElementNameSetter != null
-            ? string.Format("[{0}({1})]", AttributeTypeName, ElementNameSetter)
+            ? string.Format("[{0}(\"{1}\")]", AttributeTypeName, ElementNameSetter)
             : string.Format("[{0}]", AttributeTypeName);
     }
 }
