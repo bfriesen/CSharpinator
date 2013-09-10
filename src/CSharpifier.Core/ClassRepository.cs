@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CSharpifier
+{
+    public class ClassRepository : IClassRepository
+    {
+        private static readonly ConcurrentDictionary<string, UserDefinedClass> _classes
+            = new ConcurrentDictionary<string, UserDefinedClass>();
+
+        public IEnumerable<UserDefinedClass> GetAll()
+        {
+            return _classes.Values.OrderBy(x => x.Order);
+        }
+
+        public void AddOrUpdate(UserDefinedClass @class)
+        {
+            _classes.AddOrUpdate(
+                @class.TypeName.Raw,
+                typeName => @class,
+                (typeName, potentialClass) => GetOrCreate(typeName).MergeWith(@class));
+        }
+
+        public UserDefinedClass GetOrCreate(string typeName)
+        {
+            return _classes.GetOrAdd(
+                typeName,
+                x => new UserDefinedClass(typeName));
+        }
+    }
+}
