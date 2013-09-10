@@ -28,7 +28,7 @@ namespace CSharpifier
         public PropertyDefinition ToPropertyDefinition(IClassRepository classRepository)
         {
             var @class = Class.ToClass(classRepository);
-            var propertyDefinition = new PropertyDefinition(@class, XName.Get(Name));
+            var propertyDefinition = new PropertyDefinition(@class, Name);
             propertyDefinition.Attributes = new List<AttributeProxy>(Attributes);
             return propertyDefinition;
         }

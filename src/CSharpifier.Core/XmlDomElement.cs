@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Design.PluralizationServices;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ namespace CSharpifier
 {
     public class XmlDomElement : IDomElement
     {
+        private static Lazy<PluralizationService> _pluralizationService = new Lazy<PluralizationService>(() => PluralizationService.CreateService(new CultureInfo("en")));
         private readonly XElement _element;
 
         public XmlDomElement(XElement element)
@@ -18,7 +21,7 @@ namespace CSharpifier
 
         public bool HasElements
         {
-            get { return _element.HasElements || _element.HasAttributes; }
+            get { return _element.HasElements || _element.HasAttributes || !string.IsNullOrEmpty(_element.Value); }
         }
 
         public string Value
@@ -56,7 +59,7 @@ namespace CSharpifier
                 property.AppendPotentialPropertyDefinitions(
                     BclClass.GetLegalClassesFromValue(_element.Value)
                         .Select(bclClass =>
-                            new PropertyDefinition(bclClass, _element.Name)
+                            new PropertyDefinition(bclClass, _element.Name.ToString())
                             {
                                 Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                             }));
@@ -67,12 +70,12 @@ namespace CSharpifier
             }
 
             var userDefinedClassPropertyDefinition =
-                new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name)
+                new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name.ToString())
                 {
                     Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                 };
 
-            if (HasElements)
+            if (_element.HasElements || _element.HasAttributes)
             {
                 property.PrependPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
                 Console.WriteLine(_element.Name + ": potential high-priority udc property");
@@ -88,12 +91,24 @@ namespace CSharpifier
                 var first = _element.Elements().First();
                 if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
                 {
+                    var listPropertyDefinition =
+                        new PropertyDefinition(ListClass.FromClass(classRepository.GetOrCreate(first.Name.ToString())), _pluralizationService.Value.Pluralize(first.Name.ToString()))
+                        {
+                            Attributes = new List<AttributeProxy>
+                            {
+                                AttributeProxy.XmlArray(_element.Name.ToString()),
+                                AttributeProxy.XmlArrayItem(first.Name.ToString())
+                            }
+                        };
+
                     if (_element.Elements().Count() > 1)
                     {
+                        property.PrependPotentialPropertyDefinition(listPropertyDefinition);
                         Console.WriteLine(_element.Name + ": potential high-priority XmlArray/XmlArrayItem list");
                     }
                     else
                     {
+                        property.AppendPotentialPropertyDefinition(listPropertyDefinition);
                         Console.WriteLine(_element.Name + ": potential low-priority XmlArray/XmlArrayItem list");
                     }
                 }
@@ -109,7 +124,7 @@ namespace CSharpifier
 
             var listPropertyDefinitions = property.PotentialPropertyDefinitions
                 .Select(x =>
-                    new PropertyDefinition(ListClass.FromClass(x.Class), _element.Name)
+                    new PropertyDefinition(ListClass.FromClass(x.Class), _pluralizationService.Value.Pluralize(_element.Name.ToString()))
                     {
                         Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                     }

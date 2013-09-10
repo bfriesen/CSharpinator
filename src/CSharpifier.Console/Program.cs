@@ -18,8 +18,9 @@ namespace CSharpifier
                 xDocument = XDocument.Parse(@"
 <foo>
   <bars>
-    <bar>abc</bar>
-    <bar>xyz</bar>
+    <bar id=""1"">abc</bar>
+    <bar id=""1"">xyz</bar>
+    <baz>true</baz>
   </bars>
 </foo>");
             }

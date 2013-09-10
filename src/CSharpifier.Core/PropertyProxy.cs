@@ -30,5 +30,4 @@ namespace CSharpifier
             return property;
         }
     }
-
 }

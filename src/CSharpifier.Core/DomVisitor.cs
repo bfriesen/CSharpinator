@@ -26,7 +26,7 @@ namespace CSharpifier
         {
             if (element.HasElements) // if element has child elements
             {
-                if (currentClass != null) // if this is the root element
+                if (currentClass != null) // if this is not the root element
                 {
                     var property = element.CreateProperty(_classRepository);
                     currentClass.AddProperty(property);

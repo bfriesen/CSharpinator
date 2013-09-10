@@ -17,14 +17,6 @@ namespace CSharpifier
             return _classes.Values.OrderBy(x => x.Order);
         }
 
-        public void AddOrUpdate(UserDefinedClass @class)
-        {
-            _classes.AddOrUpdate(
-                @class.TypeName.Raw,
-                typeName => @class,
-                (typeName, potentialClass) => GetOrCreate(typeName).MergeWith(@class));
-        }
-
         public UserDefinedClass GetOrCreate(string typeName)
         {
             return _classes.GetOrAdd(

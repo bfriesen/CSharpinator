@@ -9,10 +9,10 @@ namespace CSharpifier
 {
     public class PropertyDefinition
     {
-        public PropertyDefinition(Class @class, XName propertyName)
+        public PropertyDefinition(Class @class, string propertyName)
         {
             Class = @class;
-            Name = new IdentifierName(propertyName.ToString());
+            Name = new IdentifierName(propertyName);
             Attributes = new List<AttributeProxy>();
         }
 

@@ -28,6 +28,16 @@ namespace CSharpifier
             return new AttributeProxy { AttributeTypeName = "XmlText" };
         }
 
+        public static AttributeProxy XmlArray(string arrayName)
+        {
+            return new AttributeProxy { AttributeTypeName = "XmlArray", ElementNameSetter = arrayName };
+        }
+
+        public static AttributeProxy XmlArrayItem(string arrayItemName)
+        {
+            return new AttributeProxy { AttributeTypeName = "XmlArrayItem", ElementNameSetter = arrayItemName };
+        }
+
         public string ToCode()
         {
             return ElementNameSetter != null
