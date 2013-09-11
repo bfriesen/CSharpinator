@@ -23,10 +23,10 @@ namespace CSharpifier
 
             foreach (var attribute in Attributes)
             {
-                sb.AppendLine(string.Format("        {0}", attribute.ToCode()));
+                sb.AppendLine(string.Format("{0}", attribute.ToCode()));
             }
 
-            sb.AppendFormat("        {0}", Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase));
+            return string.Format("{0}", Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase, Attributes));
 
             return sb.ToString();
         }

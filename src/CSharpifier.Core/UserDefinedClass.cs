@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace CSharpifier
 {
@@ -63,19 +64,29 @@ namespace CSharpifier
         public string GenerateCSharpCode(Case classCase, Case propertyCase)
         {
             return string.Format(
-    @"    [XmlRoot(""{0}"")]
-    public partial class {1}
-    {{
+    @"[XmlRoot(""{0}"")]
+public partial class {1}
+{{
 {2}
-    }}",
+}}",
                 _typeName.Raw,
                 _typeName.FormatAs(classCase),
-                string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode(classCase, propertyCase))));
+                string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode(classCase, propertyCase).Indent())))
+                .Indent();
         }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase)
+        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
         {
-            return string.Format("public {0} {1} {{ get; set; }}", _typeName.FormatAs(classCase), propertyName);
+            var sb = new StringBuilder();
+
+            foreach (var attribute in attributes)
+            {
+                sb.AppendLine(string.Format("{0}", attribute.ToCode()));
+            }
+
+            sb.AppendFormat("public {0} {1} {{ get; set; }}", _typeName.FormatAs(classCase), propertyName);
+
+            return sb.ToString();
         }
 
         public override bool Equals(object other)

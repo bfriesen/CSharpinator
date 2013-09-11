@@ -6,21 +6,21 @@ namespace CSharpifier
     [XmlRoot("BclClass")]
     public class BclClassProxy : ClassProxy
     {
+        public string TypeAlias { get; set; }
         public string TypeName { get; set; }
-        public string TypeFullName { get; set; }
 
         public static BclClassProxy FromBclClass(BclClass bclClass)
         {
             return new BclClassProxy
             {
-                TypeName = bclClass.TypeName,
-                TypeFullName = bclClass.Type.FullName
+                TypeAlias = bclClass.TypeAlias,
+                TypeName = bclClass.TypeName
             };
         }
 
         public static BclClass ToBclClass(BclClassProxy bclClassProxy)
         {
-            return BclClass.FromType(Type.GetType(bclClassProxy.TypeFullName));
+            return BclClass.FromTypeFullName(bclClassProxy.TypeName);
         }
     }
 }

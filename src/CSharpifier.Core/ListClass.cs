@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Text;
 
 namespace CSharpifier
 {
@@ -23,13 +25,23 @@ namespace CSharpifier
             get { return _class; }
         }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase)
+        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
         {
             var typeName =
                 _class is UserDefinedClass
                     ? ((UserDefinedClass)_class).TypeName.FormatAs(classCase)
-                    : ((BclClass)_class).TypeName;
-            return string.Format("public List<{0}> {1} {{ get; set; }}", typeName, propertyName);
+                    : ((BclClass)_class).TypeAlias;
+
+            var sb = new StringBuilder();
+
+            foreach (var attribute in attributes)
+            {
+                sb.AppendLine(string.Format("{0}", attribute.ToCode()));
+            }
+
+            sb.AppendFormat("public List<{0}> {1} {{ get; set; }}", typeName, propertyName);
+
+            return sb.ToString();
         }
 
         public override bool Equals(object other)

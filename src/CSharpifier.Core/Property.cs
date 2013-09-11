@@ -66,15 +66,5 @@ namespace CSharpifier
         {
             return PotentialPropertyDefinitions.First(x => x.IsLegal).GeneratePropertyCode(classCase, propertyCase);
         }
-
-        private static BclClass GetBclClass(Class @class)
-        {
-            if (@class is UserDefinedClass)
-            {
-                return null;
-            }
-
-            return @class as BclClass ?? GetBclClass(((ListClass)@class).Class);
-        }
     }
 }

@@ -50,6 +50,7 @@
     <Compile Include="ClassProxy.cs" />
     <Compile Include="ClassRepository.cs" />
     <Compile Include="DomVisitor.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="IClassRepository.cs" />
     <Compile Include="IdentifierName.cs" />
     <Compile Include="IDomElement.cs" />
