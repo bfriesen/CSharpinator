@@ -10,6 +10,7 @@ namespace CSharpifier
         public ClassProxy Class { get; set; }
         public List<AttributeProxy> Attributes { get; set; }
         public bool IsLegal { get; set; }
+        public bool IsEnabled { get; set; }
 
         public static PropertyDefinitionProxy FromPropertyDefinition(PropertyDefinition propertyDefinition)
         {
@@ -18,17 +19,17 @@ namespace CSharpifier
                 Name = propertyDefinition.Name.Raw,
                 Class = ClassProxy.FromClass(propertyDefinition.Class),
                 Attributes = new List<AttributeProxy>(propertyDefinition.Attributes),
-                IsLegal = propertyDefinition.IsLegal
+                IsLegal = propertyDefinition.IsLegal,
+                IsEnabled = propertyDefinition.IsEnabled
             };
         }
 
         public PropertyDefinition ToPropertyDefinition(IClassRepository classRepository)
         {
             var @class = Class.ToClass(classRepository);
-            var propertyDefinition = new PropertyDefinition(@class, Name)
+            var propertyDefinition = new PropertyDefinition(@class, Name, IsLegal, IsEnabled)
             {
-                Attributes = new List<AttributeProxy>(Attributes),
-                IsLegal = IsLegal
+                Attributes = new List<AttributeProxy>(Attributes)
             };
             return propertyDefinition;
         }

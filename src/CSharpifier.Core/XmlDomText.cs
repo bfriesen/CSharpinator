@@ -43,10 +43,9 @@ namespace CSharpifier
             property.AppendPotentialPropertyDefinitions(
                 BclClass.All
                     .Select(bclClass =>
-                        new PropertyDefinition(bclClass, Name)
+                        new PropertyDefinition(bclClass, Name, bclClass.IsLegalValue(_value), true)
                         {
-                            Attributes = new List<AttributeProxy> { AttributeProxy.XmlText() },
-                            IsLegal = bclClass.IsLegalValue(_value)
+                            Attributes = new List<AttributeProxy> { AttributeProxy.XmlText() }
                         }));
 
             return property;

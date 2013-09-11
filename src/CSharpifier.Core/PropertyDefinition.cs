@@ -1,34 +1,27 @@
 ﻿using System.Collections.Generic;
-using System.Text;
 
 namespace CSharpifier
 {
     public class PropertyDefinition
     {
-        public PropertyDefinition(Class @class, string propertyName)
+        public PropertyDefinition(Class @class, string propertyName, bool isLegal, bool isEnabled)
         {
+            Attributes = new List<AttributeProxy>();
             Class = @class;
             Name = new IdentifierName(propertyName);
-            Attributes = new List<AttributeProxy>();
+            IsLegal = isLegal;
+            IsEnabled = isEnabled;
         }
 
         public Class Class { get; set; }
         public IdentifierName Name { get; set; }
         public List<AttributeProxy> Attributes { get; set; }
         public bool IsLegal { get; set; }
+        public bool IsEnabled { get; set; }
 
         public string GeneratePropertyCode(Case classCase, Case propertyCase)
         {
-            var sb = new StringBuilder();
-
-            foreach (var attribute in Attributes)
-            {
-                sb.AppendLine(string.Format("{0}", attribute.ToCode()));
-            }
-
             return string.Format("{0}", Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase, Attributes));
-
-            return sb.ToString();
         }
     }
 }

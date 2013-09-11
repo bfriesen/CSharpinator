@@ -55,18 +55,16 @@ namespace CSharpifier
                 property.AppendPotentialPropertyDefinitions(
                     BclClass.All
                         .Select(bclClass =>
-                            new PropertyDefinition(bclClass, _element.Name.ToString())
+                            new PropertyDefinition(bclClass, _element.Name.ToString(), bclClass.IsLegalValue(_element.Value), true)
                             {
-                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) },
-                                IsLegal = bclClass.IsLegalValue(_element.Value)
+                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                             }));
             }
 
             var userDefinedClassPropertyDefinition =
-                new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name.ToString())
+                new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name.ToString(), true, true)
                 {
-                    Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) },
-                    IsLegal = true
+                    Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                 };
 
             if (_element.HasElements || _element.HasAttributes)
@@ -84,14 +82,17 @@ namespace CSharpifier
                 if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
                 {
                     var listPropertyDefinition =
-                        new PropertyDefinition(ListClass.FromClass(classRepository.GetOrCreate(first.Name.ToString())), _pluralizationService.Value.Pluralize(first.Name.ToString()))
+                        new PropertyDefinition(
+                            ListClass.FromClass(classRepository.GetOrCreate(first.Name.ToString())),
+                            _pluralizationService.Value.Pluralize(first.Name.ToString()),
+                            true,
+                            true)
                         {
                             Attributes = new List<AttributeProxy>
                             {
                                 AttributeProxy.XmlArray(_element.Name.ToString()),
                                 AttributeProxy.XmlArrayItem(first.Name.ToString())
-                            },
-                            IsLegal = true
+                            }
                         };
 
                     if (_element.Elements().Count() > 1)
@@ -107,10 +108,13 @@ namespace CSharpifier
 
             var listPropertyDefinitions = property.PotentialPropertyDefinitions
                 .Select(x =>
-                    new PropertyDefinition(ListClass.FromClass(x.Class), _pluralizationService.Value.Pluralize(_element.Name.ToString()))
+                    new PropertyDefinition(
+                        ListClass.FromClass(x.Class),
+                        _pluralizationService.Value.Pluralize(_element.Name.ToString()),
+                        x.IsLegal,
+                        x.IsEnabled)
                     {
-                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) },
-                        IsLegal = x.IsLegal
+                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                     }
                 ).ToList();
 

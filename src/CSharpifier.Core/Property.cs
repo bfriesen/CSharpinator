@@ -20,6 +20,11 @@ namespace CSharpifier
             get { return _potentialPropertyDefinitions; }
         }
 
+        public PropertyDefinition SelectedPropertyDefinition
+        {
+            get { return _potentialPropertyDefinitions.First(x => x.IsEnabled && x.IsLegal); }
+        }
+
         public void PrependPotentialPropertyDefinition(PropertyDefinition potentialPropertyDefinition)
         {
             InsertPotentialPropertyDefinition(0, potentialPropertyDefinition);
@@ -35,6 +40,10 @@ namespace CSharpifier
             var matchingPropertyDefinition = _potentialPropertyDefinitions.FirstOrDefault(x => Equals(x.Class, potentialPropertyDefinition.Class));
             if (matchingPropertyDefinition != null)
             {
+                // If the the new property definition is illegal, its match should be illegal.
+                // But not the other way around - if the new one is legal, and its match is
+                // illegal, *don't* make the match legal. Note that we never want to change
+                // IsEnabled - it's set purely by the user.
                 if (!potentialPropertyDefinition.IsLegal)
                 {
                     matchingPropertyDefinition.IsLegal = false;
@@ -64,7 +73,7 @@ namespace CSharpifier
 
         public string GeneratePropertyCode(Case classCase, Case propertyCase)
         {
-            return PotentialPropertyDefinitions.First(x => x.IsLegal).GeneratePropertyCode(classCase, propertyCase);
+            return SelectedPropertyDefinition.GeneratePropertyCode(classCase, propertyCase);
         }
     }
 }
