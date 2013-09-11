@@ -70,8 +70,6 @@ namespace CSharpifier
                 Case.PascalCase,
                 PropertyAttributes.XmlSerializion | PropertyAttributes.DataContract,
                 Console.Out);
-
-            Console.Write("Press any key to exit..."); Console.ReadKey(true);
         }
     }
 }
