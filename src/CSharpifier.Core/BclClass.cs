@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CSharpifier
 {
@@ -129,13 +126,13 @@ namespace CSharpifier
                 yield return Boolean;
             }
 
-            System.Guid tempGuid;
+            Guid tempGuid;
             if (System.Guid.TryParse(value, out tempGuid))
             {
                 yield return Guid;
             }
 
-            System.DateTime tempDateTime;
+            DateTime tempDateTime;
             if (System.DateTime.TryParse(value, out tempDateTime))
             {
                 yield return DateTime;

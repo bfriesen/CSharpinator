@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
@@ -19,7 +16,7 @@ namespace CSharpifier
             return new PropertyProxy
             {
                 Name = property.Name.Raw,
-                PotentialPropertyDefinitions = property.PotentialPropertyDefinitions.Select(x => PropertyDefinitionProxy.FromPropertyDefinition(x)).ToList()
+                PotentialPropertyDefinitions = property.PotentialPropertyDefinitions.Select(PropertyDefinitionProxy.FromPropertyDefinition).ToList()
             };
         }
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace CSharpifier
 {
@@ -15,34 +10,36 @@ namespace CSharpifier
     {
         public static ClassProxy FromClass(Class @class)
         {
-            if (@class is UserDefinedClass)
+            var userDefinedClass = @class as UserDefinedClass;
+            if (userDefinedClass != null)
             {
-                return UserDefinedClassProxy.FromUserDefinedClass((UserDefinedClass)@class);
+                return UserDefinedClassProxy.FromUserDefinedClass(userDefinedClass);
             }
-            else if (@class is BclClass)
+
+            var bclClass = @class as BclClass;
+            if (bclClass != null)
             {
-                return BclClassProxy.FromBclClass((BclClass)@class);
+                return BclClassProxy.FromBclClass(bclClass);
             }
-            else
-            {
-                return ListClassProxy.FromListClass((ListClass)@class);
-            }
+
+            return ListClassProxy.FromListClass((ListClass)@class);
         }
 
         public Class ToClass(IClassRepository classRepository)
         {
-            if (this is UserDefinedClassProxy)
+            var userDefinedClassProxy = this as UserDefinedClassProxy;
+            if (userDefinedClassProxy != null)
             {
-                return classRepository.GetOrCreate(((UserDefinedClassProxy)this).TypeName);
+                return classRepository.GetOrCreate(userDefinedClassProxy.TypeName);
             }
-            else if (this is BclClassProxy)
+
+            var bclClassProxy = this as BclClassProxy;
+            if (bclClassProxy != null)
             {
-                return BclClassProxy.ToBclClass((BclClassProxy)this);
+                return BclClassProxy.ToBclClass(bclClassProxy);
             }
-            else
-            {
-                return ListClassProxy.ToListClass((ListClassProxy)this, classRepository);
-            }
+
+            return ListClassProxy.ToListClass((ListClassProxy)this, classRepository);
         }
     }
 }

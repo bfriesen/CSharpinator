@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CSharpifier
 {
@@ -12,9 +9,10 @@ namespace CSharpifier
 
         public static ClassDefinitions FromClasses(IEnumerable<UserDefinedClass> classes)
         {
-            var classDefinitions = new ClassDefinitions();
-            classDefinitions.Classes =
-                classes.Select(x => UserDefinedClassProxy.FromUserDefinedClass(x)).ToList();
+            var classDefinitions = new ClassDefinitions
+            {
+                Classes = classes.Select(UserDefinedClassProxy.FromUserDefinedClass).ToList()
+            };
             return classDefinitions;
         }
 

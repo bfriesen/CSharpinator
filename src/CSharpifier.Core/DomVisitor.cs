@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CSharpifier
+﻿namespace CSharpifier
 {
     public class DomVisitor
     {
-        private IClassRepository _classRepository;
+        private readonly IClassRepository _classRepository;
 
         public DomVisitor(IClassRepository classRepository)
         {
@@ -45,11 +39,9 @@ namespace CSharpifier
                 {
                     currentClass = _classRepository.GetOrCreate(element.Name);
                 }
-                else // if this is not the root element
-                {
-                    var property = element.CreateProperty(_classRepository);
-                    currentClass.AddProperty(property);
-                }
+                
+                var property = element.CreateProperty(_classRepository);
+                currentClass.AddProperty(property);
             }
         }
     }

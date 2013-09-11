@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace CSharpifier
@@ -28,8 +23,10 @@ namespace CSharpifier
         public PropertyDefinition ToPropertyDefinition(IClassRepository classRepository)
         {
             var @class = Class.ToClass(classRepository);
-            var propertyDefinition = new PropertyDefinition(@class, Name);
-            propertyDefinition.Attributes = new List<AttributeProxy>(Attributes);
+            var propertyDefinition = new PropertyDefinition(@class, Name)
+            {
+                Attributes = new List<AttributeProxy>(Attributes)
+            };
             return propertyDefinition;
         }
     }

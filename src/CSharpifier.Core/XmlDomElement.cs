@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace CSharpifier
 {
     public class XmlDomElement : IDomElement
     {
-        private static Lazy<PluralizationService> _pluralizationService = new Lazy<PluralizationService>(() => PluralizationService.CreateService(new CultureInfo("en")));
+        private static readonly Lazy<PluralizationService> _pluralizationService = new Lazy<PluralizationService>(() => PluralizationService.CreateService(new CultureInfo("en")));
         private readonly XElement _element;
 
         public XmlDomElement(XElement element)
@@ -54,8 +52,6 @@ namespace CSharpifier
 
             if (!_element.HasElements && !_element.HasAttributes)
             {
-                Console.WriteLine(_element.Name + ": potential bcl properties");
-
                 property.AppendPotentialPropertyDefinitions(
                     BclClass.GetLegalClassesFromValue(_element.Value)
                         .Select(bclClass =>
@@ -63,10 +59,6 @@ namespace CSharpifier
                             {
                                 Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                             }));
-            }
-            else
-            {
-                Console.WriteLine(_element.Name + ": no potential bcl properties");
             }
 
             var userDefinedClassPropertyDefinition =
@@ -78,12 +70,10 @@ namespace CSharpifier
             if (_element.HasElements || _element.HasAttributes)
             {
                 property.PrependPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
-                Console.WriteLine(_element.Name + ": potential high-priority udc property");
             }
             else
             {
                 property.AppendPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
-                Console.WriteLine(_element.Name + ": potential low-priority udc property");
             }
 
             if (!_element.HasAttributes && _element.HasElements)
@@ -104,22 +94,12 @@ namespace CSharpifier
                     if (_element.Elements().Count() > 1)
                     {
                         property.PrependPotentialPropertyDefinition(listPropertyDefinition);
-                        Console.WriteLine(_element.Name + ": potential high-priority XmlArray/XmlArrayItem list");
                     }
                     else
                     {
                         property.AppendPotentialPropertyDefinition(listPropertyDefinition);
-                        Console.WriteLine(_element.Name + ": potential low-priority XmlArray/XmlArrayItem list");
                     }
                 }
-                else
-                {
-                    Console.WriteLine(_element.Name + ": no potential XmlArray/XmlArrayItem list");
-                }
-            }
-            else
-            {
-                Console.WriteLine(_element.Name + ": no potential XmlArray/XmlArrayItem list");
             }
 
             var listPropertyDefinitions = property.PotentialPropertyDefinitions
@@ -130,18 +110,17 @@ namespace CSharpifier
                     }
                 ).ToList();
 
-            if (_element.Parent.Elements(_element.Name).Count() > 1)
+            if (_element.Parent != null)
             {
-                property.PrependPotentialPropertyDefinitions(listPropertyDefinitions);
-                Console.WriteLine(_element.Name + ": potential high-priority XmlElement list");
+                if (_element.Parent.Elements(_element.Name).Count() > 1)
+                {
+                    property.PrependPotentialPropertyDefinitions(listPropertyDefinitions);
+                }
+                else
+                {
+                    property.AppendPotentialPropertyDefinitions(listPropertyDefinitions);
+                }
             }
-            else
-            {
-                property.AppendPotentialPropertyDefinitions(listPropertyDefinitions);
-                Console.WriteLine(_element.Name + ": potential low-priority XmlElement list");
-            }
-
-            Console.WriteLine(); Console.WriteLine();
 
             return property;
         }
