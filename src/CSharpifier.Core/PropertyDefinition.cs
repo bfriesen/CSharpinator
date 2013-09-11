@@ -15,6 +15,7 @@ namespace CSharpifier
         public Class Class { get; set; }
         public IdentifierName Name { get; set; }
         public List<AttributeProxy> Attributes { get; set; }
+        public bool IsLegal { get; set; }
 
         public string GeneratePropertyCode(Case classCase, Case propertyCase)
         {

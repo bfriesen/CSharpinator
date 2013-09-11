@@ -37,7 +37,7 @@ namespace CSharpifier
             yield return rootClass;
 
             foreach (var childClass in rootClass.Properties
-                .Select(x => x.PotentialPropertyDefinitions.First())
+                .Select(x => x.PotentialPropertyDefinitions.First(y => y.IsLegal))
                 .Where(x => IsUserDefinedClass(x.Class))
                 .Select(x => GetUserDefinedClass(x.Class)))
             {

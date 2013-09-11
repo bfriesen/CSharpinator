@@ -22,11 +22,6 @@ namespace CSharpifier
 
         public void PrependPotentialPropertyDefinition(PropertyDefinition potentialPropertyDefinition)
         {
-            if (_potentialPropertyDefinitions.Any(x => x.Class == potentialPropertyDefinition.Class))
-            {
-                return;
-            }
-
             InsertPotentialPropertyDefinition(0, potentialPropertyDefinition);
         }
 
@@ -37,8 +32,14 @@ namespace CSharpifier
 
         private void InsertPotentialPropertyDefinition(int index, PropertyDefinition potentialPropertyDefinition)
         {
-            if (_potentialPropertyDefinitions.Any(x => Equals(x.Class, potentialPropertyDefinition.Class)))
+            var matchingPropertyDefinition = _potentialPropertyDefinitions.FirstOrDefault(x => Equals(x.Class, potentialPropertyDefinition.Class));
+            if (matchingPropertyDefinition != null)
             {
+                if (!potentialPropertyDefinition.IsLegal)
+                {
+                    matchingPropertyDefinition.IsLegal = false;
+                }
+
                 return;
             }
 
@@ -63,7 +64,17 @@ namespace CSharpifier
 
         public string GeneratePropertyCode(Case classCase, Case propertyCase)
         {
-            return PotentialPropertyDefinitions.First().GeneratePropertyCode(classCase, propertyCase);
+            return PotentialPropertyDefinitions.First(x => x.IsLegal).GeneratePropertyCode(classCase, propertyCase);
+        }
+
+        private static BclClass GetBclClass(Class @class)
+        {
+            if (@class is UserDefinedClass)
+            {
+                return null;
+            }
+
+            return @class as BclClass ?? GetBclClass(((ListClass)@class).Class);
         }
     }
 }

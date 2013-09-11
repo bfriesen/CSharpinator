@@ -53,18 +53,20 @@ namespace CSharpifier
             if (!_element.HasElements && !_element.HasAttributes)
             {
                 property.AppendPotentialPropertyDefinitions(
-                    BclClass.GetLegalClassesFromValue(_element.Value)
+                    BclClass.All
                         .Select(bclClass =>
                             new PropertyDefinition(bclClass, _element.Name.ToString())
                             {
-                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) },
+                                IsLegal = bclClass.IsLegalValue(_element.Value)
                             }));
             }
 
             var userDefinedClassPropertyDefinition =
                 new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name.ToString())
                 {
-                    Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                    Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) },
+                    IsLegal = true
                 };
 
             if (_element.HasElements || _element.HasAttributes)
@@ -88,7 +90,8 @@ namespace CSharpifier
                             {
                                 AttributeProxy.XmlArray(_element.Name.ToString()),
                                 AttributeProxy.XmlArrayItem(first.Name.ToString())
-                            }
+                            },
+                            IsLegal = true
                         };
 
                     if (_element.Elements().Count() > 1)
@@ -106,7 +109,8 @@ namespace CSharpifier
                 .Select(x =>
                     new PropertyDefinition(ListClass.FromClass(x.Class), _pluralizationService.Value.Pluralize(_element.Name.ToString()))
                     {
-                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) },
+                        IsLegal = x.IsLegal
                     }
                 ).ToList();
 

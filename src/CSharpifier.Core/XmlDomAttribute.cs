@@ -40,11 +40,12 @@ namespace CSharpifier
         {
             var property = new Property(_attribute.Name);
             property.AppendPotentialPropertyDefinitions(
-                BclClass.GetLegalClassesFromValue(_attribute.Value)
+                BclClass.All
                     .Select(bclClass =>
                         new PropertyDefinition(bclClass, _attribute.Name.ToString())
                         {
-                            Attributes = new List<AttributeProxy> { AttributeProxy.XmlAttribute(_attribute.Name.ToString()) }
+                            Attributes = new List<AttributeProxy> { AttributeProxy.XmlAttribute(_attribute.Name.ToString()) },
+                            IsLegal = bclClass.IsLegalValue(_attribute.Value)
                         }));
             return property;
         }
