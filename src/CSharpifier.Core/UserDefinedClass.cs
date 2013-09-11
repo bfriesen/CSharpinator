@@ -42,6 +42,7 @@ namespace CSharpifier
                 return;
             }
 
+            foundProperty.HasHadNonEmptyValue |= property.HasHadNonEmptyValue;
             foundProperty.AppendPotentialPropertyDefinitions(property.PotentialPropertyDefinitions);
         }
 

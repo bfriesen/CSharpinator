@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace CSharpifier
 {
@@ -8,12 +7,14 @@ namespace CSharpifier
     {
         private readonly List<PropertyDefinition> _potentialPropertyDefinitions = new List<PropertyDefinition>();
 
-        public Property(XName propertyName)
+        public Property(string propertyName, bool isNonEmpty)
         {
-            Name = new IdentifierName(propertyName.ToString());
+            Name = new IdentifierName(propertyName);
+            HasHadNonEmptyValue |= isNonEmpty;
         }
 
         public IdentifierName Name { get; set; }
+        public bool HasHadNonEmptyValue { get; set; }
 
         public IEnumerable<PropertyDefinition> PotentialPropertyDefinitions
         {
@@ -22,7 +23,19 @@ namespace CSharpifier
 
         public PropertyDefinition SelectedPropertyDefinition
         {
-            get { return _potentialPropertyDefinitions.First(x => x.IsEnabled && x.IsLegal); }
+            get
+            {
+                return _potentialPropertyDefinitions.First(x =>
+                {
+                    if (!x.IsEnabled || !x.IsLegal)
+                    {
+                        return false;
+                    }
+
+                    var bclClass = x.Class as BclClass;
+                    return bclClass == null || !bclClass.IsNullable || HasHadNonEmptyValue;
+                });
+            }
         }
 
         public void PrependPotentialPropertyDefinition(PropertyDefinition potentialPropertyDefinition)

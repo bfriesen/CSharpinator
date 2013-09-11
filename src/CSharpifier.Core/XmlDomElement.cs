@@ -48,7 +48,7 @@ namespace CSharpifier
 
         public Property CreateProperty(IClassRepository classRepository)
         {
-            var property = new Property(_element.Name);
+            var property = new Property(_element.Name.ToString(), _element.HasElements || _element.HasAttributes || !string.IsNullOrEmpty(_element.Value));
 
             if (!_element.HasElements && !_element.HasAttributes)
             {

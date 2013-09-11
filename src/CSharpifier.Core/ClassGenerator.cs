@@ -17,6 +17,7 @@ namespace CSharpifier
         {
             writer.WriteLine("using System;");
             writer.WriteLine("using System.Collections.Generic;");
+            writer.WriteLine("using System.Globalization;");
             writer.WriteLine("using System.Xml.Serialization;");
             writer.WriteLine();
             writer.WriteLine("namespace YourNamespaceHere");

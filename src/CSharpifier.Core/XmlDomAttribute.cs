@@ -38,7 +38,7 @@ namespace CSharpifier
 
         public Property CreateProperty(IClassRepository classRepository)
         {
-            var property = new Property(_attribute.Name);
+            var property = new Property(_attribute.Name.ToString(), !string.IsNullOrEmpty(_attribute.Value));
             property.AppendPotentialPropertyDefinitions(
                 BclClass.All
                     .Select(bclClass =>
