@@ -109,6 +109,7 @@ namespace CSharpifier
             }
 
             var listPropertyDefinitions = property.PotentialPropertyDefinitions
+                .Where(x => !(x.Class is ListClass))
                 .Select(x =>
                     new PropertyDefinition(
                         ListClass.FromClass(x.Class),
