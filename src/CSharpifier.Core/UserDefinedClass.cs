@@ -45,7 +45,7 @@ namespace CSharpifier
             }
 
             foundProperty.HasHadNonEmptyValue |= property.HasHadNonEmptyValue;
-            foundProperty.AppendPotentialPropertyDefinitions(property.PotentialPropertyDefinitions);
+            foundProperty.MergePotentialPropertyDefinitions(property.PotentialPropertyDefinitions);
         }
 
         public UserDefinedClass MergeWith(UserDefinedClass other)
