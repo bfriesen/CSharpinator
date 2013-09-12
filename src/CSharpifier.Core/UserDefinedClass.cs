@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 namespace CSharpifier
 {
+    [DebuggerDisplay("{TypeName.Raw}")]
     public class UserDefinedClass : Class
     {
         private static int _orderSeed;

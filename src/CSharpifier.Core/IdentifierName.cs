@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace CSharpifier
 {
+    [DebuggerDisplay("{Raw}")]
     public class IdentifierName
     {
         private readonly string _rawIdentifierName;

@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 
 namespace CSharpifier
 {
+    [DebuggerDisplay("{Name}")]
     public class XmlDomAttribute : IDomElement
     {
         private readonly XAttribute _attribute;

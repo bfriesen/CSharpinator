@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace CSharpifier
 {
+    [DebuggerDisplay("{Name.Raw}")]
     public class Property
     {
         private readonly List<PropertyDefinition> _potentialPropertyDefinitions = new List<PropertyDefinition>();
