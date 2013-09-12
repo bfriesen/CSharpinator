@@ -11,6 +11,11 @@ namespace CSharpifier
             return string.Join("\r\n", value.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Select(x => "    " + x));
         }
 
+        public static IEnumerable<UserDefinedClass> GetUsedClasses(this IClassRepository repository)
+        {
+            return repository.GetAll().First().GetUsedClasses();
+        }
+
         public static IEnumerable<UserDefinedClass> GetUsedClasses(this UserDefinedClass rootClass)
         {
             return GetUserDefinedClassesImpl(rootClass).Distinct();
