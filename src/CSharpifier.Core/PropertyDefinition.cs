@@ -23,5 +23,23 @@ namespace CSharpifier
         {
             return string.Format("{0}", Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase, Attributes));
         }
+
+        public override string ToString()
+        {
+            return
+                (Class is BclClass
+                     ? ((BclClass)Class).TypeAlias
+                     : Class is UserDefinedClass
+                           ? ((UserDefinedClass)Class).TypeName.Raw
+                           : "List<" +
+                             (((ListClass)Class).Class is BclClass
+                                  ? ((BclClass)((ListClass)Class).Class).TypeAlias
+                                  : ((UserDefinedClass)((ListClass)Class).Class).TypeName.Raw)
+                             + ">")
+                + ":"
+                + (IsLegal ? "Legal" : "Illegal")
+                + ":"
+                + (IsEnabled ? "Enabled" : "Disabled");
+        }
     }
 }

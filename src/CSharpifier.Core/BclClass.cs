@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace CSharpifier
 {
+    [DebuggerDisplay("{TypeAlias}")]
     public class BclClass : Class
     {
         private static readonly ConcurrentDictionary<string, BclClass> _classes = new ConcurrentDictionary<string, BclClass>();
@@ -70,7 +72,7 @@ namespace CSharpifier
 
         public static BclClass NullableBoolean
         {
-            get { return _classes.GetOrAdd(typeof(bool?).FullName, typeName => new NullableBclClass(typeName, "bool", value => string.IsNullOrEmpty(value) || value == "true" || value == "false", ".ToString()", "bool.Parse(value)")); }
+            get { return _classes.GetOrAdd(typeof(bool?).FullName, typeName => new NullableBclClass(typeName, "bool?", value => string.IsNullOrEmpty(value) || value == "true" || value == "false", ".ToString()", "bool.Parse(value)")); }
         }
 
         public static BclClass PascalCaseBoolean
@@ -90,7 +92,7 @@ namespace CSharpifier
 
         public static BclClass NullableInt32
         {
-            get { return _classes.GetOrAdd(typeof(int?).FullName, typeName => new NullableBclClass(typeName, "int", value => { int temp; return string.IsNullOrEmpty(value) || int.TryParse(value, out temp); }, ".ToString()", "int.Parse(value)")); }
+            get { return _classes.GetOrAdd(typeof(int?).FullName, typeName => new NullableBclClass(typeName, "int?", value => { int temp; return string.IsNullOrEmpty(value) || int.TryParse(value, out temp); }, ".ToString()", "int.Parse(value)")); }
         }
 
         public static BclClass Int64
@@ -100,7 +102,7 @@ namespace CSharpifier
 
         public static BclClass NullableInt64
         {
-            get { return _classes.GetOrAdd(typeof(long?).FullName, typeName => new NullableBclClass(typeName, "long", value => { long temp; return string.IsNullOrEmpty(value) || long.TryParse(value, out temp); }, ".ToString()", "long.Parse(value)")); }
+            get { return _classes.GetOrAdd(typeof(long?).FullName, typeName => new NullableBclClass(typeName, "long?", value => { long temp; return string.IsNullOrEmpty(value) || long.TryParse(value, out temp); }, ".ToString()", "long.Parse(value)")); }
         }
 
         public static BclClass Decimal
@@ -110,7 +112,7 @@ namespace CSharpifier
 
         public static BclClass NullableDecimal
         {
-            get { return _classes.GetOrAdd(typeof(decimal?).FullName, typeName => new NullableBclClass(typeName, "decimal", value => { decimal temp; return string.IsNullOrEmpty(value) || decimal.TryParse(value, out temp); }, ".ToString()", "decimal.Parse(value)")); }
+            get { return _classes.GetOrAdd(typeof(decimal?).FullName, typeName => new NullableBclClass(typeName, "decimal?", value => { decimal temp; return string.IsNullOrEmpty(value) || decimal.TryParse(value, out temp); }, ".ToString()", "decimal.Parse(value)")); }
         }
 
         public static BclClass DateTime
@@ -120,7 +122,7 @@ namespace CSharpifier
 
         public static BclClass NullableDateTime
         {
-            get { return _classes.GetOrAdd(typeof(DateTime?).FullName, typeName => new NullableBclClass(typeName, "DateTime", value => { DateTime temp; return string.IsNullOrEmpty(value) || System.DateTime.TryParse(value, out temp); }, ".ToString()", @"DateTime.ParseExact(value, ""o"", CultureInfo.CurrentCulture);")); }
+            get { return _classes.GetOrAdd(typeof(DateTime?).FullName, typeName => new NullableBclClass(typeName, "DateTime?", value => { DateTime temp; return string.IsNullOrEmpty(value) || System.DateTime.TryParse(value, out temp); }, ".ToString()", @"DateTime.ParseExact(value, ""o"", CultureInfo.CurrentCulture);")); }
         }
 
         public static BclClass Guid
@@ -130,7 +132,7 @@ namespace CSharpifier
 
         public static BclClass NullableGuid
         {
-            get { return _classes.GetOrAdd(typeof(Guid?).FullName, typeName => new NullableBclClass(typeName, "Guid", value => { Guid temp; return string.IsNullOrEmpty(value) || System.Guid.TryParse(value, out temp); }, ".ToString()", "Guid.Parse(value)")); }
+            get { return _classes.GetOrAdd(typeof(Guid?).FullName, typeName => new NullableBclClass(typeName, "Guid?", value => { Guid temp; return string.IsNullOrEmpty(value) || System.Guid.TryParse(value, out temp); }, ".ToString()", "Guid.Parse(value)")); }
         }
 
         public static BclClass FromTypeFullName(string typeFullName)
@@ -250,7 +252,7 @@ namespace CSharpifier
 
                 sb.AppendFormat(
 @"[XmlIgnore]
-public {0}? {1} {{ get; set; }}", _typeAlias, propertyName).AppendLine().AppendLine();
+public {0} {1} {{ get; set; }}", TypeAlias, propertyName).AppendLine().AppendLine();
 
                 foreach (var attribute in attributes)
                 {
@@ -266,9 +268,9 @@ public {0}? {1} {{ get; set; }}", _typeAlias, propertyName).AppendLine().AppendL
     }}
     set
     {{
-        {0} = value == null ? null : ({2}?){3};
+        {0} = value == null ? null : ({2}){3};
     }}
-}}", propertyName, _toString, _typeAlias, _parse);
+}}", propertyName, _toString, TypeAlias, _parse);
 
                 return sb.ToString();
             }
@@ -287,7 +289,7 @@ public {0}? {1} {{ get; set; }}", _typeAlias, propertyName).AppendLine().AppendL
 
                 sb.AppendFormat(
                     @"[XmlIgnore]
-public {0} {1} {{ get; set; }}", _typeAlias, propertyName).AppendLine().AppendLine();
+public bool {0} {{ get; set; }}", propertyName).AppendLine().AppendLine();
 
                 foreach (var attribute in attributes)
                 {
@@ -314,7 +316,7 @@ public {0} {1} {{ get; set; }}", _typeAlias, propertyName).AppendLine().AppendLi
         private class NullablePascalCaseBooleanClass : BclClass
         {
             public NullablePascalCaseBooleanClass()
-                : base("PascalCaseBoolean", "bool", value => value == null || value == "True" || value == "False")
+                : base("NullablePascalCaseBoolean", "bool?", value => value == null || value == "True" || value == "False")
             {
             }
 
@@ -326,7 +328,7 @@ public {0} {1} {{ get; set; }}", _typeAlias, propertyName).AppendLine().AppendLi
 
                 sb.AppendFormat(
                     @"[XmlIgnore]
-public {0} {1} {{ get; set; }}", _typeAlias, propertyName).AppendLine().AppendLine();
+public bool? {0} {{ get; set; }}", propertyName).AppendLine().AppendLine();
 
                 foreach (var attribute in attributes)
                 {
