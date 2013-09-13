@@ -62,6 +62,16 @@ namespace CSharpifier
                                 Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                             }));
             }
+            else
+            {
+                property.AppendPotentialPropertyDefinitions(
+                    BclClass.All
+                        .Select(bclClass =>
+                            new PropertyDefinition(bclClass, _element.Name.ToString(), false, true)
+                            {
+                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                            }));
+            }
 
             var userDefinedClassPropertyDefinition =
                 new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name.ToString(), true, true)
