@@ -5,7 +5,9 @@ namespace CSharpifier
     [XmlRoot("BclClass")]
     public class BclClassProxy : ClassProxy
     {
+        [XmlAttribute]
         public string TypeAlias { get; set; }
+        [XmlAttribute]
         public string TypeName { get; set; }
 
         public static BclClassProxy FromBclClass(BclClass bclClass)

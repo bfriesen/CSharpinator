@@ -38,9 +38,9 @@ namespace CSharpifier
         public void AddProperty(Property property)
         {
             Property foundProperty;
-            if (!_properties.TryGetValue(property.Name.Raw, out foundProperty))
+            if (!_properties.TryGetValue(property.Id, out foundProperty))
             {
-                _properties.Add(property.Name.Raw, property);
+                _properties.Add(property.Id, property);
                 return;
             }
 

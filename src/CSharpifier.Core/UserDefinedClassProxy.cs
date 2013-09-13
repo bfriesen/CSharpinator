@@ -7,7 +7,9 @@ namespace CSharpifier
     [XmlRoot("UserDefinedClass")]
     public class UserDefinedClassProxy : ClassProxy
     {
+        [XmlAttribute]
         public string TypeName { get; set; }
+        [XmlElement("Property")]
         public List<PropertyProxy> Properties { get; set; }
 
         public static UserDefinedClassProxy FromUserDefinedClass(UserDefinedClass userDefinedClass)

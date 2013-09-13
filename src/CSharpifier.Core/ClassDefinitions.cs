@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace CSharpifier
 {
     public class ClassDefinitions
     {
+        [XmlElement("Class")]
         public List<UserDefinedClassProxy> Classes { get; set; }
 
         public static ClassDefinitions FromClasses(IEnumerable<UserDefinedClass> classes)

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace CSharpifier
@@ -6,11 +8,114 @@ namespace CSharpifier
     [XmlRoot("PropertyDefinition")]
     public class PropertyDefinitionProxy
     {
+        [XmlAttribute]
         public string Name { get; set; }
+        [XmlIgnore]
         public ClassProxy Class { get; set; }
+        [XmlIgnore]
         public List<AttributeProxy> Attributes { get; set; }
+        [XmlAttribute]
         public bool IsLegal { get; set; }
+        [XmlAttribute]
         public bool IsEnabled { get; set; }
+
+        [XmlAttribute("Class")]
+        public string ClassString
+        {
+            get { return GetClassString(Class); }
+            set { Class = GetClassFromString(value); }
+        }
+
+        [XmlAttribute("Attributes")]
+        public string AttributesString
+        {
+            get { return GetAttributesString(Attributes); }
+            set { Attributes = GetAttributesFromString(value); }
+        }
+
+        private static string GetClassString(ClassProxy @class)
+        {
+            var userDefined = @class as UserDefinedClassProxy;
+            if (userDefined != null)
+            {
+                return "UserDefined:" + userDefined.TypeName;
+            }
+
+            var bcl = @class as BclClassProxy;
+            if (bcl != null)
+            {
+                return "Bcl:" + bcl.TypeAlias + ":" + bcl.TypeName;
+            }
+
+            var list = @class as ListClassProxy;
+            if (list != null)
+            {
+                return "List:" + GetClassString(list.Class);
+            }
+
+            throw new InvalidOperationException("Invalid class type: " + @class.GetType());
+        }
+
+        private static ClassProxy GetClassFromString(string classString)
+        {
+            var firstColonIndex = classString.IndexOf(':');
+            var classType = classString.Substring(0, firstColonIndex);
+            var remainder = classString.Substring(firstColonIndex + 1);
+
+            switch (classType)
+            {
+                case "UserDefined":
+                    {
+                        return new UserDefinedClassProxy
+                        {
+                            Properties = new List<PropertyProxy>(),
+                            TypeName = remainder
+                        };
+                    }
+                case "Bcl":
+                    {
+                        var split = remainder.Split(':');
+                        return new BclClassProxy
+                        {
+                            TypeAlias = split[0],
+                            TypeName = split[1]
+                        };
+                    }
+                case "List":
+                    {
+                        return new ListClassProxy
+                        {
+                            Class = GetClassFromString(remainder)
+                        };
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException("Invalid class type: " + classType);
+                    }
+            }
+        }
+
+        private string GetAttributesString(List<AttributeProxy> attributes)
+        {
+            string attributesString = string.Join("|", attributes.Select(x => x.AttributeTypeName + (string.IsNullOrEmpty(x.ElementNameSetter) ? "" : ":" + x.ElementNameSetter)));
+            return attributesString;
+        }
+
+        private static List<AttributeProxy> GetAttributesFromString(string value)
+        {
+            var attributes = new List<AttributeProxy>(value.Split('|').Select(x =>
+            {
+                var split = x.Split(':');
+                var elementNameSetter = split.Length == 2 ? split[1] : null;
+
+                return new AttributeProxy
+                {
+                    AttributeTypeName = split[0],
+                    ElementNameSetter = elementNameSetter
+                };
+            }));
+            return attributes;
+        }
 
         public static PropertyDefinitionProxy FromPropertyDefinition(PropertyDefinition propertyDefinition)
         {

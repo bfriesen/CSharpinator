@@ -7,15 +7,18 @@ namespace CSharpifier
     [XmlRoot("Property")]
     public class PropertyProxy
     {
-        public string Name { get; set; }
+        [XmlAttribute]
+        public string Id { get; set; }
+        [XmlAttribute]
         public bool HasHadNonEmptyValue { get; set; }
+        [XmlElement("PropertyDefinition")]
         public List<PropertyDefinitionProxy> PotentialPropertyDefinitions { get; set; }
 
         public static PropertyProxy FromProperty(Property property)
         {
             return new PropertyProxy
             {
-                Name = property.Name.Raw,
+                Id = property.Id,
                 HasHadNonEmptyValue = property.HasHadNonEmptyValue,
                 PotentialPropertyDefinitions = property.PotentialPropertyDefinitions.Select(PropertyDefinitionProxy.FromPropertyDefinition).ToList()
             };
@@ -23,7 +26,7 @@ namespace CSharpifier
 
         public Property ToProperty(IClassRepository classRepository)
         {
-            var property = new Property(Name, HasHadNonEmptyValue);
+            var property = new Property(Id, HasHadNonEmptyValue);
             property.AppendPotentialPropertyDefinitions(PotentialPropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository)));
             return property;
         }

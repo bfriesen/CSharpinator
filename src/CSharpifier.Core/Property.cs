@@ -10,13 +10,13 @@ namespace CSharpifier
     {
         private readonly List<PropertyDefinition> _potentialPropertyDefinitions = new List<PropertyDefinition>();
 
-        public Property(string propertyName, bool isNonEmpty)
+        public Property(string id, bool isNonEmpty)
         {
-            Name = new IdentifierName(propertyName);
+            Id = id;
             HasHadNonEmptyValue |= isNonEmpty;
         }
 
-        public IdentifierName Name { get; set; }
+        public string Id { get; set; }
         public bool HasHadNonEmptyValue { get; set; }
 
         public IEnumerable<PropertyDefinition> PotentialPropertyDefinitions
