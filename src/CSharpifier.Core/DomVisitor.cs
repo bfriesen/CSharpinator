@@ -37,11 +37,13 @@
             {
                 if (currentClass == null) // if this is the root element
                 {
-                    currentClass = _classRepository.GetOrCreate(element.Name);
+                    _classRepository.GetOrCreate(element.Name);
                 }
-                
-                var property = element.CreateProperty(_classRepository);
-                currentClass.AddProperty(property);
+                else
+                {
+                    var property = element.CreateProperty(_classRepository);
+                    currentClass.AddProperty(property);
+                }
             }
         }
     }

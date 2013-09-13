@@ -16,6 +16,11 @@ namespace CSharpifier
             return classDefinitions;
         }
 
+        public void LoadToRepository(IClassRepository classRepository)
+        {
+            ToClasses(classRepository);
+        }
+
         public IEnumerable<UserDefinedClass> ToClasses(IClassRepository classRepository)
         {
             return Classes.Select(x => x.ToUserDefinedClass(classRepository)).ToList();

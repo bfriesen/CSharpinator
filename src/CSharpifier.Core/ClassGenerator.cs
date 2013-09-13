@@ -12,14 +12,14 @@ namespace CSharpifier
             _repository = repository;
         }
 
-        public void Write(Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
+        public void Write(string @namespace, Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
         {
             writer.WriteLine("using System;");
             writer.WriteLine("using System.Collections.Generic;");
             writer.WriteLine("using System.Globalization;");
             writer.WriteLine("using System.Xml.Serialization;");
             writer.WriteLine();
-            writer.WriteLine("namespace YourNamespaceHere");
+            writer.WriteLine("namespace {0}", @namespace);
             writer.WriteLine("{");
 
             writer.WriteLine(

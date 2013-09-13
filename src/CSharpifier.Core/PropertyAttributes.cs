@@ -5,7 +5,8 @@ namespace CSharpifier
     [Flags]
     public enum PropertyAttributes
     {
-        XmlSerializion,
-        DataContract
+        None            = 0x00,
+        XmlSerializion  = 0x01,
+        DataContract    = 0x02
     }
 }
