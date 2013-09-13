@@ -41,13 +41,17 @@ namespace CSharpifier
         public Property CreateProperty(IClassRepository classRepository)
         {
             var property = new Property(_attribute.Name.ToString(), !string.IsNullOrEmpty(_attribute.Value));
-            property.AppendPotentialPropertyDefinitions(
-                BclClass.All
-                    .Select(bclClass =>
-                        new PropertyDefinition(bclClass, _attribute.Name.ToString(), bclClass.IsLegalValue(_attribute.Value), true)
-                        {
-                            Attributes = new List<AttributeProxy> { AttributeProxy.XmlAttribute(_attribute.Name.ToString()) }
-                        }));
+            
+            property.InitializePotentialPropertyDefinitions(
+                propertyDefinitions =>
+                propertyDefinitions.Append(
+                    BclClass.All
+                        .Select(bclClass =>
+                            new PropertyDefinition(bclClass, _attribute.Name.ToString(), bclClass.IsLegalValue(_attribute.Value), true)
+                            {
+                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlAttribute(_attribute.Name.ToString()) }
+                            })));
+            
             return property;
         }
     }

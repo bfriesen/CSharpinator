@@ -52,96 +52,100 @@ namespace CSharpifier
         {
             var property = new Property(_element.Name.ToString(), _element.HasElements || _element.HasAttributes || !string.IsNullOrEmpty(_element.Value));
 
-            if (!_element.HasElements && !_element.HasAttributes)
-            {
-                property.AppendPotentialPropertyDefinitions(
-                    BclClass.All
-                        .Select(bclClass =>
-                            new PropertyDefinition(bclClass, _element.Name.ToString(), bclClass.IsLegalValue(_element.Value), true)
-                            {
-                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
-                            }));
-            }
-            else
-            {
-                property.AppendPotentialPropertyDefinitions(
-                    BclClass.All
-                        .Select(bclClass =>
-                            new PropertyDefinition(bclClass, _element.Name.ToString(), false, true)
-                            {
-                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
-                            }));
-            }
-
-            var userDefinedClassPropertyDefinition =
-                new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name.ToString(), true, true)
+            property.InitializePotentialPropertyDefinitions(
+                propertyDefinitions =>
                 {
-                    Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
-                };
-
-            if (_element.HasElements || _element.HasAttributes)
-            {
-                property.PrependPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
-            }
-            else
-            {
-                property.AppendPotentialPropertyDefinition(userDefinedClassPropertyDefinition);
-            }
-
-            if (!_element.HasAttributes && _element.HasElements)
-            {
-                var first = _element.Elements().First();
-                if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
-                {
-                    var listPropertyDefinition =
-                        new PropertyDefinition(
-                            ListClass.FromClass(classRepository.GetOrCreate(first.Name.ToString())),
-                            _pluralizationService.Value.Pluralize(first.Name.ToString()),
-                            true,
-                            true)
-                        {
-                            Attributes = new List<AttributeProxy>
-                            {
-                                AttributeProxy.XmlArray(_element.Name.ToString()),
-                                AttributeProxy.XmlArrayItem(first.Name.ToString())
-                            }
-                        };
-
-                    if (_element.Elements().Count() > 1)
+                    if (!_element.HasElements && !_element.HasAttributes)
                     {
-                        property.PrependPotentialPropertyDefinition(listPropertyDefinition);
+                        propertyDefinitions.Append(
+                            BclClass.All
+                                .Select(bclClass =>
+                                    new PropertyDefinition(bclClass, _element.Name.ToString(), bclClass.IsLegalValue(_element.Value), true)
+                                    {
+                                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                                    }));
                     }
                     else
                     {
-                        property.AppendPotentialPropertyDefinition(listPropertyDefinition);
+                        propertyDefinitions.Append(
+                            BclClass.All
+                                .Select(bclClass =>
+                                    new PropertyDefinition(bclClass, _element.Name.ToString(), false, true)
+                                    {
+                                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                                    }));
                     }
-                }
-            }
 
-            var listPropertyDefinitions = property.PotentialPropertyDefinitions
-                .Where(x => !(x.Class is ListClass))
-                .Select(x =>
-                    new PropertyDefinition(
-                        ListClass.FromClass(x.Class),
-                        _pluralizationService.Value.Pluralize(_element.Name.ToString()),
-                        x.IsLegal,
-                        x.IsEnabled)
+                    var userDefinedClassPropertyDefinition =
+                        new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name.ToString(), true, true)
+                        {
+                            Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                        };
+
+                    if (_element.HasElements || _element.HasAttributes)
                     {
-                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                        propertyDefinitions.Prepend(userDefinedClassPropertyDefinition);
                     }
-                ).ToList();
+                    else
+                    {
+                        propertyDefinitions.Append(userDefinedClassPropertyDefinition);
+                    }
 
-            if (_element.Parent != null)
-            {
-                if (_element.Parent.Elements(_element.Name).Count() > 1)
-                {
-                    property.PrependPotentialPropertyDefinitions(listPropertyDefinitions);
-                }
-                else
-                {
-                    property.AppendPotentialPropertyDefinitions(listPropertyDefinitions);
-                }
-            }
+                    if (!_element.HasAttributes && _element.HasElements)
+                    {
+                        var first = _element.Elements().First();
+                        if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
+                        {
+                            var listPropertyDefinition =
+                                new PropertyDefinition(
+                                    ListClass.FromClass(classRepository.GetOrCreate(first.Name.ToString())),
+                                    _pluralizationService.Value.Pluralize(first.Name.ToString()),
+                                    true,
+                                    true)
+                                {
+                                    Attributes = new List<AttributeProxy>
+                                    {
+                                        AttributeProxy.XmlArray(_element.Name.ToString()),
+                                        AttributeProxy.XmlArrayItem(first.Name.ToString())
+                                    }
+                                };
+
+                            if (_element.Elements().Count() > 1)
+                            {
+                                propertyDefinitions.Prepend(listPropertyDefinition);
+                            }
+                            else
+                            {
+                                propertyDefinitions.Append(listPropertyDefinition);
+                            }
+                        }
+                    }
+
+                    var listPropertyDefinitions = propertyDefinitions
+                        .Where(x => !(x.Class is ListClass))
+                        .Select(x =>
+                            new PropertyDefinition(
+                                ListClass.FromClass(x.Class),
+                                _pluralizationService.Value.Pluralize(_element.Name.ToString()),
+                                x.IsLegal,
+                                x.IsEnabled)
+                            {
+                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
+                            }
+                        ).ToList();
+
+                    if (_element.Parent != null)
+                    {
+                        if (_element.Parent.Elements(_element.Name).Count() > 1)
+                        {
+                            propertyDefinitions.Prepend(listPropertyDefinitions);
+                        }
+                        else
+                        {
+                            propertyDefinitions.Append(listPropertyDefinitions);
+                        }
+                    }
+                });
 
             return property;
         }

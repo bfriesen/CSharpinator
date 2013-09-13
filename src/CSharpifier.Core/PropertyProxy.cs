@@ -27,7 +27,11 @@ namespace CSharpifier
         public Property ToProperty(IClassRepository classRepository)
         {
             var property = new Property(Id, HasHadNonEmptyValue);
-            property.AppendPotentialPropertyDefinitions(PotentialPropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository)));
+
+            property.InitializePotentialPropertyDefinitions(
+                propertyDefinitions =>
+                propertyDefinitions.Append(PotentialPropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository))));
+            
             return property;
         }
     }

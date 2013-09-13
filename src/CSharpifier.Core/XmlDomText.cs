@@ -38,14 +38,16 @@ namespace CSharpifier
         public Property CreateProperty(IClassRepository classRepository)
         {
             var property = new Property(Name, !string.IsNullOrEmpty(_value));
-
-            property.AppendPotentialPropertyDefinitions(
+            
+            property.InitializePotentialPropertyDefinitions(
+                propertyDefinitions =>
+                propertyDefinitions.Append(
                 BclClass.All
                     .Select(bclClass =>
                         new PropertyDefinition(bclClass, Name, bclClass.IsLegalValue(_value), true)
                         {
                             Attributes = new List<AttributeProxy> { AttributeProxy.XmlText() }
-                        }));
+                        })));
 
             return property;
         }

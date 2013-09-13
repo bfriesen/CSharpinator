@@ -60,6 +60,7 @@
     <Compile Include="Property.cs" />
     <Compile Include="PropertyAttributes.cs" />
     <Compile Include="PropertyDefinition.cs" />
+    <Compile Include="PropertyDefinitionExtensions.cs" />
     <Compile Include="PropertyDefinitionProxy.cs" />
     <Compile Include="PropertyProxy.cs" />
     <Compile Include="UserDefinedClass.cs" />
