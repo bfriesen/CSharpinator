@@ -6,5 +6,6 @@ namespace CSharpifier
     {
         IEnumerable<UserDefinedClass> GetAll();
         UserDefinedClass GetOrCreate(string typeName);
+        UserDefinedClass GetOrCreate(string typeName, out bool isNew);
     }
 }

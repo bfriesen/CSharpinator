@@ -35,11 +35,17 @@ namespace CSharpifier
             get { return _properties.Values; }
         }
 
-        public void AddProperty(Property property)
+        public void AddProperty(Property property, bool isParentClassNew)
         {
             Property foundProperty;
             if (!_properties.TryGetValue(property.Id, out foundProperty))
             {
+                // If we're adding a new property to an old class, it should be nullable.
+                if (!isParentClassNew)
+                {
+                    property.MakeNullable();
+                }
+
                 _properties.Add(property.Id, property);
                 return;
             }
@@ -58,7 +64,7 @@ namespace CSharpifier
 
             foreach (var otherProperty in other.Properties)
             {
-                AddProperty(otherProperty);
+                AddProperty(otherProperty, false);
             }
 
             return this;

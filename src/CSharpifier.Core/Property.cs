@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace CSharpifier
 {
-    [DebuggerDisplay("{Name.Raw}")]
+    [DebuggerDisplay("{Id}")]
     public class Property
     {
         private readonly Lazy<List<PropertyDefinition>> _potentialPropertyDefinitions;
@@ -46,6 +46,18 @@ namespace CSharpifier
         public string GeneratePropertyCode(Case classCase, Case propertyCase)
         {
             return SelectedPropertyDefinition.GeneratePropertyCode(classCase, propertyCase);
+        }
+
+        public void MakeNullable()
+        {
+            foreach (var potentialPropertyDefinition in PotentialPropertyDefinitions)
+            {
+                var bclClass = potentialPropertyDefinition.Class as BclClass;
+                if (bclClass != null && !bclClass.IsNullable)
+                {
+                    potentialPropertyDefinition.IsEnabled = false;
+                }
+            }
         }
 
         public void InitializePotentialPropertyDefinitions(Action<List<PropertyDefinition>> initializeAction)

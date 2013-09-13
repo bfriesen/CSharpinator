@@ -27,7 +27,8 @@ namespace CSharpifier
 
             foreach (var propertyProxy in Properties)
             {
-                userDefinedClass.AddProperty(propertyProxy.ToProperty(classRepository));
+                // We're sending 'true' for the isParentClassNew parameter, since we don't want to mark anything as nullable.
+                userDefinedClass.AddProperty(propertyProxy.ToProperty(classRepository), true);
             }
 
             return userDefinedClass;

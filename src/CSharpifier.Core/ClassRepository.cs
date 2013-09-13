@@ -20,5 +20,19 @@ namespace CSharpifier
                 typeName,
                 x => new UserDefinedClass(typeName));
         }
+
+        public UserDefinedClass GetOrCreate(string typeName, out bool isNew)
+        {
+            var isNewClass = false;
+            var @class = _classes.GetOrAdd(
+                typeName,
+                x =>
+                {
+                    isNewClass = true;
+                    return new UserDefinedClass(typeName);
+                });
+            isNew = isNewClass;
+            return @class;
+        }
     }
 }
