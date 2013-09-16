@@ -43,13 +43,10 @@ namespace CSharpifier
         {
             return _extraPropertyDefinitionSets.GetOrAdd(
                 name,
-                n =>
+                n => new PropertyDefinitionSet
                 {
-                    return new PropertyDefinitionSet
-                    {
-                        Name = n,
-                        PropertyDefinitions = new List<PropertyDefinition>()
-                    };
+                    Name = n,
+                    PropertyDefinitions = new List<PropertyDefinition>()
                 });
         }
 

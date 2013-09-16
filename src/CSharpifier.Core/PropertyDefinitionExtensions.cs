@@ -63,7 +63,13 @@ namespace CSharpifier
 
         public static void MergeWith(this Property propertyToMergeInto, Property propertyToMergeFrom)
         {
-            // TODO: implement
+            propertyToMergeInto.HasHadNonEmptyValue |= propertyToMergeFrom.HasHadNonEmptyValue;
+            propertyToMergeInto.DefaultPropertyDefinitionSet.PropertyDefinitions.MergeWith(propertyToMergeFrom.DefaultPropertyDefinitionSet.PropertyDefinitions);
+
+            foreach (var extraPropertyDefinitionSet in propertyToMergeFrom.ExtraPropertyDefinitionSets)
+            {
+                propertyToMergeInto.AddOrUpdateExtraPropertyDefinitionSet(extraPropertyDefinitionSet);
+            }
         }
 
         public static void MergeWith(this List<PropertyDefinition> listToMergeInto, IEnumerable<PropertyDefinition> listToMergeFrom)

@@ -1,20 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace CSharpifier
 {
     public class PropertyDefinitionSetProxy
     {
+        [XmlAttribute]
         public string Name { get; set; }
+
+        [XmlAttribute]
         public int Order { get; set; }
+
+        [XmlAttribute]
         public bool IsEnabled { get; set; }
 
-        [XmlArray]
-        [XmlArrayItem("PropertyDefinition")]
+        [XmlElement("PropertyDefinition")]
         public List<PropertyDefinitionProxy> PropertyDefinitions { get; set; }
 
         public static PropertyDefinitionSetProxy FromPropertyDefinitionSet(PropertyDefinitionSet propertyDefinitionSet)

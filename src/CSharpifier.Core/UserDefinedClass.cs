@@ -50,7 +50,6 @@ namespace CSharpifier
                 return;
             }
 
-            foundProperty.HasHadNonEmptyValue |= property.HasHadNonEmptyValue;
             foundProperty.MergeWith(property);
         }
 
