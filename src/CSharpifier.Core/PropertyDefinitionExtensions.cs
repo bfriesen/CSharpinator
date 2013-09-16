@@ -38,6 +38,11 @@ namespace CSharpifier
             {
                 destination.IsLegal = false;
             }
+
+            if (!source.IsEnabled)
+            {
+                destination.IsEnabled = false;
+            }
         }
 
         public static void Append(this List<PropertyDefinition> potentialPropertyDefinitions, IEnumerable<PropertyDefinition> otherPotentialPropertyDefinitions)
@@ -56,10 +61,15 @@ namespace CSharpifier
             }
         }
 
-        public static void MergeWith(this List<PropertyDefinition> potentialPropertyDefinitions, IEnumerable<PropertyDefinition> otherPotentialPropertyDefinitions)
+        public static void MergeWith(this Property propertyToMergeInto, Property propertyToMergeFrom)
         {
-            var thisList = potentialPropertyDefinitions;
-            var otherList = otherPotentialPropertyDefinitions.ToList();
+            // TODO: implement
+        }
+
+        public static void MergeWith(this List<PropertyDefinition> listToMergeInto, IEnumerable<PropertyDefinition> listToMergeFrom)
+        {
+            var thisList = listToMergeInto;
+            var otherList = listToMergeFrom.ToList();
 
             var matchingIndexes = new List<Tuple<int, int>>();
 

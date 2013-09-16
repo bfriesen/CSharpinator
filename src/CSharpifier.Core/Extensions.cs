@@ -11,6 +11,40 @@ namespace CSharpifier
             return string.Join("\r\n", value.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Select(x => "    " + x));
         }
 
+        public static BclClass AsBclClass(this Class @class)
+        {
+            var bclClass = @class as BclClass;
+            if (bclClass != null)
+            {
+                return bclClass;
+            }
+
+            var listClass = @class as ListClass;
+            if (listClass != null)
+            {
+                return listClass.Class.AsBclClass();
+            }
+
+            return null;
+        }
+
+        public static UserDefinedClass AsUserDefinedClass(this Class @class)
+        {
+            var userDefinedClass = @class as UserDefinedClass;
+            if (userDefinedClass != null)
+            {
+                return userDefinedClass;
+            }
+
+            var listClass = @class as ListClass;
+            if (listClass != null)
+            {
+                return listClass.Class.AsUserDefinedClass();
+            }
+
+            return null;
+        }
+
         public static IEnumerable<UserDefinedClass> GetUsedClasses(this IClassRepository repository)
         {
             return repository.GetAll().First().GetUsedClasses();
@@ -30,7 +64,7 @@ namespace CSharpifier
                 .Where(x => IsUserDefinedClass(x.Class))
                 .Select(x => GetUserDefinedClass(x.Class)))
             {
-                foreach (var grandchildClass in GetUsedClasses(childClass))
+                foreach (var grandchildClass in GetUserDefinedClassesImpl(childClass))
                 {
                     yield return grandchildClass;
                 }
@@ -52,7 +86,7 @@ namespace CSharpifier
             return IsUserDefinedClass(((ListClass)@class).Class);
         }
 
-        private static UserDefinedClass GetUserDefinedClass(Class @class)
+        private static UserDefinedClass GetUserDefinedClass(this Class @class)
         {
             if (@class is UserDefinedClass)
             {

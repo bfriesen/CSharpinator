@@ -62,6 +62,8 @@
     <Compile Include="PropertyDefinition.cs" />
     <Compile Include="PropertyDefinitionExtensions.cs" />
     <Compile Include="PropertyDefinitionProxy.cs" />
+    <Compile Include="PropertyDefinitionSet.cs" />
+    <Compile Include="PropertyDefinitionSetProxy.cs" />
     <Compile Include="PropertyProxy.cs" />
     <Compile Include="UserDefinedClass.cs" />
     <Compile Include="UserDefinedClassProxy.cs" />

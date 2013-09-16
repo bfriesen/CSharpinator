@@ -23,7 +23,7 @@ namespace CSharpifier
 
         public UserDefinedClass ToUserDefinedClass(IClassRepository classRepository)
         {
-            var userDefinedClass = classRepository.GetOrCreate(TypeName);
+            var userDefinedClass = classRepository.GetOrAdd(TypeName);
 
             foreach (var propertyProxy in Properties)
             {

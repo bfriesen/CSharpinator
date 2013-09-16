@@ -30,7 +30,7 @@ namespace CSharpifier
             var userDefinedClassProxy = this as UserDefinedClassProxy;
             if (userDefinedClassProxy != null)
             {
-                return classRepository.GetOrCreate(userDefinedClassProxy.TypeName);
+                return classRepository.GetOrAdd(userDefinedClassProxy.TypeName);
             }
 
             var bclClassProxy = this as BclClassProxy;

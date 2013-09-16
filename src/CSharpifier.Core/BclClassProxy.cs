@@ -1,4 +1,6 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 namespace CSharpifier
 {

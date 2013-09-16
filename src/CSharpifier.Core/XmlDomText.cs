@@ -39,7 +39,7 @@ namespace CSharpifier
         {
             var property = new Property(Name, !string.IsNullOrEmpty(_value));
             
-            property.InitializePotentialPropertyDefinitions(
+            property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
                 propertyDefinitions.Append(
                 BclClass.All

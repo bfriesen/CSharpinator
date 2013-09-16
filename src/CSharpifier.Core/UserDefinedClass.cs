@@ -51,7 +51,7 @@ namespace CSharpifier
             }
 
             foundProperty.HasHadNonEmptyValue |= property.HasHadNonEmptyValue;
-            foundProperty.PotentialPropertyDefinitions.MergeWith(property.PotentialPropertyDefinitions);
+            foundProperty.MergeWith(property);
         }
 
         public string GenerateCSharpCode(Case classCase, Case propertyCase)

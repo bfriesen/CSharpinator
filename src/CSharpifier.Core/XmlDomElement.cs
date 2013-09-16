@@ -52,7 +52,7 @@ namespace CSharpifier
         {
             var property = new Property(_element.Name.ToString(), _element.HasElements || _element.HasAttributes || !string.IsNullOrEmpty(_element.Value));
 
-            property.InitializePotentialPropertyDefinitions(
+            property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
                 {
                     if (!_element.HasElements && !_element.HasAttributes)
@@ -77,7 +77,7 @@ namespace CSharpifier
                     }
 
                     var userDefinedClassPropertyDefinition =
-                        new PropertyDefinition(classRepository.GetOrCreate(_element.Name.ToString()), _element.Name.ToString(), true, true)
+                        new PropertyDefinition(classRepository.GetOrAdd(_element.Name.ToString()), _element.Name.ToString(), true, true)
                         {
                             Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
                         };
@@ -93,12 +93,14 @@ namespace CSharpifier
 
                     if (!_element.HasAttributes && _element.HasElements)
                     {
+                        var xmlArraySet = property.GetOrAddExtraPropertyDefinitionSet("xml_array_list");
+                        xmlArraySet.IsEnabled = true;
+
                         var first = _element.Elements().First();
-                        if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
-                        {
-                            var listPropertyDefinition =
+
+                        var xmlArrayListPropertyDefinition =
                                 new PropertyDefinition(
-                                    ListClass.FromClass(classRepository.GetOrCreate(first.Name.ToString())),
+                                    ListClass.FromClass(classRepository.GetOrAdd(first.Name.ToString())),
                                     _pluralizationService.Value.Pluralize(first.Name.ToString()),
                                     true,
                                     true)
@@ -110,18 +112,32 @@ namespace CSharpifier
                                     }
                                 };
 
+                        xmlArraySet.PropertyDefinitions = new List<PropertyDefinition>{ xmlArrayListPropertyDefinition };
+
+                        if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
+                        {
                             if (_element.Elements().Count() > 1)
                             {
-                                propertyDefinitions.Prepend(listPropertyDefinition);
+                                xmlArraySet.Order = -1;
                             }
                             else
                             {
-                                propertyDefinitions.Append(listPropertyDefinition);
+                                xmlArraySet.Order = 2;
                             }
                         }
                     }
+                    else
+                    {
+                        if (property.ExtraPropertyDefinitionSetExists("xml_array_list"))
+                        {
+                            var xmlArraySet = property.GetOrAddExtraPropertyDefinitionSet("xml_array_list");
+                            xmlArraySet.IsEnabled = false;
+                        }
+                    }
 
-                    var listPropertyDefinitions = propertyDefinitions
+                    var xmlElementSet = property.GetOrAddExtraPropertyDefinitionSet("xml_element_list");
+
+                    var xmlElementListPropertyDefinitions = propertyDefinitions
                         .Where(x => !(x.Class is ListClass))
                         .Select(x =>
                             new PropertyDefinition(
@@ -134,16 +150,24 @@ namespace CSharpifier
                             }
                         ).ToList();
 
+                    xmlElementSet.PropertyDefinitions = xmlElementListPropertyDefinitions;
+
                     if (_element.Parent != null)
                     {
+                        xmlElementSet.IsEnabled = true;
+
                         if (_element.Parent.Elements(_element.Name).Count() > 1)
                         {
-                            propertyDefinitions.Prepend(listPropertyDefinitions);
+                            xmlElementSet.Order = -2;
                         }
                         else
                         {
-                            propertyDefinitions.Append(listPropertyDefinitions);
+                            xmlElementSet.Order = 1;
                         }
+                    }
+                    else
+                    {
+                        xmlElementSet.IsEnabled = false;
                     }
                 });
 

@@ -14,14 +14,14 @@ namespace CSharpifier
             return _classes.Values.OrderBy(x => x.Order);
         }
 
-        public UserDefinedClass GetOrCreate(string typeName)
+        public UserDefinedClass GetOrAdd(string typeName)
         {
             return _classes.GetOrAdd(
                 typeName,
                 x => new UserDefinedClass(typeName));
         }
 
-        public UserDefinedClass GetOrCreate(string typeName, out bool isNew)
+        public UserDefinedClass GetOrAdd(string typeName, out bool isNew)
         {
             var isNewClass = false;
             var @class = _classes.GetOrAdd(

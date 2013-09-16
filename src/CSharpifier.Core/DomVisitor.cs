@@ -16,7 +16,7 @@ namespace CSharpifier
         public void Visit(IDomElement element, bool metaExists)
         {
             bool isNew;
-            _classRepository.GetOrCreate(element.Name, out isNew);
+            _classRepository.GetOrAdd(element.Name, out isNew);
             Visit(element, null, isNew, true, metaExists);
         }
 
@@ -30,7 +30,7 @@ namespace CSharpifier
                     currentClass.AddProperty(property, isNew, metaExists);
                 }
 
-                currentClass = _classRepository.GetOrCreate(element.Name, out isNew);
+                currentClass = _classRepository.GetOrAdd(element.Name, out isNew);
 
                 foreach (var childElement in element.Elements)
                 {
@@ -49,7 +49,7 @@ namespace CSharpifier
             {
                 if (isRoot) // if this is the root element
                 {
-                    _classRepository.GetOrCreate(element.Name);
+                    _classRepository.GetOrAdd(element.Name);
                 }
                 else
                 {

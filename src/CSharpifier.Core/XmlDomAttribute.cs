@@ -42,7 +42,7 @@ namespace CSharpifier
         {
             var property = new Property(_attribute.Name.ToString(), !string.IsNullOrEmpty(_attribute.Value));
             
-            property.InitializePotentialPropertyDefinitions(
+            property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
                 propertyDefinitions.Append(
                     BclClass.All

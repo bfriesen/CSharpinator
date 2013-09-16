@@ -9,10 +9,16 @@ namespace CSharpifier
     {
         [XmlAttribute]
         public string Id { get; set; }
+
         [XmlAttribute]
         public bool HasHadNonEmptyValue { get; set; }
-        [XmlElement("PropertyDefinition")]
-        public List<PropertyDefinitionProxy> PotentialPropertyDefinitions { get; set; }
+
+        [XmlElement("DefaultPropertyDefinitionSet")]
+        public PropertyDefinitionSetProxy DefaultPropertyDefinitionSet { get; set; }
+
+        [XmlArray("ExtraPropertyDefinitionSets")]
+        [XmlArrayItem("PropertyDefinitionSet")]
+        public List<PropertyDefinitionSetProxy> ExtraPropertyDefinitionSets { get; set; }
 
         public static PropertyProxy FromProperty(Property property)
         {
@@ -20,7 +26,8 @@ namespace CSharpifier
             {
                 Id = property.Id,
                 HasHadNonEmptyValue = property.HasHadNonEmptyValue,
-                PotentialPropertyDefinitions = property.PotentialPropertyDefinitions.Select(PropertyDefinitionProxy.FromPropertyDefinition).ToList()
+                DefaultPropertyDefinitionSet = PropertyDefinitionSetProxy.FromPropertyDefinitionSet(property.DefaultPropertyDefinitionSet),
+                ExtraPropertyDefinitionSets = property.ExtraPropertyDefinitionSets.Select(PropertyDefinitionSetProxy.FromPropertyDefinitionSet).ToList()
             };
         }
 
@@ -28,9 +35,14 @@ namespace CSharpifier
         {
             var property = new Property(Id, HasHadNonEmptyValue);
 
-            property.InitializePotentialPropertyDefinitions(
+            property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
-                propertyDefinitions.Append(PotentialPropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository))));
+                propertyDefinitions.Append(DefaultPropertyDefinitionSet.PropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository))));
+
+            foreach (var set in ExtraPropertyDefinitionSets.Select(x => x.ToPropertyDefinitionSet(classRepository)))
+            {
+                property.AddOrUpdateExtraPropertyDefinitionSet(set);
+            }
             
             return property;
         }
