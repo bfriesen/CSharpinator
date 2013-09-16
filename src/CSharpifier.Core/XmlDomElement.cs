@@ -93,29 +93,29 @@ namespace CSharpifier
 
                     if (!_element.HasAttributes && _element.HasElements)
                     {
-                        var xmlArraySet = property.GetOrAddExtraPropertyDefinitionSet("xml_array_list");
-                        xmlArraySet.IsEnabled = true;
-
                         var first = _element.Elements().First();
 
-                        var xmlArrayListPropertyDefinition =
-                                new PropertyDefinition(
-                                    ListClass.FromClass(classRepository.GetOrAdd(first.Name.ToString())),
-                                    _pluralizationService.Value.Pluralize(first.Name.ToString()),
-                                    true,
-                                    true)
-                                {
-                                    Attributes = new List<AttributeProxy>
+                        if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
+                        {
+                            var xmlArraySet = property.GetOrAddExtraPropertyDefinitionSet("xml_array_list");
+                            xmlArraySet.IsEnabled = true;
+
+                            var xmlArrayListPropertyDefinition =
+                                    new PropertyDefinition(
+                                        ListClass.FromClass(classRepository.GetOrAdd(first.Name.ToString())),
+                                        _pluralizationService.Value.Pluralize(first.Name.ToString()),
+                                        true,
+                                        true)
+                                    {
+                                        Attributes = new List<AttributeProxy>
                                     {
                                         AttributeProxy.XmlArray(_element.Name.ToString()),
                                         AttributeProxy.XmlArrayItem(first.Name.ToString())
                                     }
-                                };
+                                    };
 
-                        xmlArraySet.PropertyDefinitions = new List<PropertyDefinition>{ xmlArrayListPropertyDefinition };
+                            xmlArraySet.PropertyDefinitions = new List<PropertyDefinition> { xmlArrayListPropertyDefinition };
 
-                        if (_element.Elements().Skip(1).All(x => x.Name == first.Name))
-                        {
                             if (_element.Elements().Count() > 1)
                             {
                                 xmlArraySet.Order = -1;
