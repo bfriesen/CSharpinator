@@ -125,6 +125,14 @@ namespace CSharpifier
                                 xmlArraySet.Order = 2;
                             }
                         }
+                        else
+                        {
+                            if (property.ExtraPropertyDefinitionSetExists("xml_array_list"))
+                            {
+                                var xmlArraySet = property.GetOrAddExtraPropertyDefinitionSet("xml_array_list");
+                                xmlArraySet.IsEnabled = false;
+                            }
+                        }
                     }
                     else
                     {

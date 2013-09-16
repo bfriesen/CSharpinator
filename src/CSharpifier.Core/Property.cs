@@ -75,6 +75,7 @@ namespace CSharpifier
                 return
                     _extraPropertyDefinitionSets.Values.Concat(new[] { DefaultPropertyDefinitionSet })
                         .OrderBy(x => x.Order)
+                        .Where(x => x.IsEnabled)
                         .SelectMany(x => x.PropertyDefinitions);
             }
         }

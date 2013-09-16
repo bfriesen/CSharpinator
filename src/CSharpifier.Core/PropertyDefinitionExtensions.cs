@@ -70,6 +70,11 @@ namespace CSharpifier
             {
                 propertyToMergeInto.AddOrUpdateExtraPropertyDefinitionSet(extraPropertyDefinitionSet);
             }
+
+            foreach (var orphanedSet in propertyToMergeInto.ExtraPropertyDefinitionSets.Where(intoSet => propertyToMergeFrom.ExtraPropertyDefinitionSets.All(fromSet => intoSet.Name != fromSet.Name)))
+            {
+                orphanedSet.IsEnabled = false;
+            }
         }
 
         public static void MergeWith(this List<PropertyDefinition> listToMergeInto, IEnumerable<PropertyDefinition> listToMergeFrom)
