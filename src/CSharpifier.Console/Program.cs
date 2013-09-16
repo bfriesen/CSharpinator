@@ -17,8 +17,6 @@ namespace CSharpifier
             string meta = null;
             string classCaseString = "PascalCase";
             string propertyCaseString = "PascalCase";
-            bool? xml = null;
-            bool? json = null;
 
             var p = new OptionSet
             {
@@ -27,8 +25,6 @@ namespace CSharpifier
                 { "m|meta=", "The path to the metadata file used to describe the classes. If not provided, no metadata will be saved.", value => meta = value },
                 { "c|class_case=", "The casing to be used for class names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => classCaseString = value },
                 { "p|property_case=", "The casing to be used for property names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => propertyCaseString = value },
-                { "x|xml", "Whether to output attributes for use by XmlSerializer.", value => xml = value != null },
-                { "j|json", "Whether to output attributes for use by DataContractJsonSerializer.", value => json = value != null },
                 { "h|help", "Show this message and exit.", value => showHelp = value != null },
             };
 
@@ -59,14 +55,6 @@ namespace CSharpifier
                 return;
             }
 
-            if (xml == null && json == null)
-            {
-                Console.WriteLine("Error: must provide -xml or -json (or both).");
-                Console.WriteLine();
-                ShowHelp(p);
-                return;
-            }
-
             Case classCase;
             if (!Enum.TryParse(classCaseString, out classCase))
             {
@@ -84,10 +72,6 @@ namespace CSharpifier
                 ShowHelp(p);
                 return;
             }
-
-            var propertyAttributes = PropertyAttributes.None;
-            propertyAttributes |= xml == true ? PropertyAttributes.XmlSerializion : PropertyAttributes.None;
-            propertyAttributes |= json == true ? PropertyAttributes.DataContract : PropertyAttributes.None;
 
             TextWriter outWriter = output == null ? Console.Out : new StreamWriter(output, false);
 
@@ -160,7 +144,6 @@ namespace CSharpifier
                     @namespace,
                     classCase,
                     propertyCase,
-                    propertyAttributes,
                     outWriter);
             }
             catch (Exception ex)
@@ -234,7 +217,6 @@ namespace CSharpifier
             Console.WriteLine();
             Console.WriteLine("Generates a set of c# classes based on an xml or json document.");
             Console.WriteLine("DOCUMENT can be the path to an xml or json document, or the document itself.");
-            Console.WriteLine("Either -xml or -json or both must be provided.");
             Console.WriteLine();
             Console.WriteLine("Options:");
             p.WriteOptionDescriptions(Console.Out);

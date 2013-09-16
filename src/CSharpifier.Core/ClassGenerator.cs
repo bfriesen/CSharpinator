@@ -12,7 +12,7 @@ namespace CSharpifier
             _repository = repository;
         }
 
-        public void Write(string @namespace, Case classCase, Case propertyCase, PropertyAttributes propertyAttributes, TextWriter writer)
+        public void Write(string @namespace, Case classCase, Case propertyCase, TextWriter writer)
         {
             writer.WriteLine("using System;");
             writer.WriteLine("using System.Collections.Generic;");
