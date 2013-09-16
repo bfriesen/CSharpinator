@@ -49,12 +49,25 @@ namespace CSharpifier
             {
                 if (isRoot) // if this is the root element
                 {
+                    // Make sure a class exists for the root element, no matter what.
                     _classRepository.GetOrAdd(element.Name);
                 }
                 else
                 {
                     var property = element.CreateProperty(_classRepository);
                     currentClass.AddProperty(property, isNew, metaExists);
+                }
+                
+                if (metaExists)
+                {
+                    // If we're refining, and this element has no children, there is a
+                    // possibility that it had previous contained children. Make those
+                    // children nullable.
+                    currentClass = _classRepository.GetOrAdd(element.Name);
+                    foreach (var property in currentClass.Properties)
+                    {
+                        property.MakeNullable();
+                    }
                 }
             }
         }
