@@ -106,7 +106,8 @@ namespace CSharpifier
 
             var serializer = new XmlSerializer(typeof(ClassDefinitions));
 
-            if (meta != null && File.Exists(meta))
+            var metaExists = meta != null && File.Exists(meta);
+            if (metaExists)
             {
                 using (var reader = new StreamReader(meta))
                 {
@@ -118,7 +119,7 @@ namespace CSharpifier
 
             try
             {
-                domVisitor.Visit(domElement);
+                domVisitor.Visit(domElement, metaExists);
             }
             catch (Exception ex)
             {

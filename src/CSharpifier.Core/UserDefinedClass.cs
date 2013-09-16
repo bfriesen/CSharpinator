@@ -35,13 +35,13 @@ namespace CSharpifier
             get { return _properties.Values; }
         }
 
-        public void AddProperty(Property property, bool isParentClassNew)
+        public void AddProperty(Property property, bool isParentClassNew, bool metaExists)
         {
             Property foundProperty;
             if (!_properties.TryGetValue(property.Id, out foundProperty))
             {
                 // If we're adding a new property to an old class, it should be nullable.
-                if (!isParentClassNew)
+                if (!isParentClassNew && metaExists)
                 {
                     property.MakeNullable();
                 }
@@ -52,22 +52,6 @@ namespace CSharpifier
 
             foundProperty.HasHadNonEmptyValue |= property.HasHadNonEmptyValue;
             foundProperty.PotentialPropertyDefinitions.MergeWith(property.PotentialPropertyDefinitions);
-        }
-
-        public UserDefinedClass MergeWith(UserDefinedClass other)
-        {
-            if (TypeName != other.TypeName)
-            {
-                // We shouldn't hit this situation, but just in case, bail.
-                return this;
-            }
-
-            foreach (var otherProperty in other.Properties)
-            {
-                AddProperty(otherProperty, false);
-            }
-
-            return this;
         }
 
         public string GenerateCSharpCode(Case classCase, Case propertyCase)
