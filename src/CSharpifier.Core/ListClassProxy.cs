@@ -11,7 +11,7 @@ namespace CSharpifier
         {
             return new ListClassProxy
             {
-                Class = ClassProxy.FromClass(listClass.Class)
+                Class = FromClass(listClass.Class)
             };
         }
 

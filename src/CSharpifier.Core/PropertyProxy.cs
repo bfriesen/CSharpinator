@@ -39,11 +39,12 @@ namespace CSharpifier
                 propertyDefinitions =>
                 propertyDefinitions.Append(DefaultPropertyDefinitionSet.PropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository))));
 
-            foreach (var set in ExtraPropertyDefinitionSets.Select(x => x.ToPropertyDefinitionSet(classRepository)))
+            foreach (var proxySet in ExtraPropertyDefinitionSets)
             {
+                var set = proxySet.ToPropertyDefinitionSet(classRepository);
                 property.AddOrUpdateExtraPropertyDefinitionSet(set);
             }
-            
+
             return property;
         }
     }

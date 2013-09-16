@@ -13,36 +13,57 @@ namespace CSharpifier
 
         public static BclClass AsBclClass(this Class @class)
         {
-            var bclClass = @class as BclClass;
-            if (bclClass != null)
+            return @class.AsClass<BclClass>();
+        }
+
+        public static UserDefinedClass AsUserDefinedClass(this Class @class)
+        {
+            return @class.AsClass<UserDefinedClass>();
+        }
+
+        private static TClass AsClass<TClass>(this Class @class)
+            where TClass : Class
+        {
+            var tClass = @class as TClass;
+            if (tClass != null)
             {
-                return bclClass;
+                return tClass;
             }
 
             var listClass = @class as ListClass;
             if (listClass != null)
             {
-                return listClass.Class.AsBclClass();
+                return listClass.Class.AsClass<TClass>();
             }
 
             return null;
         }
 
-        public static UserDefinedClass AsUserDefinedClass(this Class @class)
+        public static bool IsBclClass(this Class @class)
         {
-            var userDefinedClass = @class as UserDefinedClass;
-            if (userDefinedClass != null)
+            return @class.IsClass<BclClass>();
+        }
+
+        public static bool IsUserDefinedClass(this Class @class)
+        {
+            return @class.IsClass<UserDefinedClass>();
+        }
+
+        private static bool IsClass<TClass>(this Class @class)
+            where TClass : Class
+        {
+            if (@class is TClass)
             {
-                return userDefinedClass;
+                return true;
             }
 
             var listClass = @class as ListClass;
             if (listClass != null)
             {
-                return listClass.Class.AsUserDefinedClass();
+                return listClass.Class.IsClass<TClass>();
             }
 
-            return null;
+            return false;
         }
 
         public static IEnumerable<UserDefinedClass> GetUsedClasses(this IClassRepository repository)
@@ -61,39 +82,14 @@ namespace CSharpifier
 
             foreach (var childClass in @class.Properties
                 .Select(x => x.SelectedPropertyDefinition)
-                .Where(x => IsUserDefinedClass(x.Class))
-                .Select(x => GetUserDefinedClass(x.Class)))
+                .Where(x => x.Class.IsUserDefinedClass())
+                .Select(x => x.Class.AsUserDefinedClass()))
             {
                 foreach (var grandchildClass in GetUserDefinedClassesImpl(childClass))
                 {
                     yield return grandchildClass;
                 }
             }
-        }
-
-        private static bool IsUserDefinedClass(Class @class)
-        {
-            if (@class is UserDefinedClass)
-            {
-                return true;
-            }
-
-            if (@class is BclClass)
-            {
-                return false;
-            }
-
-            return IsUserDefinedClass(((ListClass)@class).Class);
-        }
-
-        private static UserDefinedClass GetUserDefinedClass(this Class @class)
-        {
-            if (@class is UserDefinedClass)
-            {
-                return (UserDefinedClass)@class;
-            }
-
-            return GetUserDefinedClass(((ListClass)@class).Class);
         }
     }
 }

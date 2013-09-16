@@ -37,7 +37,7 @@ namespace CSharpifier
                     "",
                     (acc, n) =>
                         acc
-                        + char.ToUpper(n[0]).ToString()
+                        + char.ToUpper(n[0])
                         + (n.Length > 1 ? n.Substring(1) : "")));
 
             _camelCase = new Lazy<string>(
@@ -47,7 +47,7 @@ namespace CSharpifier
                     "",
                     (acc, n) =>
                     acc
-                    + char.ToUpper(n[0]).ToString()
+                    + char.ToUpper(n[0])
                     + (n.Length > 1 ? n.Substring(1) : "")));
 
             _snakeCase = new Lazy<string>(
@@ -65,6 +65,7 @@ namespace CSharpifier
             get { return _pascalCase.Value; }
         }
 
+        // ReSharper disable InconsistentNaming
         public string camelCase
         {
             get { return _camelCase.Value; }
@@ -74,6 +75,7 @@ namespace CSharpifier
         {
             get { return _snakeCase.Value; }
         }
+        // ReSharper restore InconsistentNaming
 
         public string FormatAs(Case propertyCase)
         {
