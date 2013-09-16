@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
 namespace CSharpifier
@@ -44,7 +45,19 @@ namespace CSharpifier
             var bcl = @class as BclClassProxy;
             if (bcl != null)
             {
-                return "Bcl:" + bcl.TypeAlias + ":" + bcl.TypeName;
+                var typeName = bcl.TypeName;
+
+                var type = Type.GetType(typeName);
+                if (type != null && type.IsGenericType)
+                {
+                    var genericArgs = type.GetGenericArguments();
+                    if (genericArgs.Length == 1 && type == typeof(Nullable<>).MakeGenericType(genericArgs[0]))
+                    {
+                        typeName = string.Format("Nullable({0})", genericArgs[0].FullName);
+                    }
+                }
+
+                return "Bcl:" + bcl.TypeAlias + ":" + typeName;
             }
 
             var list = @class as ListClassProxy;
@@ -75,10 +88,22 @@ namespace CSharpifier
                 case "Bcl":
                     {
                         var split = remainder.Split(':');
+
+                        var typeName = split[1];
+                        var nullableMatch = Regex.Match(typeName, @"Nullable\(([^)]+)\)");
+                        if (nullableMatch.Success)
+                        {
+                            var genericArg = Type.GetType(nullableMatch.Groups[1].Value);
+                            if (genericArg != null)
+                            {
+                                typeName = typeof(Nullable<>).MakeGenericType(genericArg).FullName;
+                            }
+                        }
+
                         return new BclClassProxy
                         {
                             TypeAlias = split[0],
-                            TypeName = split[1]
+                            TypeName = typeName
                         };
                     }
                 case "List":
