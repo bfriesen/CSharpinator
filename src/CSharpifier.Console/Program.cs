@@ -13,6 +13,7 @@ namespace CSharpifier
         {
             bool showHelp = false;
             string @namespace = "YOUR_NAMESPACE";
+            bool skipNamespace = false;
             string output = null;
             string meta = null;
             string classCaseString = "PascalCase";
@@ -21,6 +22,7 @@ namespace CSharpifier
             var p = new OptionSet
             {
                 { "n|namespace=", "The {NAMESPACE} to use for the generated classes.", value => @namespace = value },
+                { "s|skip_namespace", "Whether to skip writing out the namespace declaration and using statements.", value => skipNamespace = value != null },
                 { "o|output=", "The path for the output file. If not provided, output will be written to standard out.", value => output = value },
                 { "m|meta=", "The path to the metadata file used to describe the classes. If not provided, no metadata will be saved.", value => meta = value },
                 { "c|class_case=", "The casing to be used for class names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => classCaseString = value },
@@ -144,11 +146,13 @@ namespace CSharpifier
                     @namespace,
                     classCase,
                     propertyCase,
-                    outWriter);
+                    outWriter,
+                    true);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);
+                Console.WriteLine("Error!");
+                Console.WriteLine(ex);
             }
             finally
             {
