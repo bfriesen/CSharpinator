@@ -7,7 +7,7 @@ using System.Text;
 namespace CSharpifier
 {
     [DebuggerDisplay("{TypeAlias}")]
-    public class BclClass : Class
+    public class BclClass : IClass
     {
         private static readonly ConcurrentDictionary<string, BclClass> _classes = new ConcurrentDictionary<string, BclClass>();
         private readonly string _typeName;
@@ -21,7 +21,7 @@ namespace CSharpifier
             _isLegalValue = isLegalValue;
         }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
+        public virtual string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
         {
             var sb = new StringBuilder();
 

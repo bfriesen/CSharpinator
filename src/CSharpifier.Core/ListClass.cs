@@ -6,28 +6,28 @@ using System.Text;
 namespace CSharpifier
 {
     [DebuggerDisplay("List<{Class.TypeName is BclClass ? ((BclClass)Class).TypeAlias : ((UserDefinedClass)Class).TypeName.Raw}>")]
-    public class ListClass : Class
+    public class ListClass : IClass
     {
-        private static readonly ConcurrentDictionary<Class, ListClass> _classes
-            = new ConcurrentDictionary<Class, ListClass>();
-        private readonly Class _class;
+        private static readonly ConcurrentDictionary<IClass, ListClass> _classes
+            = new ConcurrentDictionary<IClass, ListClass>();
+        private readonly IClass _class;
 
-        private ListClass(Class @class)
+        private ListClass(IClass @class)
         {
             _class = @class;
         }
 
-        public static ListClass FromClass(Class @class)
+        public static ListClass FromClass(IClass @class)
         {
             return _classes.GetOrAdd(@class, x => new ListClass(x));
         }
 
-        public Class Class
+        public IClass Class
         {
             get { return _class; }
         }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
+        public virtual string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
         {
             var typeName =
                 _class is UserDefinedClass

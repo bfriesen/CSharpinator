@@ -6,7 +6,7 @@ using System.Text;
 namespace CSharpifier
 {
     [DebuggerDisplay("{TypeName.Raw}")]
-    public class UserDefinedClass : Class
+    public class UserDefinedClass : IClass
     {
         private static int _orderSeed;
 
@@ -67,7 +67,7 @@ public partial class {1}
                 .Indent();
         }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
+        public virtual string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
         {
             var sb = new StringBuilder();
 

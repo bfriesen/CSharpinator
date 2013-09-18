@@ -4,7 +4,7 @@ namespace CSharpifier
 {
     public class PropertyDefinition
     {
-        public PropertyDefinition(Class @class, string propertyName, bool isLegal, bool isEnabled)
+        public PropertyDefinition(IClass @class, string propertyName, bool isLegal, bool isEnabled)
         {
             Attributes = new List<AttributeProxy>();
             Class = @class;
@@ -13,7 +13,7 @@ namespace CSharpifier
             IsEnabled = isEnabled;
         }
 
-        public Class Class { get; set; }
+        public IClass Class { get; set; }
         public IdentifierName Name { get; set; }
         public List<AttributeProxy> Attributes { get; set; }
         public bool IsLegal { get; set; }

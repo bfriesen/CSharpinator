@@ -8,7 +8,7 @@ namespace CSharpifier
     [XmlInclude(typeof(ListClassProxy))]
     public class ClassProxy
     {
-        public static ClassProxy FromClass(Class @class)
+        public static ClassProxy FromClass(IClass @class)
         {
             var userDefinedClass = @class as UserDefinedClass;
             if (userDefinedClass != null)
@@ -25,7 +25,7 @@ namespace CSharpifier
             return ListClassProxy.FromListClass((ListClass)@class);
         }
 
-        public Class ToClass(IClassRepository classRepository)
+        public IClass ToClass(IClassRepository classRepository)
         {
             var userDefinedClassProxy = this as UserDefinedClassProxy;
             if (userDefinedClassProxy != null)

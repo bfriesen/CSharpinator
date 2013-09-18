@@ -2,8 +2,8 @@
 
 namespace CSharpifier
 {
-    public abstract class Class
+    public interface IClass
     {
-        public abstract string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes);
+        string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes);
     }
 }

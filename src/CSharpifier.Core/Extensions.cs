@@ -11,18 +11,18 @@ namespace CSharpifier
             return string.Join("\r\n", value.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Select(x => "    " + x));
         }
 
-        public static BclClass AsBclClass(this Class @class)
+        public static BclClass AsBclClass(this IClass @class)
         {
             return @class.AsClass<BclClass>();
         }
 
-        public static UserDefinedClass AsUserDefinedClass(this Class @class)
+        public static UserDefinedClass AsUserDefinedClass(this IClass @class)
         {
             return @class.AsClass<UserDefinedClass>();
         }
 
-        private static TClass AsClass<TClass>(this Class @class)
-            where TClass : Class
+        private static TClass AsClass<TClass>(this IClass @class)
+            where TClass : class, IClass
         {
             var tClass = @class as TClass;
             if (tClass != null)
@@ -39,18 +39,18 @@ namespace CSharpifier
             return null;
         }
 
-        public static bool IsBclClass(this Class @class)
+        public static bool IsBclClass(this IClass @class)
         {
             return @class.IsClass<BclClass>();
         }
 
-        public static bool IsUserDefinedClass(this Class @class)
+        public static bool IsUserDefinedClass(this IClass @class)
         {
             return @class.IsClass<UserDefinedClass>();
         }
 
-        private static bool IsClass<TClass>(this Class @class)
-            where TClass : Class
+        private static bool IsClass<TClass>(this IClass @class)
+            where TClass : IClass
         {
             if (@class is TClass)
             {
