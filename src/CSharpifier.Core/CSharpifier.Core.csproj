@@ -44,7 +44,7 @@
     <Compile Include="BclClass.cs" />
     <Compile Include="BclClassProxy.cs" />
     <Compile Include="Case.cs" />
-    <Compile Include="Class.cs" />
+    <Compile Include="IClass.cs" />
     <Compile Include="ClassDefinitions.cs" />
     <Compile Include="ClassGenerator.cs" />
     <Compile Include="ClassProxy.cs" />
