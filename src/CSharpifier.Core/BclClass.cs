@@ -45,7 +45,7 @@ namespace CSharpifier
 
         public static IBclClass NullableBoolean
         {
-            get { return _classes.GetOrAdd(typeof(bool?).FullName, typeName => new NullableBclClass(typeName, "bool?", value => string.IsNullOrEmpty(value) || value == "true" || value == "false", ".ToString()", "bool.Parse(value)")); }
+            get { return _classes.GetOrAdd(typeof(bool?).FullName, typeName => new NullableBclClass(typeName, "bool?", value => string.IsNullOrEmpty(value) || value == "true" || value == "false", ".ToString().ToLower()", "bool.Parse(value)")); }
         }
 
         public static IBclClass PascalCaseBoolean

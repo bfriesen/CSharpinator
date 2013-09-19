@@ -48,6 +48,15 @@ namespace CSharpifier
 
         public IEnumerable<IBclClass> GetAllBclClasses()
         {
+            yield return GetOrCreateFormattedDateTime("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK");
+            yield return GetOrCreateNullableFormattedDateTime("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK");
+
+            foreach (var dateTimeFormat in _configuration.DateTimeFormats)
+            {
+                yield return GetOrCreateFormattedDateTime(dateTimeFormat);
+                yield return GetOrCreateNullableFormattedDateTime(dateTimeFormat);
+            }
+
             yield return BclClass.Int32;
             yield return BclClass.NullableInt32;
             yield return BclClass.Int64;
@@ -60,15 +69,6 @@ namespace CSharpifier
             yield return BclClass.NullablePascalCaseBoolean;
             yield return BclClass.Guid;
             yield return BclClass.NullableGuid;
-            yield return GetOrCreateFormattedDateTime("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK");
-            yield return GetOrCreateNullableFormattedDateTime("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK");
-            
-            foreach (var dateTimeFormat in _configuration.DateTimeFormats)
-            {
-                yield return GetOrCreateFormattedDateTime(dateTimeFormat);
-                yield return GetOrCreateNullableFormattedDateTime(dateTimeFormat);
-            }
-
             yield return BclClass.String;
         }
 
