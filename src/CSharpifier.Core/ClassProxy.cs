@@ -16,7 +16,7 @@ namespace CSharpifier
                 return UserDefinedClassProxy.FromUserDefinedClass(userDefinedClass);
             }
 
-            var bclClass = @class as BclClass;
+            var bclClass = @class as IBclClass;
             if (bclClass != null)
             {
                 return BclClassProxy.FromBclClass(bclClass);
@@ -25,7 +25,7 @@ namespace CSharpifier
             return ListClassProxy.FromListClass((ListClass)@class);
         }
 
-        public IClass ToClass(IClassRepository classRepository)
+        public IClass ToClass(IClassRepository classRepository, IFactory factory)
         {
             var userDefinedClassProxy = this as UserDefinedClassProxy;
             if (userDefinedClassProxy != null)
@@ -36,10 +36,10 @@ namespace CSharpifier
             var bclClassProxy = this as BclClassProxy;
             if (bclClassProxy != null)
             {
-                return BclClassProxy.ToBclClass(bclClassProxy);
+                return BclClassProxy.ToBclClass(bclClassProxy, factory);
             }
 
-            return ListClassProxy.ToListClass((ListClassProxy)this, classRepository);
+            return ListClassProxy.ToListClass((ListClassProxy)this, classRepository, factory);
         }
     }
 }

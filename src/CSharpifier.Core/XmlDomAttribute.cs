@@ -9,10 +9,12 @@ namespace CSharpifier
     public class XmlDomAttribute : IDomElement
     {
         private readonly XAttribute _attribute;
+        private readonly IFactory _factory;
 
-        public XmlDomAttribute(XAttribute attribute)
+        public XmlDomAttribute(XAttribute attribute, IFactory factory)
         {
             _attribute = attribute;
+            _factory = factory;
         }
 
         public bool HasElements
@@ -40,20 +42,16 @@ namespace CSharpifier
 
         public Property CreateProperty(IClassRepository classRepository)
         {
-            var property = new Property(_attribute.Name.ToString(), !string.IsNullOrEmpty(_attribute.Value));
+            var property = _factory.CreateProperty(_attribute.Name.ToString(), !string.IsNullOrEmpty(_attribute.Value));
             
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
                 propertyDefinitions.Append(
-                    BclClass.All
+                    _factory.GetAllBclClasses()
                         .Select(bclClass =>
-                            new PropertyDefinition(bclClass, _attribute.Name.ToString(), bclClass.IsLegalValue(_attribute.Value), true)
-                            {
-                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlAttribute(_attribute.Name.ToString()) }
-                            })));
+                            _factory.CreatePropertyDefinition(bclClass, _attribute.Name.ToString(), bclClass.IsLegalValue(_attribute.Value), true, AttributeProxy.XmlAttribute(_attribute.Name.ToString())))));
             
             return property;
         }
     }
-
 }

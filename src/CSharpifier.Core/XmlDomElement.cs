@@ -13,10 +13,12 @@ namespace CSharpifier
     {
         private static readonly Lazy<PluralizationService> _pluralizationService = new Lazy<PluralizationService>(() => PluralizationService.CreateService(new CultureInfo("en")));
         private readonly XElement _element;
+        private readonly IFactory _factory;
 
-        public XmlDomElement(XElement element)
+        public XmlDomElement(XElement element, IFactory factory)
         {
             _element = element;
+            _factory = factory;
         }
 
         public bool HasElements
@@ -39,18 +41,18 @@ namespace CSharpifier
             get
             {
                 return
-                    _element.Attributes().Select(x => (IDomElement)new XmlDomAttribute(x))
-                        .Concat(_element.Elements().Select(x => new XmlDomElement(x)))
+                    _element.Attributes().Select(x => (IDomElement)_factory.CreateXmlDomAttribute(x))
+                        .Concat(_element.Elements().Select(x => _factory.CreateXmlDomElement(x)))
                         .Concat(
                             !_element.HasElements && !string.IsNullOrEmpty(_element.Value)
-                                ? new[] { new XmlDomText(_element.Value) }
+                                ? new[] { _factory.CreateXmlDomText(_element.Value) }
                                 : Enumerable.Empty<IDomElement>());
             }
         }
 
         public Property CreateProperty(IClassRepository classRepository)
         {
-            var property = new Property(_element.Name.ToString(), _element.HasElements || _element.HasAttributes || !string.IsNullOrEmpty(_element.Value));
+            var property = _factory.CreateProperty(_element.Name.ToString(), _element.HasElements || _element.HasAttributes || !string.IsNullOrEmpty(_element.Value));
 
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
@@ -58,29 +60,20 @@ namespace CSharpifier
                     if (!_element.HasElements && !_element.HasAttributes)
                     {
                         propertyDefinitions.Append(
-                            BclClass.All
+                            _factory.GetAllBclClasses()
                                 .Select(bclClass =>
-                                    new PropertyDefinition(bclClass, _element.Name.ToString(), bclClass.IsLegalValue(_element.Value), true)
-                                    {
-                                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
-                                    }));
+                                    _factory.CreatePropertyDefinition(bclClass, _element.Name.ToString(), bclClass.IsLegalValue(_element.Value), true, AttributeProxy.XmlElement(_element.Name.ToString()))));
                     }
                     else
                     {
                         propertyDefinitions.Append(
-                            BclClass.All
+                            _factory.GetAllBclClasses()
                                 .Select(bclClass =>
-                                    new PropertyDefinition(bclClass, _element.Name.ToString(), false, true)
-                                    {
-                                        Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
-                                    }));
+                                    _factory.CreatePropertyDefinition(bclClass, _element.Name.ToString(), false, true, AttributeProxy.XmlElement(_element.Name.ToString()))));
                     }
 
                     var userDefinedClassPropertyDefinition =
-                        new PropertyDefinition(classRepository.GetOrAdd(_element.Name.ToString()), _element.Name.ToString(), true, true)
-                        {
-                            Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
-                        };
+                        _factory.CreatePropertyDefinition(classRepository.GetOrAdd(_element.Name.ToString()), _element.Name.ToString(), true, true, AttributeProxy.XmlElement(_element.Name.ToString()));
 
                     if (_element.HasElements || _element.HasAttributes)
                     {
@@ -101,18 +94,13 @@ namespace CSharpifier
                             xmlArraySet.IsEnabled = true;
 
                             var xmlArrayListPropertyDefinition =
-                                    new PropertyDefinition(
+                                    _factory.CreatePropertyDefinition(
                                         ListClass.FromClass(classRepository.GetOrAdd(first.Name.ToString())),
                                         _pluralizationService.Value.Pluralize(first.Name.ToString()),
                                         true,
-                                        true)
-                                    {
-                                        Attributes = new List<AttributeProxy>
-                                    {
+                                        true,
                                         AttributeProxy.XmlArray(_element.Name.ToString()),
-                                        AttributeProxy.XmlArrayItem(first.Name.ToString())
-                                    }
-                                    };
+                                        AttributeProxy.XmlArrayItem(first.Name.ToString()));
 
                             xmlArraySet.PropertyDefinitions = new List<PropertyDefinition> { xmlArrayListPropertyDefinition };
 
@@ -148,14 +136,12 @@ namespace CSharpifier
                     var xmlElementListPropertyDefinitions = propertyDefinitions
                         .Where(x => !(x.Class is ListClass))
                         .Select(x =>
-                            new PropertyDefinition(
+                            _factory.CreatePropertyDefinition(
                                 ListClass.FromClass(x.Class),
                                 _pluralizationService.Value.Pluralize(_element.Name.ToString()),
                                 x.IsLegal,
-                                x.IsEnabled)
-                            {
-                                Attributes = new List<AttributeProxy> { AttributeProxy.XmlElement(_element.Name.ToString()) }
-                            }
+                                x.IsEnabled,
+                                AttributeProxy.XmlElement(_element.Name.ToString()))
                         ).ToList();
 
                     xmlElementSet.PropertyDefinitions = xmlElementListPropertyDefinitions;

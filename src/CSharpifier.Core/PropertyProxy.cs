@@ -31,17 +31,17 @@ namespace CSharpifier
             };
         }
 
-        public Property ToProperty(IClassRepository classRepository)
+        public Property ToProperty(IClassRepository classRepository, IFactory factory)
         {
-            var property = new Property(Id, HasHadNonEmptyValue);
+            var property = factory.CreateProperty(Id, HasHadNonEmptyValue);
 
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
-                propertyDefinitions.Append(DefaultPropertyDefinitionSet.PropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository))));
+                propertyDefinitions.Append(DefaultPropertyDefinitionSet.PropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository, factory))));
 
             foreach (var proxySet in ExtraPropertyDefinitionSets)
             {
-                var set = proxySet.ToPropertyDefinitionSet(classRepository);
+                var set = proxySet.ToPropertyDefinitionSet(classRepository, factory);
                 property.AddOrUpdateExtraPropertyDefinitionSet(set);
             }
 

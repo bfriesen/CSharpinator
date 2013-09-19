@@ -42,6 +42,18 @@ namespace CSharpifier
                 return "UserDefined:" + userDefined.TypeName;
             }
 
+            var formattedDateTime = @class as FormattedDateTimeProxy;
+            if (formattedDateTime != null)
+            {
+                return "FormattedDateTime:" + formattedDateTime.Format;
+            }
+
+            var nullableFormattedDateTime = @class as NullableFormattedDateTimeProxy;
+            if (nullableFormattedDateTime != null)
+            {
+                return "NullableFormattedDateTime:" + nullableFormattedDateTime.Format;
+            }
+
             var bcl = @class as BclClassProxy;
             if (bcl != null)
             {
@@ -78,45 +90,53 @@ namespace CSharpifier
             switch (classType)
             {
                 case "UserDefined":
+                {
+                    return new UserDefinedClassProxy
                     {
-                        return new UserDefinedClassProxy
-                        {
-                            Properties = new List<PropertyProxy>(),
-                            TypeName = remainder
-                        };
-                    }
+                        Properties = new List<PropertyProxy>(),
+                        TypeName = remainder
+                    };
+                }
+                case "FormattedDateTime":
+                {
+                    return new FormattedDateTimeProxy { Format = remainder };
+                }
+                case "NullableFormattedDateTime":
+                {
+                    return new NullableFormattedDateTimeProxy { Format = remainder };
+                }
                 case "Bcl":
-                    {
-                        var split = remainder.Split(':');
+                {
+                    var split = remainder.Split(':');
 
-                        var typeName = split[1];
-                        var nullableMatch = Regex.Match(typeName, @"Nullable\(([^)]+)\)");
-                        if (nullableMatch.Success)
+                    var typeName = split[1];
+                    var nullableMatch = Regex.Match(typeName, @"Nullable\(([^)]+)\)");
+                    if (nullableMatch.Success)
+                    {
+                        var genericArg = Type.GetType(nullableMatch.Groups[1].Value);
+                        if (genericArg != null)
                         {
-                            var genericArg = Type.GetType(nullableMatch.Groups[1].Value);
-                            if (genericArg != null)
-                            {
-                                typeName = typeof(Nullable<>).MakeGenericType(genericArg).FullName;
-                            }
+                            typeName = typeof(Nullable<>).MakeGenericType(genericArg).FullName;
                         }
+                    }
 
-                        return new BclClassProxy
-                        {
-                            TypeAlias = split[0],
-                            TypeName = typeName
-                        };
-                    }
+                    return new BclClassProxy
+                    {
+                        TypeAlias = split[0],
+                        TypeName = typeName
+                    };
+                }
                 case "List":
+                {
+                    return new ListClassProxy
                     {
-                        return new ListClassProxy
-                        {
-                            Class = GetClassFromString(remainder)
-                        };
-                    }
+                        Class = GetClassFromString(remainder)
+                    };
+                }
                 default:
-                    {
-                        throw new InvalidOperationException("Invalid class type: " + classType);
-                    }
+                {
+                    throw new InvalidOperationException("Invalid class type: " + classType);
+                }
             }
         }
 
@@ -154,13 +174,10 @@ namespace CSharpifier
             };
         }
 
-        public PropertyDefinition ToPropertyDefinition(IClassRepository classRepository)
+        public PropertyDefinition ToPropertyDefinition(IClassRepository classRepository, IFactory factory)
         {
-            var @class = Class.ToClass(classRepository);
-            var propertyDefinition = new PropertyDefinition(@class, Name, IsLegal, IsEnabled)
-            {
-                Attributes = new List<AttributeProxy>(Attributes)
-            };
+            var @class = Class.ToClass(classRepository, factory);
+            var propertyDefinition = factory.CreatePropertyDefinition(@class, Name, IsLegal, IsEnabled, Attributes.ToArray());
             return propertyDefinition;
         }
     }

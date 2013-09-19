@@ -1,0 +1,53 @@
+Need to be able to detect DateTime formats - DateTime is a little broken right now.
+
+Edge case xml example:
+
+<container>
+  <foos>
+    <foo>abc</foo>
+    <foo>xyz</foo>
+    <bar>123</bar>
+  </foos>
+</container>
+
+Produced c# code:
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Xml.Serialization;
+
+namespace FooBar
+{
+    [XmlRoot("container")]
+    public partial class Container
+    {
+        [XmlElement("foos")]
+        public Foos Foos { get; set; }
+    }
+
+    [XmlRoot("foos")]
+    public partial class Foos
+    {
+        [XmlElement("foo")]
+        public List<string> Foos { get; set; }
+    
+        [XmlIgnore]
+        public int? Bar { get; set; }
+        
+        [XmlElement("bar")]
+        public string BarString
+        {
+            get
+            {
+                return Bar == null ? null : Bar.ToString();
+            }
+            set
+            {
+                Bar = value == null ? null : (int?)int.Parse(value);
+            }
+        }
+    }
+}
+
+The problem is that class Foos has a property named Foos, which doesn't compile.

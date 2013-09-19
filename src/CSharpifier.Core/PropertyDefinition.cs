@@ -4,13 +4,16 @@ namespace CSharpifier
 {
     public class PropertyDefinition
     {
-        public PropertyDefinition(IClass @class, string propertyName, bool isLegal, bool isEnabled)
+        private readonly IFactory _factory;
+
+        public PropertyDefinition(IClass @class, string propertyName, bool isLegal, bool isEnabled, IFactory factory)
         {
             Attributes = new List<AttributeProxy>();
             Class = @class;
             Name = new IdentifierName(propertyName);
             IsLegal = isLegal;
             IsEnabled = isEnabled;
+            _factory = factory;
         }
 
         public IClass Class { get; set; }
@@ -27,13 +30,13 @@ namespace CSharpifier
         public override string ToString()
         {
             return
-                (Class is BclClass
-                     ? ((BclClass)Class).TypeAlias
+                (Class is IBclClass
+                     ? ((IBclClass)Class).TypeAlias
                      : Class is UserDefinedClass
                            ? ((UserDefinedClass)Class).TypeName.Raw
                            : "List<" +
-                             (((ListClass)Class).Class is BclClass
-                                  ? ((BclClass)((ListClass)Class).Class).TypeAlias
+                             (((ListClass)Class).Class is IBclClass
+                                  ? ((IBclClass)((ListClass)Class).Class).TypeAlias
                                   : ((UserDefinedClass)((ListClass)Class).Class).TypeName.Raw)
                              + ">")
                 + ":"

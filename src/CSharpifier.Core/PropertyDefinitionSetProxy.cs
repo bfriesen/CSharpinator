@@ -29,14 +29,14 @@ namespace CSharpifier
             };
         }
 
-        public PropertyDefinitionSet ToPropertyDefinitionSet(IClassRepository classRepository)
+        public PropertyDefinitionSet ToPropertyDefinitionSet(IClassRepository classRepository, IFactory factory)
         {
             return new PropertyDefinitionSet
             {
                 Name = Name,
                 Order = Order,
                 IsEnabled = IsEnabled,
-                PropertyDefinitions = PropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository)).ToList()
+                PropertyDefinitions = PropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository, factory)).ToList()
             };
         }
     }

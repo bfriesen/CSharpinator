@@ -14,11 +14,14 @@ namespace CSharpifier
 
         private readonly ConcurrentDictionary<string, PropertyDefinitionSet> _extraPropertyDefinitionSets = new ConcurrentDictionary<string, PropertyDefinitionSet>();
 
-        public Property(string id, bool isNonEmpty)
+        private readonly IFactory _factory;
+
+        public Property(string id, bool isNonEmpty, IFactory factory)
         {
             Id = id;
             HasHadNonEmptyValue |= isNonEmpty;
             _defaultPropertyDefinitionSet = new Lazy<PropertyDefinitionSet>(CreateDefaultPropertyDefinitionSet);
+            _factory = factory;
         }
 
         public string Id { get; set; }
@@ -91,7 +94,7 @@ namespace CSharpifier
                         return false;
                     }
 
-                    var bclClass = x.Class as BclClass;
+                    var bclClass = x.Class as IBclClass;
                     return bclClass == null || !bclClass.IsNullable || HasHadNonEmptyValue;
                 });
             }

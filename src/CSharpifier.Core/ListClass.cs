@@ -8,8 +8,7 @@ namespace CSharpifier
     [DebuggerDisplay("List<{Class.TypeName is BclClass ? ((BclClass)Class).TypeAlias : ((UserDefinedClass)Class).TypeName.Raw}>")]
     public class ListClass : IClass
     {
-        private static readonly ConcurrentDictionary<IClass, ListClass> _classes
-            = new ConcurrentDictionary<IClass, ListClass>();
+        private static readonly ConcurrentDictionary<IClass, ListClass> _classes = new ConcurrentDictionary<IClass, ListClass>();
         private readonly IClass _class;
 
         private ListClass(IClass @class)
@@ -27,12 +26,12 @@ namespace CSharpifier
             get { return _class; }
         }
 
-        public virtual string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
+        public string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
         {
             var typeName =
                 _class is UserDefinedClass
                     ? ((UserDefinedClass)_class).TypeName.FormatAs(classCase)
-                    : ((BclClass)_class).TypeAlias;
+                    : ((IBclClass)_class).TypeAlias;
 
             var sb = new StringBuilder();
 

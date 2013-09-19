@@ -6,8 +6,7 @@ namespace CSharpifier
 {
     public class ClassRepository : IClassRepository
     {
-        private static readonly ConcurrentDictionary<string, UserDefinedClass> _classes
-            = new ConcurrentDictionary<string, UserDefinedClass>();
+        private readonly ConcurrentDictionary<string, UserDefinedClass> _classes = new ConcurrentDictionary<string, UserDefinedClass>();
 
         public IEnumerable<UserDefinedClass> GetAll()
         {

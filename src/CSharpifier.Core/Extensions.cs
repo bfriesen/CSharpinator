@@ -11,9 +11,9 @@ namespace CSharpifier
             return string.Join("\r\n", value.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Select(x => "    " + x));
         }
 
-        public static BclClass AsBclClass(this IClass @class)
+        public static IBclClass AsBclClass(this IClass @class)
         {
-            return @class.AsClass<BclClass>();
+            return @class.AsClass<IBclClass>();
         }
 
         public static UserDefinedClass AsUserDefinedClass(this IClass @class)
@@ -41,7 +41,7 @@ namespace CSharpifier
 
         public static bool IsBclClass(this IClass @class)
         {
-            return @class.IsClass<BclClass>();
+            return @class.IsClass<IBclClass>();
         }
 
         public static bool IsUserDefinedClass(this IClass @class)

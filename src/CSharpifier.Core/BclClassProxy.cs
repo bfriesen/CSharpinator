@@ -10,8 +10,30 @@ namespace CSharpifier
         [XmlAttribute]
         public string TypeName { get; set; }
 
-        public static BclClassProxy FromBclClass(BclClass bclClass)
+        public static BclClassProxy FromBclClass(IBclClass bclClass)
         {
+            var formattedDateTime = bclClass as FormattedDateTime;
+            if (formattedDateTime != null)
+            {
+                return new FormattedDateTimeProxy
+                {
+                    TypeAlias = formattedDateTime.TypeAlias,
+                    TypeName = formattedDateTime.TypeName,
+                    Format = formattedDateTime.Format
+                };
+            }
+
+            var nullableFormattedDateTime = bclClass as NullableFormattedDateTime;
+            if (nullableFormattedDateTime != null)
+            {
+                return new NullableFormattedDateTimeProxy
+                {
+                    TypeAlias = nullableFormattedDateTime.TypeAlias,
+                    TypeName = nullableFormattedDateTime.TypeName,
+                    Format = nullableFormattedDateTime.Format
+                };
+            }
+
             return new BclClassProxy
             {
                 TypeAlias = bclClass.TypeAlias,
@@ -19,9 +41,21 @@ namespace CSharpifier
             };
         }
 
-        public static BclClass ToBclClass(BclClassProxy bclClassProxy)
+        public static IBclClass ToBclClass(BclClassProxy bclClassProxy, IFactory factory)
         {
-            return BclClass.FromTypeFullName(bclClassProxy.TypeName);
+            var formattedDateTime = bclClassProxy as FormattedDateTimeProxy;
+            if (formattedDateTime != null)
+            {
+                return factory.GetOrCreateFormattedDateTime(formattedDateTime.Format);
+            }
+
+            var nullableFormattedDateTime = bclClassProxy as NullableFormattedDateTimeProxy;
+            if (nullableFormattedDateTime != null)
+            {
+                return factory.GetOrCreateNullableFormattedDateTime(nullableFormattedDateTime.Format);
+            }
+
+            return factory.GetBclClassFromTypeName(bclClassProxy.TypeName);
         }
     }
 }

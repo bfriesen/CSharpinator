@@ -42,8 +42,14 @@
   <ItemGroup>
     <Compile Include="AttributeProxy.cs" />
     <Compile Include="BclClass.cs" />
+    <Compile Include="BclClassBase.cs" />
     <Compile Include="BclClassProxy.cs" />
     <Compile Include="Case.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Factory.cs" />
+    <Compile Include="FormattedDateTime.cs" />
+    <Compile Include="FormattedDateTimeProxy.cs" />
+    <Compile Include="IBclClass.cs" />
     <Compile Include="IClass.cs" />
     <Compile Include="ClassDefinitions.cs" />
     <Compile Include="ClassGenerator.cs" />
@@ -52,13 +58,19 @@
     <Compile Include="DomVisitor.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="IClassRepository.cs" />
+    <Compile Include="IConfiguration.cs" />
     <Compile Include="IdentifierName.cs" />
     <Compile Include="IDomElement.cs" />
+    <Compile Include="IFactory.cs" />
     <Compile Include="ListClass.cs" />
     <Compile Include="ListClassProxy.cs" />
+    <Compile Include="NullableBclClass.cs" />
+    <Compile Include="NullableFormattedDateTime.cs" />
+    <Compile Include="NullableFormattedDateTimeProxy.cs" />
+    <Compile Include="NullablePascalCaseBooleanClass.cs" />
+    <Compile Include="PascalCaseBooleanClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property.cs" />
-    <Compile Include="PropertyAttributes.cs" />
     <Compile Include="PropertyDefinition.cs" />
     <Compile Include="PropertyDefinitionExtensions.cs" />
     <Compile Include="PropertyDefinitionProxy.cs" />

@@ -6,10 +6,12 @@ namespace CSharpifier
     public class XmlDomText : IDomElement
     {
         private readonly string _value;
+        private readonly IFactory _factory;
 
-        public XmlDomText(string value)
+        public XmlDomText(string value, IFactory factory)
         {
             _value = value;
+            _factory = factory;
         }
 
         public bool HasElements
@@ -37,17 +39,14 @@ namespace CSharpifier
 
         public Property CreateProperty(IClassRepository classRepository)
         {
-            var property = new Property(Name, !string.IsNullOrEmpty(_value));
+            var property = _factory.CreateProperty(Name, !string.IsNullOrEmpty(_value));
             
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
                 propertyDefinitions.Append(
-                BclClass.All
+                _factory.GetAllBclClasses()
                     .Select(bclClass =>
-                        new PropertyDefinition(bclClass, Name, bclClass.IsLegalValue(_value), true)
-                        {
-                            Attributes = new List<AttributeProxy> { AttributeProxy.XmlText() }
-                        })));
+                        _factory.CreatePropertyDefinition(bclClass, Name, bclClass.IsLegalValue(_value), true, AttributeProxy.XmlText()))));
 
             return property;
         }

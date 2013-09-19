@@ -21,14 +21,14 @@ namespace CSharpifier
             };
         }
 
-        public UserDefinedClass ToUserDefinedClass(IClassRepository classRepository)
+        public UserDefinedClass ToUserDefinedClass(IClassRepository classRepository, IFactory factory)
         {
             var userDefinedClass = classRepository.GetOrAdd(TypeName);
 
             foreach (var propertyProxy in Properties)
             {
                 // We're sending 'true' for the isParentClassNew parameter, since we don't want to mark anything as nullable.
-                userDefinedClass.AddProperty(propertyProxy.ToProperty(classRepository), true, true);
+                userDefinedClass.AddProperty(propertyProxy.ToProperty(classRepository, factory), true, true);
             }
 
             return userDefinedClass;

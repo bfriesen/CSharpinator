@@ -18,6 +18,7 @@ namespace CSharpifier
             string meta = null;
             string classCaseString = "PascalCase";
             string propertyCaseString = "PascalCase";
+            var dateTimeFormats = new HashSet<string>();
 
             var p = new OptionSet
             {
@@ -27,6 +28,7 @@ namespace CSharpifier
                 { "m|meta=", "The path to the metadata file used to describe the classes. If not provided, no metadata will be saved.", value => meta = value },
                 { "c|class_case=", "The casing to be used for class names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => classCaseString = value },
                 { "p|property_case=", "The casing to be used for property names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => propertyCaseString = value },
+                { "d|date_time_format=", "A custom date time format string used for the serialization of date time fields.", value => dateTimeFormats.Add(value) },
                 { "h|help", "Show this message and exit.", value => showHelp = value != null },
             };
 
@@ -75,21 +77,14 @@ namespace CSharpifier
                 return;
             }
 
-            TextWriter outWriter = output == null ? Console.Out : new StreamWriter(output, false);
-
-            IDomElement domElement;
-            try
+            var configuration = new Configuration();
+            foreach (var dateTimeFormat in dateTimeFormats)
             {
-                domElement = GetRootElement(extra[0]);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Unable to create valid document: " + ex.Message);
-                return;
+                configuration.DateTimeFormats.Add(dateTimeFormat);
             }
 
+            var factory = new Factory(configuration);
             var classRepository = new ClassRepository();
-
             var serializer = new XmlSerializer(typeof(ClassDefinitions));
 
             var metaExists = meta != null && File.Exists(meta);
@@ -97,10 +92,30 @@ namespace CSharpifier
             {
                 using (var reader = new StreamReader(meta))
                 {
-                    ((ClassDefinitions)serializer.Deserialize(reader)).LoadToRepository(classRepository);
+                    var classDefinitions = (ClassDefinitions)serializer.Deserialize(reader);
+
+                    foreach (var dateTimeFormat in classDefinitions.DateTimeFormats)
+                    {
+                        configuration.DateTimeFormats.Add(dateTimeFormat);
+                    }
+
+                    classDefinitions.LoadToRepository(classRepository, factory);
                 }
             }
-            
+
+            var outWriter = output == null ? Console.Out : new StreamWriter(output, false);
+
+            IDomElement domElement;
+            try
+            {
+                domElement = GetRootElement(extra[0], factory);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unable to create valid document: " + ex.Message);
+                return;
+            }
+
             var domVisitor = new DomVisitor(classRepository);
 
             try
@@ -118,6 +133,10 @@ namespace CSharpifier
                 try
                 {
                     var classDefinitions = ClassDefinitions.FromClasses(classRepository.GetAll());
+                    foreach (var dateTimeFormat in configuration.DateTimeFormats)
+                    {
+                        classDefinitions.DateTimeFormats.Add(dateTimeFormat);
+                    }
 
                     string tempFileName;
                     using (var writer = new StreamWriter(tempFileName = Path.GetTempFileName()))
@@ -147,7 +166,7 @@ namespace CSharpifier
                     classCase,
                     propertyCase,
                     outWriter,
-                    true);
+                    skipNamespace);
             }
             catch (Exception ex)
             {
@@ -163,20 +182,20 @@ namespace CSharpifier
             }
         }
 
-        private static IDomElement GetRootElement(string arg)
+        private static IDomElement GetRootElement(string arg, IFactory factory)
         {
             IDomElement domElement;
 
             if (!File.Exists(arg))
             {
-                if (!TryParseDocument(arg, out domElement))
+                if (!TryParseDocument(arg, factory, out domElement))
                 {
                     throw new InvalidArgumentsException("No file exists at: " + arg);
                 }
             }
             else
             {
-                if (!TryLoadDocument(arg, out domElement))
+                if (!TryLoadDocument(arg, factory, out domElement))
                 {
                     throw new InvalidArgumentsException("Error reading into XDocument for file: " + arg);
                 }
@@ -185,12 +204,12 @@ namespace CSharpifier
             return domElement;
         }
 
-        private static bool TryParseDocument(string arg, out IDomElement domElement)
+        private static bool TryParseDocument(string arg, IFactory factory, out IDomElement domElement)
         {
             try
             {
                 var xDocument = XDocument.Parse(arg);
-                domElement = new XmlDomElement(xDocument.Root);
+                domElement = factory.CreateXmlDomElement(xDocument.Root);
                 return true;
             }
             catch
@@ -200,12 +219,12 @@ namespace CSharpifier
             }
         }
 
-        private static bool TryLoadDocument(string arg, out IDomElement domElement)
+        private static bool TryLoadDocument(string arg, IFactory factory, out IDomElement domElement)
         {
             try
             {
                 var xDocument = XDocument.Load(arg);
-                domElement = new XmlDomElement(xDocument.Root);
+                domElement = factory.CreateXmlDomElement(xDocument.Root);
                 return true;
             }
             catch

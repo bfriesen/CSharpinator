@@ -15,9 +15,9 @@ namespace CSharpifier
             };
         }
 
-        public static ListClass ToListClass(ListClassProxy listClassProxy, IClassRepository classRepository)
+        public static ListClass ToListClass(ListClassProxy listClassProxy, IClassRepository classRepository, IFactory factory)
         {
-            return ListClass.FromClass(listClassProxy.Class.ToClass(classRepository));
+            return ListClass.FromClass(listClassProxy.Class.ToClass(classRepository, factory));
         }
     }
 }
