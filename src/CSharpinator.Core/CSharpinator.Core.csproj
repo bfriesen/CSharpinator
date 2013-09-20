@@ -7,8 +7,8 @@
     <ProjectGuid>{18F1E803-267D-48F5-A8AD-0DB2C323EBE0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CSharpifier</RootNamespace>
-    <AssemblyName>CSharpifier.Core</AssemblyName>
+    <RootNamespace>CSharpinator</RootNamespace>
+    <AssemblyName>CSharpinator.Core</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
