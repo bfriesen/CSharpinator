@@ -45,7 +45,7 @@ public {0} {1} {{ get; set; }}", TypeAlias, propertyName).AppendLine().AppendLin
     }}
     set
     {{
-        {0} = value == null ? null : ({2}){3};
+        {0} = string.IsNullOrEmpty(value) ? null : ({2}){3};
     }}
 }}", propertyName, _toString, TypeAlias, _parse);
 

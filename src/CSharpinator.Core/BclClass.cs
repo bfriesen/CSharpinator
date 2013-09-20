@@ -15,8 +15,8 @@ namespace CSharpinator
             : base(typeName, typeAlias, isLegalValue)
         {
         }
-        
-        public override bool IsNullable { get { return false; } }
+
+        public override bool IsNullable { get { return TypeAlias == "string"; } }
 
         public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
         {

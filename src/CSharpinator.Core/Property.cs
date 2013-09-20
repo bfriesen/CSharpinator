@@ -95,7 +95,7 @@ namespace CSharpinator
                     }
 
                     var bclClass = x.Class as IBclClass;
-                    return bclClass == null || !bclClass.IsNullable || HasHadNonEmptyValue;
+                    return bclClass == null || !bclClass.IsNullable || HasHadNonEmptyValue || bclClass.TypeAlias == "string";
                 });
 
                 if (selectedPropertyDefinition == null)
