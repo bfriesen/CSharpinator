@@ -10,7 +10,7 @@ namespace CSharpinator
     {
         private static int _orderSeed;
 
-        private readonly Dictionary<string, Property> _properties = new Dictionary<string, Property>();
+        private readonly Dictionary<DomPath, Property> _properties = new Dictionary<DomPath, Property>();
         private readonly DomPath _domPath;
         private readonly int _order;
 
@@ -28,7 +28,7 @@ namespace CSharpinator
         public void AddProperty(Property property, bool isParentClassNew, bool metaExists)
         {
             Property foundProperty;
-            if (!_properties.TryGetValue(property.Id, out foundProperty))
+            if (!_properties.TryGetValue(property.DomPath, out foundProperty))
             {
                 // If we're adding a new property to an old class, it should be nullable.
                 if (!isParentClassNew && metaExists)
@@ -36,7 +36,7 @@ namespace CSharpinator
                     property.MakeNullable();
                 }
 
-                _properties.Add(property.Id, property);
+                _properties.Add(property.DomPath, property);
                 return;
             }
 

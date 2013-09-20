@@ -42,7 +42,7 @@ namespace CSharpinator
 
         public Property CreateProperty(IClassRepository classRepository)
         {
-            var property = _factory.CreateProperty(Name, !string.IsNullOrEmpty(_value));
+            var property = _factory.CreateProperty(_text.GetDomPath(_factory), !string.IsNullOrEmpty(_value));
             
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>

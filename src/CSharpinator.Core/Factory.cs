@@ -33,9 +33,9 @@ namespace CSharpinator
             return new XmlDomText(text, this);
         }
 
-        public Property CreateProperty(string id, bool isNonEmpty)
+        public Property CreateProperty(DomPath domPath, bool isNonEmpty)
         {
-            return new Property(id, isNonEmpty, this);
+            return new Property(domPath, isNonEmpty, this);
         }
 
         public PropertyDefinition CreatePropertyDefinition(IClass @class, string propertyName, bool isLegal, bool isEnabled, params AttributeProxy[] attributes)

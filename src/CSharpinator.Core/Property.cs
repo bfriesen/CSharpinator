@@ -14,17 +14,18 @@ namespace CSharpinator
 
         private readonly ConcurrentDictionary<string, PropertyDefinitionSet> _extraPropertyDefinitionSets = new ConcurrentDictionary<string, PropertyDefinitionSet>();
 
+        private readonly DomPath _domPath;
         private readonly IFactory _factory;
 
-        public Property(string id, bool isNonEmpty, IFactory factory)
+        public Property(DomPath domPath, bool isNonEmpty, IFactory factory)
         {
-            Id = id;
             HasHadNonEmptyValue |= isNonEmpty;
             _defaultPropertyDefinitionSet = new Lazy<PropertyDefinitionSet>(CreateDefaultPropertyDefinitionSet);
+            _domPath = domPath;
             _factory = factory;
         }
 
-        public string Id { get; set; }
+        public DomPath DomPath { get { return _domPath; } }
         public bool HasHadNonEmptyValue { get; set; }
 
         public PropertyDefinitionSet DefaultPropertyDefinitionSet
@@ -100,7 +101,7 @@ namespace CSharpinator
 
                 if (selectedPropertyDefinition == null)
                 {
-                    throw new InvalidOperationException(string.Format("No potential property definition qualifies to be selected."));
+                    throw new InvalidOperationException(string.Format("No potential property definition qualifies to be selected: " + DomPath.FullPath));
                 }
 
                 return selectedPropertyDefinition;

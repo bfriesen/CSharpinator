@@ -41,7 +41,7 @@ namespace CSharpinator
 
                 foreach (var orphanedProperty in
                         currentClass.Properties.Where(
-                            property => metaExists && element.Elements.All(childElement => property.Id != childElement.Name)))
+                            property => metaExists && element.Elements.All(childElement => !property.DomPath.Equals(childElement.GetDomPath(_factory)))))
                 {
                     // If there's a property that exists, but isn't present in our element's children, it should be nullable.
                     orphanedProperty.MakeNullable();

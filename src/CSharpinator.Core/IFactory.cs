@@ -9,7 +9,7 @@ namespace CSharpinator
         XmlDomAttribute CreateXmlDomAttribute(XAttribute attribute);
         XmlDomText CreateXmlDomText(XText text);
 
-        Property CreateProperty(string id, bool isNonEmpty);
+        Property CreateProperty(DomPath domPath, bool isNonEmpty);
         PropertyDefinition CreatePropertyDefinition(IClass @class, string propertyName, bool isLegal, bool isEnabled, params AttributeProxy[] attributes);
 
         IEnumerable<IBclClass> GetAllBclClasses();

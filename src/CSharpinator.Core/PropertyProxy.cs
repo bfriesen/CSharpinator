@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -8,7 +9,7 @@ namespace CSharpinator
     public class PropertyProxy
     {
         [XmlAttribute]
-        public string Id { get; set; }
+        public string DomPath { get; set; }
 
         [XmlAttribute]
         public bool HasHadNonEmptyValue { get; set; }
@@ -24,7 +25,7 @@ namespace CSharpinator
         {
             return new PropertyProxy
             {
-                Id = property.Id,
+                DomPath = string.Format("{0}:{1}", property.DomPath.FullPath, property.DomPath.TypeNameDepth),
                 HasHadNonEmptyValue = property.HasHadNonEmptyValue,
                 DefaultPropertyDefinitionSet = PropertyDefinitionSetProxy.FromPropertyDefinitionSet(property.DefaultPropertyDefinitionSet),
                 ExtraPropertyDefinitionSets = property.ExtraPropertyDefinitionSets.Select(PropertyDefinitionSetProxy.FromPropertyDefinitionSet).ToList()
@@ -33,7 +34,9 @@ namespace CSharpinator
 
         public Property ToProperty(IClassRepository classRepository, IFactory factory)
         {
-            var property = factory.CreateProperty(Id, HasHadNonEmptyValue);
+            var split = DomPath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+            var domPath = factory.GetOrCreateDomPath(split[0], int.Parse(split[1]));
+            var property = factory.CreateProperty(domPath, HasHadNonEmptyValue);
 
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
