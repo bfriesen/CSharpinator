@@ -53,5 +53,10 @@ namespace CSharpifier
             
             return property;
         }
+
+        public DomPath GetDomPath(IFactory factory)
+        {
+            return _attribute.GetDomPath(factory);
+        }
     }
 }

@@ -1,16 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace CSharpifier
 {
     public class XmlDomText : IDomElement
     {
         private readonly string _value;
+        private readonly XText _text;
         private readonly IFactory _factory;
 
-        public XmlDomText(string value, IFactory factory)
+        public XmlDomText(XText text, IFactory factory)
         {
-            _value = value;
+            _text = text;
+            _value = text.Value;
             _factory = factory;
         }
 
@@ -49,6 +52,11 @@ namespace CSharpifier
                         _factory.CreatePropertyDefinition(bclClass, Name, bclClass.IsLegalValue(_value), true, AttributeProxy.XmlText()))));
 
             return property;
+        }
+
+        public DomPath GetDomPath(IFactory factory)
+        {
+            return _text.GetDomPath(factory);
         }
     }
 }

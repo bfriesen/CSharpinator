@@ -5,7 +5,7 @@ namespace CSharpifier
     public interface IClassRepository
     {
         IEnumerable<UserDefinedClass> GetAll();
-        UserDefinedClass GetOrAdd(string typeName);
-        UserDefinedClass GetOrAdd(string typeName, out bool isNew);
+        UserDefinedClass GetOrAdd(DomPath path);
+        UserDefinedClass GetOrAdd(DomPath path, out bool isNew);
     }
 }

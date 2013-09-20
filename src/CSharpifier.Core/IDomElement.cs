@@ -9,5 +9,6 @@ namespace CSharpifier
         string Name { get; }
         IEnumerable<IDomElement> Elements { get; }
         Property CreateProperty(IClassRepository classRepository);
+        DomPath GetDomPath(IFactory factory);
     }
 }

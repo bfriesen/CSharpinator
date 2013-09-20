@@ -45,7 +45,7 @@ namespace CSharpifier
                         .Concat(_element.Elements().Select(x => _factory.CreateXmlDomElement(x)))
                         .Concat(
                             !_element.HasElements && !string.IsNullOrEmpty(_element.Value)
-                                ? new[] { _factory.CreateXmlDomText(_element.Value) }
+                                ? new[] { _factory.CreateXmlDomText((XText)_element.Nodes().First()) }
                                 : Enumerable.Empty<IDomElement>());
             }
         }
@@ -73,7 +73,7 @@ namespace CSharpifier
                     }
 
                     var userDefinedClassPropertyDefinition =
-                        _factory.CreatePropertyDefinition(classRepository.GetOrAdd(_element.Name.ToString()), _element.Name.ToString(), true, true, AttributeProxy.XmlElement(_element.Name.ToString()));
+                        _factory.CreatePropertyDefinition(classRepository.GetOrAdd(_element.GetDomPath(_factory)), _element.Name.ToString(), true, true, AttributeProxy.XmlElement(_element.Name.ToString()));
 
                     if (_element.HasElements || _element.HasAttributes)
                     {
@@ -95,7 +95,7 @@ namespace CSharpifier
 
                             var xmlArrayListPropertyDefinition =
                                     _factory.CreatePropertyDefinition(
-                                        ListClass.FromClass(classRepository.GetOrAdd(first.Name.ToString())),
+                                        ListClass.FromClass(classRepository.GetOrAdd(first.GetDomPath(_factory))),
                                         _pluralizationService.Value.Pluralize(first.Name.ToString()),
                                         true,
                                         true,
@@ -166,6 +166,11 @@ namespace CSharpifier
                 });
 
             return property;
+        }
+
+        public DomPath GetDomPath(IFactory factory)
+        {
+            return _element.GetDomPath(factory);
         }
     }
 }

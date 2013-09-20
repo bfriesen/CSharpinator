@@ -7,7 +7,7 @@ namespace CSharpifier
     {
         XmlDomElement CreateXmlDomElement(XElement element);
         XmlDomAttribute CreateXmlDomAttribute(XAttribute attribute);
-        XmlDomText CreateXmlDomText(string value);
+        XmlDomText CreateXmlDomText(XText text);
 
         Property CreateProperty(string id, bool isNonEmpty);
         PropertyDefinition CreatePropertyDefinition(IClass @class, string propertyName, bool isLegal, bool isEnabled, params AttributeProxy[] attributes);
@@ -18,5 +18,8 @@ namespace CSharpifier
         FormattedDateTime GetOrCreateFormattedDateTime(string format);
 
         NullableFormattedDateTime GetOrCreateNullableFormattedDateTime(string format);
+
+        DomPath GetOrCreateDomPath(string fullPath);
+        DomPath GetOrCreateDomPath(string fullPath, int typeNameDepth);
     }
 }

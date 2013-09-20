@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,29 +7,29 @@ namespace CSharpifier
 {
     public class ClassRepository : IClassRepository
     {
-        private readonly ConcurrentDictionary<string, UserDefinedClass> _classes = new ConcurrentDictionary<string, UserDefinedClass>();
+        private readonly ConcurrentDictionary<DomPath, UserDefinedClass> _classes = new ConcurrentDictionary<DomPath, UserDefinedClass>();
 
         public IEnumerable<UserDefinedClass> GetAll()
         {
             return _classes.Values.OrderBy(x => x.Order);
         }
 
-        public UserDefinedClass GetOrAdd(string typeName)
+        public UserDefinedClass GetOrAdd(DomPath path)
         {
             return _classes.GetOrAdd(
-                typeName,
-                x => new UserDefinedClass(typeName));
+                path,
+                x => new UserDefinedClass(x));
         }
 
-        public UserDefinedClass GetOrAdd(string typeName, out bool isNew)
+        public UserDefinedClass GetOrAdd(DomPath path, out bool isNew)
         {
             var isNewClass = false;
             var @class = _classes.GetOrAdd(
-                typeName,
+                path,
                 x =>
                 {
                     isNewClass = true;
-                    return new UserDefinedClass(typeName);
+                    return new UserDefinedClass(x);
                 });
             isNew = isNewClass;
             return @class;

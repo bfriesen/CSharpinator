@@ -11,29 +11,19 @@ namespace CSharpifier
         private static int _orderSeed;
 
         private readonly Dictionary<string, Property> _properties = new Dictionary<string, Property>();
-        private readonly IdentifierName _typeName;
+        private readonly DomPath _domPath;
         private readonly int _order;
 
-        public UserDefinedClass(string typeName)
+        public UserDefinedClass(DomPath domPath)
         {
-            _typeName = new IdentifierName(typeName);
+            _domPath = domPath;
             _order = _orderSeed++;
         }
 
-        public IdentifierName TypeName
-        {
-            get { return _typeName; }
-        }
-
-        public int Order
-        {
-            get { return _order; }
-        }
-
-        public IEnumerable<Property> Properties
-        {
-            get { return _properties.Values; }
-        }
+        public IdentifierName TypeName { get { return DomPath.TypeName; } }
+        public int Order { get { return _order; } }
+        public IEnumerable<Property> Properties { get { return _properties.Values; } }
+        public DomPath DomPath { get { return _domPath; } }
 
         public void AddProperty(Property property, bool isParentClassNew, bool metaExists)
         {
@@ -61,8 +51,8 @@ public partial class {1}
 {{
 {2}
 }}",
-                _typeName.Raw,
-                _typeName.FormatAs(classCase),
+                DomPath.ElementName.Raw,
+                DomPath.TypeName.FormatAs(classCase),
                 string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode(classCase, propertyCase).Indent())))
                 .Indent();
         }
@@ -76,7 +66,7 @@ public partial class {1}
                 sb.AppendLine(string.Format("{0}", attribute.ToCode()));
             }
 
-            sb.AppendFormat("public {0} {1} {{ get; set; }}", _typeName.FormatAs(classCase), propertyName);
+            sb.AppendFormat("public {0} {1} {{ get; set; }}", DomPath.TypeName.FormatAs(classCase), propertyName);
 
             return sb.ToString();
         }
@@ -89,12 +79,15 @@ public partial class {1}
                 return false;
             }
 
-            return _typeName.Raw == otherUserDefinedClass._typeName.Raw;
+            return DomPath.Equals(otherUserDefinedClass.DomPath);
         }
 
         public override int GetHashCode()
         {
-            return _typeName.Raw.GetHashCode();
+            unchecked
+            {
+                return ("UserDefinedClass".GetHashCode() * 397) ^ DomPath.GetHashCode();
+            }
         }
     }
 }

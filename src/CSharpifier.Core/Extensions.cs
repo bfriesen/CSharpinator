@@ -1,11 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace CSharpifier
 {
     public static class Extensions
     {
+        public static string GetXPath(this XText text)
+        {
+            return GetXPath(text.Parent);
+        }
+
+        public static string GetXPath(this XAttribute attribute)
+        {
+            return GetXPath(attribute.Parent) + "/" + attribute.Name.LocalName;
+        }
+
+        public static string GetXPath(this XElement element)
+        {
+            return string.Join("/", element.AncestorsAndSelf().Select(x => x.Name.LocalName).Reverse());
+        }
+
+        public static DomPath GetDomPath(this XText text, IFactory factory)
+        {
+            return factory.GetOrCreateDomPath(text.GetXPath());
+        }
+
+        public static DomPath GetDomPath(this XAttribute attribute, IFactory factory)
+        {
+            return factory.GetOrCreateDomPath(attribute.GetXPath());
+        }
+
+        public static DomPath GetDomPath(this XElement element, IFactory factory)
+        {
+            return factory.GetOrCreateDomPath(element.GetXPath());
+        }
+
         public static string Indent(this string value)
         {
             return string.Join("\r\n", value.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Select(x => "    " + x));

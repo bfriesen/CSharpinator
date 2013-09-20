@@ -87,7 +87,7 @@ namespace CSharpifier
         {
             get                               
             {
-                return PotentialPropertyDefinitions.First(x =>
+                var selectedPropertyDefinition = PotentialPropertyDefinitions.FirstOrDefault(x =>
                 {
                     if (!x.IsEnabled || !x.IsLegal)
                     {
@@ -97,6 +97,13 @@ namespace CSharpifier
                     var bclClass = x.Class as IBclClass;
                     return bclClass == null || !bclClass.IsNullable || HasHadNonEmptyValue;
                 });
+
+                if (selectedPropertyDefinition == null)
+                {
+                    throw new InvalidOperationException(string.Format("No potential property definition qualifies to be selected."));
+                }
+
+                return selectedPropertyDefinition;
             }
         }
 

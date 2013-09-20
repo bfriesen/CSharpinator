@@ -116,7 +116,7 @@ namespace CSharpifier
                 return;
             }
 
-            var domVisitor = new DomVisitor(classRepository);
+            var domVisitor = new DomVisitor(classRepository, factory);
 
             try
             {

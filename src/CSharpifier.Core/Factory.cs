@@ -28,9 +28,9 @@ namespace CSharpifier
             return new XmlDomAttribute(attribute, this);
         }
 
-        public XmlDomText CreateXmlDomText(string value)
+        public XmlDomText CreateXmlDomText(XText text)
         {
-            return new XmlDomText(value, this);
+            return new XmlDomText(text, this);
         }
 
         public Property CreateProperty(string id, bool isNonEmpty)
@@ -162,6 +162,51 @@ namespace CSharpifier
             }
 
             throw new InvalidOperationException("Invalid type for BclClass: " + type);
+        }
+
+        private readonly Dictionary<string, DomPath> domPaths = new Dictionary<string, DomPath>();
+        private readonly HashSet<string> stuff = new HashSet<string>();
+
+        public DomPath GetOrCreateDomPath(string fullPath)
+        {
+            if (domPaths.ContainsKey(fullPath))
+            {
+                return domPaths[fullPath];
+            }
+
+            for (int i = 0;; i++)
+            {
+                var domPath = new DomPath(fullPath, i);
+                if (!stuff.Contains(domPath.TypeName.Raw))
+                {
+                    stuff.Add(domPath.TypeName.Raw);
+                    domPaths.Add(fullPath, domPath);
+                    return domPath;
+                }
+            }
+
+            // If there is one that exists with the given fullPath, return it.
+            // Start with a depth of zero.
+            //     If there is not one that exists at the current depth, create and return one at that depth
+            //     Increment depth
+        }
+
+        public DomPath GetOrCreateDomPath(string fullPath, int typeNameDepth)
+        {
+            if (domPaths.ContainsKey(fullPath))
+            {
+                return domPaths[fullPath];
+            }
+
+            var domPath = new DomPath(fullPath, typeNameDepth);
+            if (stuff.Contains(domPath.TypeName.Raw))
+            {
+                throw new InvalidOperationException("Invalid metadata: more than one user defined class with identical type names.");
+            }
+
+            stuff.Add(domPath.TypeName.Raw);
+            domPaths.Add(fullPath, domPath);
+            return domPath;
         }
     }
 }

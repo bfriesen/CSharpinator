@@ -39,7 +39,7 @@ namespace CSharpifier
             var userDefined = @class as UserDefinedClassProxy;
             if (userDefined != null)
             {
-                return "UserDefined:" + userDefined.TypeName;
+                return "UserDefined:" + userDefined.DomPath;
             }
 
             var formattedDateTime = @class as FormattedDateTimeProxy;
@@ -94,7 +94,7 @@ namespace CSharpifier
                     return new UserDefinedClassProxy
                     {
                         Properties = new List<PropertyProxy>(),
-                        TypeName = remainder
+                        DomPath = remainder
                     };
                 }
                 case "FormattedDateTime":
