@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     public class ClassDefinitions
     {

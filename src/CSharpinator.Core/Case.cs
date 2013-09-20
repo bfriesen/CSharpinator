@@ -1,4 +1,4 @@
-﻿namespace CSharpifier
+﻿namespace CSharpinator
 {
     // ReSharper disable InconsistentNaming
     public enum Case

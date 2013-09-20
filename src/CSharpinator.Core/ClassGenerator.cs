@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     public class ClassGenerator
     {

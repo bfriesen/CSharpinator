@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [XmlRoot("PropertyDefinition")]
     public class PropertyDefinitionProxy

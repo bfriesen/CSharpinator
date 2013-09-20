@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [DebuggerDisplay("{TypeName.Raw}")]
     public class UserDefinedClass : IClass

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [DebuggerDisplay("{TypeAlias}")]
     public class BclClass : BclClassBase

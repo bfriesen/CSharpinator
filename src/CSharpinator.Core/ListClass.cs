@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [DebuggerDisplay("List<{Class.TypeName is BclClass ? ((BclClass)Class).TypeAlias : ((UserDefinedClass)Class).TypeName.Raw}>")]
     public class ListClass : IClass

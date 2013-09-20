@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [DebuggerDisplay("{Name}")]
     public class XmlDomElement : IDomElement

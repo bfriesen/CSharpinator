@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     public class DomVisitor
     {

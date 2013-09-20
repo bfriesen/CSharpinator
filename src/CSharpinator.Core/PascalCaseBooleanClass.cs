@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     public class PascalCaseBooleanClass : BclClassBase
     {

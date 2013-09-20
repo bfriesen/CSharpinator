@@ -1,4 +1,4 @@
-﻿namespace CSharpifier
+﻿namespace CSharpinator
 {
     public interface IBclClass : IClass
     {

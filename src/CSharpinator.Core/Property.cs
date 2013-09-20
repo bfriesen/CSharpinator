@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Collections.Concurrent;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [DebuggerDisplay("{Id}")]
     public class Property

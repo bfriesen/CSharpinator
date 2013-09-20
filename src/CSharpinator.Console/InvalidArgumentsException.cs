@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     public class InvalidArgumentsException : Exception
     {

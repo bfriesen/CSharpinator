@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [XmlRoot("NullableFormattableDateTime")]
     public class NullableFormattedDateTimeProxy : BclClassProxy

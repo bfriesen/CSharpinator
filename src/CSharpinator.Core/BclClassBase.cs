@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     public abstract class BclClassBase : IBclClass
     {

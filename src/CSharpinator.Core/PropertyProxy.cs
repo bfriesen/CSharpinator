@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [XmlRoot("Property")]
     public class PropertyProxy

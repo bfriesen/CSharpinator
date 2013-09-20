@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     public class XmlDomText : IDomElement
     {

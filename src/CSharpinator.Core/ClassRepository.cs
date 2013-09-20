@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     public class ClassRepository : IClassRepository
     {

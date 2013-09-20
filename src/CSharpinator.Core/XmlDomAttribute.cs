@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace CSharpifier
+namespace CSharpinator
 {
     [DebuggerDisplay("{Name}")]
     public class XmlDomAttribute : IDomElement
