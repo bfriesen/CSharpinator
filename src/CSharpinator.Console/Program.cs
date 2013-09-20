@@ -38,9 +38,9 @@ namespace CSharpinator
             }
             catch (OptionException e)
             {
-                Console.Write("csharpify: ");
+                Console.Write("csharpinate: ");
                 Console.WriteLine(e.Message);
-                Console.WriteLine("Try `csharpify --help' for more information.");
+                Console.WriteLine("Try `csharpinate --help' for more information.");
                 return;
             }
 
@@ -235,7 +235,7 @@ namespace CSharpinator
 
         private static void ShowHelp(OptionSet p)
         {
-            Console.WriteLine("Usage: csharpify DOCUMENT [OPTIONS]+");
+            Console.WriteLine("Usage: csharpinate DOCUMENT [OPTIONS]+");
             Console.WriteLine();
             Console.WriteLine("Generates a set of c# classes based on an xml or json document.");
             Console.WriteLine("DOCUMENT can be the path to an xml or json document, or the document itself.");
