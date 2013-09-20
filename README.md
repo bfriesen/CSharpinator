@@ -1,2 +1,2 @@
-Xml2CSharp_Prototype
-====================
+CSharpinator
+============
