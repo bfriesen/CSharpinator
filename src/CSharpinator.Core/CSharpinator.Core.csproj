@@ -48,6 +48,8 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="DomPath.cs" />
     <Compile Include="Factory.cs" />
+    <Compile Include="FormattedBoolean.cs" />
+    <Compile Include="FormattedBooleanBase.cs" />
     <Compile Include="FormattedDateTime.cs" />
     <Compile Include="FormattedDateTimeProxy.cs" />
     <Compile Include="IBclClass.cs" />
@@ -66,6 +68,7 @@
     <Compile Include="ListClass.cs" />
     <Compile Include="ListClassProxy.cs" />
     <Compile Include="NullableBclClass.cs" />
+    <Compile Include="NullableFormattedBoolean.cs" />
     <Compile Include="NullableFormattedDateTime.cs" />
     <Compile Include="NullableFormattedDateTimeProxy.cs" />
     <Compile Include="NullablePascalCaseBooleanClass.cs" />
