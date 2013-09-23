@@ -19,14 +19,19 @@ namespace CSharpinator
         public IdentifierName(string rawIdentifierName)
         {
             _rawIdentifierName = rawIdentifierName;
-            
+
             _words =
                 Regex.Split(
                     Regex.Replace(
-                        rawIdentifierName.Replace(' ', '_'),
+                        Regex.Replace(
+                            rawIdentifierName.Replace(
+                                ' ',
+                                '_'),
+                            "([A-Z])([A-Z]+)(?=$|[A-Z_0-9])",
+                            match => match.Groups[1].Value + match.Groups[2].Value.ToLowerInvariant()),
                         @"([A-Z])",
                         match => "_" + match.Value.ToLowerInvariant()),
-                    @"(?:_(?=[a-zA-Z0-9]))|(?:^_$)")
+                    @"(?:_+(?=[a-zA-Z0-9]))|(?:^_$)")
                 .Select(x => x.Trim().Trim('_'))
                 .Where(x => !string.IsNullOrEmpty(x) && x.Length > 0)
                 .ToList();
