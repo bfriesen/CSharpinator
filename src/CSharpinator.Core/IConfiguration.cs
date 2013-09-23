@@ -5,5 +5,6 @@ namespace CSharpinator
     public interface IConfiguration
     {
         ICollection<string> DateTimeFormats { get; }
+        ICollection<BooleanFormat> BooleanFormats { get; }
     }
 }

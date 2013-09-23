@@ -44,6 +44,7 @@
     <Compile Include="BclClass.cs" />
     <Compile Include="BclClassBase.cs" />
     <Compile Include="BclClassProxy.cs" />
+    <Compile Include="BooleanFormat.cs" />
     <Compile Include="Case.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="DomPath.cs" />

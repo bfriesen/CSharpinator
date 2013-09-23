@@ -18,6 +18,7 @@ namespace CSharpinator
             string classCaseString = "PascalCase";
             string propertyCaseString = "PascalCase";
             var dateTimeFormats = new HashSet<string>();
+            var booleanFormatStrings = new HashSet<string>();
 
             var p = new OptionSet
             {
@@ -28,6 +29,7 @@ namespace CSharpinator
                 { "c|class_case=", "The casing to be used for class names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => classCaseString = value },
                 { "p|property_case=", "The casing to be used for property names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => propertyCaseString = value },
                 { "d|date_time_format=", "A custom date time format string used for the serialization of date time fields.", value => dateTimeFormats.Add(value) },
+                { "b|boolean_values=", "Custom boolean values used for the serialization of boolean fields. Must be in the format 'true_value:false_value'. ", value => booleanFormatStrings.Add(value) },
                 { "h|help", "Show this message and exit.", value => showHelp = value != null },
             };
 
@@ -77,9 +79,22 @@ namespace CSharpinator
             }
 
             var configuration = new Configuration();
+
             foreach (var dateTimeFormat in dateTimeFormats)
             {
                 configuration.DateTimeFormats.Add(dateTimeFormat);
+            }
+
+            foreach (var formatString in booleanFormatStrings)
+            {
+                try
+                {
+                    configuration.BooleanFormats.Add(BooleanFormat.FromFormatString(formatString));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: {0}", ex.Message);
+                }
             }
 
             var factory = new Factory(configuration);

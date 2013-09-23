@@ -96,11 +96,5 @@ namespace CSharpinator
                 comparisonValues.Select(
                     comparisonValue => string.Format("{0} == \"{1}\"", variableName, comparisonValue)));
         }
-
-        protected class BooleanFormat
-        {
-            public string True { get; set; }
-            public string False { get; set; }
-        }
     }
 }
