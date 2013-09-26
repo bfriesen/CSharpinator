@@ -225,51 +225,49 @@ namespace CSharpinator
             return new JObjectDomElement((JObject)jProperty.Value, jProperty.Name, this);
         }
 
-        public IDomElement CreateJsonDomElement(JProperty jProperty)
+        public IDomElement CreateJsonDomElement(JToken jToken, string name)
         {
-            switch (jProperty.Value.Type)
+            switch (jToken.Type)
             {
-                case JTokenType.None:
-                    break;
                 case JTokenType.Object:
-                    return new JObjectDomElement((JObject)jProperty.Value, jProperty.Name, this);
+                    return new JObjectDomElement((JObject)jToken, name, this);
                 case JTokenType.Array:
-                    break;
+                    return new JArrayDomElement((JArray)jToken, name, this);
+                case JTokenType.Integer:
+                case JTokenType.Float:
+                case JTokenType.Date:
+                case JTokenType.Boolean:
+                case JTokenType.String:
+                case JTokenType.Guid:
+                case JTokenType.Uri:
+                case JTokenType.TimeSpan:
+                    return new JValueDomElement((JValue)jToken, name, this);
                 case JTokenType.Constructor:
                     break;
                 case JTokenType.Property:
                     break;
                 case JTokenType.Comment:
                     break;
-                case JTokenType.Integer:
-                    break;
-                case JTokenType.Float:
-                    break;
-                case JTokenType.String:
-                    break;
-                case JTokenType.Boolean:
-                    break;
                 case JTokenType.Null:
                     break;
                 case JTokenType.Undefined:
-                    break;
-                case JTokenType.Date:
                     break;
                 case JTokenType.Raw:
                     break;
                 case JTokenType.Bytes:
                     break;
-                case JTokenType.Guid:
-                    break;
-                case JTokenType.Uri:
-                    break;
-                case JTokenType.TimeSpan:
+                case JTokenType.None:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            throw new NotImplementedException("Factory.CreateJsonDomElement has not been implemented for JTokenType." + jProperty.Value.Type);
+            throw new NotImplementedException("Factory.CreateJsonDomElement has not been implemented for JTokenType." + jToken.Type);
+        }
+
+        public IDomElement CreateJsonDomElement(JProperty jProperty)
+        {
+            return CreateJsonDomElement(jProperty.Value, jProperty.Name);
         }
     }
 }

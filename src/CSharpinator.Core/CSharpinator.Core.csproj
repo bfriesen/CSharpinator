@@ -68,7 +68,9 @@
     <Compile Include="IdentifierName.cs" />
     <Compile Include="IDomElement.cs" />
     <Compile Include="IFactory.cs" />
+    <Compile Include="JArrayDomElement.cs" />
     <Compile Include="JObjectDomElement.cs" />
+    <Compile Include="JValueDomElement.cs" />
     <Compile Include="ListClass.cs" />
     <Compile Include="ListClassProxy.cs" />
     <Compile Include="NullableBclClass.cs" />
