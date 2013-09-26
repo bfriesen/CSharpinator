@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace CSharpinator
 {
@@ -21,5 +22,7 @@ namespace CSharpinator
 
         DomPath GetOrCreateDomPath(string fullPath);
         DomPath GetOrCreateDomPath(string fullPath, int typeNameDepth);
+
+        IDomElement CreateJsonDomElement(JProperty jProperty);
     }
 }

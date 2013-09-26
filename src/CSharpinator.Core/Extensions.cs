@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace CSharpinator
 {
@@ -35,6 +37,11 @@ namespace CSharpinator
         public static DomPath GetDomPath(this XElement element, IFactory factory)
         {
             return factory.GetOrCreateDomPath(element.GetXPath());
+        }
+
+        public static DomPath GetDomPath(this JObject jObject, IFactory factory)
+        {
+            return factory.GetOrCreateDomPath(Regex.Replace(jObject.Path, @"\[\d+\]", ""));
         }
 
         public static string Indent(this string value)

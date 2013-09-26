@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace CSharpinator
 {
@@ -207,6 +208,68 @@ namespace CSharpinator
             stuff.Add(domPath.TypeName.Raw);
             domPaths.Add(fullPath, domPath);
             return domPath;
+        }
+
+        public JObjectDomElement CreateJObjectDomElement(JObject jObject)
+        {
+            return new JObjectDomElement(jObject, this);
+        }
+
+        public JObjectDomElement CreateJObjectDomElement(JProperty jProperty)
+        {
+            if (jProperty.Value.Type != JTokenType.Object)
+            {
+                throw new ArgumentException("A JProperty passed in to CreateJObjectDomElement must have a value of Type JTokenType.Object.", "jProperty");
+            }
+
+            return new JObjectDomElement((JObject)jProperty.Value, jProperty.Name, this);
+        }
+
+        public IDomElement CreateJsonDomElement(JProperty jProperty)
+        {
+            switch (jProperty.Value.Type)
+            {
+                case JTokenType.None:
+                    break;
+                case JTokenType.Object:
+                    return new JObjectDomElement((JObject)jProperty.Value, jProperty.Name, this);
+                case JTokenType.Array:
+                    break;
+                case JTokenType.Constructor:
+                    break;
+                case JTokenType.Property:
+                    break;
+                case JTokenType.Comment:
+                    break;
+                case JTokenType.Integer:
+                    break;
+                case JTokenType.Float:
+                    break;
+                case JTokenType.String:
+                    break;
+                case JTokenType.Boolean:
+                    break;
+                case JTokenType.Null:
+                    break;
+                case JTokenType.Undefined:
+                    break;
+                case JTokenType.Date:
+                    break;
+                case JTokenType.Raw:
+                    break;
+                case JTokenType.Bytes:
+                    break;
+                case JTokenType.Guid:
+                    break;
+                case JTokenType.Uri:
+                    break;
+                case JTokenType.TimeSpan:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            throw new NotImplementedException("Factory.CreateJsonDomElement has not been implemented for JTokenType." + jProperty.Value.Type);
         }
     }
 }
