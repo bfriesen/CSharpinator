@@ -107,9 +107,10 @@ namespace CSharpinator
             var outWriter = output == null ? Console.Out : new StreamWriter(output, false);
 
             IDomElement domElement;
+            DocumentType documentType;
             try
             {
-                domElement = GetRootElement(extra[0], factory);
+                domElement = GetRootElement(extra[0], factory, out documentType);
             }
             catch (Exception ex)
             {
@@ -167,7 +168,8 @@ namespace CSharpinator
                     classCase,
                     propertyCase,
                     outWriter,
-                    skipNamespace);
+                    skipNamespace,
+                    documentType);
             }
             catch (Exception ex)
             {
@@ -183,20 +185,20 @@ namespace CSharpinator
             }
         }
 
-        private static IDomElement GetRootElement(string arg, IFactory factory)
+        private static IDomElement GetRootElement(string arg, IFactory factory, out DocumentType documentType)
         {
             IDomElement domElement;
 
             if (!File.Exists(arg))
             {
-                if (!TryParseDocument(arg, factory, out domElement))
+                if (!TryParseDocument(arg, factory, out domElement, out documentType))
                 {
                     throw new InvalidArgumentsException("No file exists at: " + arg);
                 }
             }
             else
             {
-                if (!TryLoadDocument(arg, factory, out domElement))
+                if (!TryLoadDocument(arg, factory, out domElement, out documentType))
                 {
                     throw new InvalidArgumentsException("Error reading into XDocument for file: " + arg);
                 }
@@ -205,12 +207,13 @@ namespace CSharpinator
             return domElement;
         }
 
-        private static bool TryParseDocument(string arg, IFactory factory, out IDomElement domElement)
+        private static bool TryParseDocument(string arg, IFactory factory, out IDomElement domElement, out DocumentType documentType)
         {
             try
             {
                 var xDocument = XDocument.Parse(arg);
                 domElement = factory.CreateXmlDomElement(xDocument.Root);
+                documentType = DocumentType.Xml;
                 return true;
             }
             catch
@@ -219,22 +222,25 @@ namespace CSharpinator
                 {
                     var jToken = JToken.Parse(arg);
                     domElement = factory.CreateJsonDomElement(jToken);
+                    documentType = DocumentType.Json;
                     return true;
                 }
                 catch
                 {
                     domElement = null;
+                    documentType = DocumentType.Invalid;
                     return false;
                 }
             }
         }
 
-        private static bool TryLoadDocument(string arg, IFactory factory, out IDomElement domElement)
+        private static bool TryLoadDocument(string arg, IFactory factory, out IDomElement domElement, out DocumentType documentType)
         {
             try
             {
                 var xDocument = XDocument.Load(arg);
                 domElement = factory.CreateXmlDomElement(xDocument.Root);
+                documentType = DocumentType.Xml;
                 return true;
             }
             catch
@@ -251,11 +257,13 @@ namespace CSharpinator
                     }
 
                     domElement = factory.CreateJsonDomElement(jToken);
+                    documentType = DocumentType.Json;
                     return true;
                 }
                 catch
                 {
                     domElement = null;
+                    documentType = DocumentType.Invalid;
                     return false;
                 }
             }

@@ -51,6 +51,7 @@
     <Compile Include="BclClassProxy.cs" />
     <Compile Include="Case.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="DocumentType.cs" />
     <Compile Include="DomPath.cs" />
     <Compile Include="Factory.cs" />
     <Compile Include="FactoryExtensions.cs" />

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -43,18 +44,28 @@ namespace CSharpinator
             foundProperty.MergeWith(property);
         }
 
-        public string GenerateCSharpCode(Case classCase, Case propertyCase)
+        public string GenerateCSharpCode(Case classCase, Case propertyCase, DocumentType documentType)
         {
             return string.Format(
-    @"[XmlRoot(""{0}"")]
+    @"{0}
 public partial class {1}
 {{
 {2}
 }}",
-                DomPath.ElementName.Raw,
+                GetClassAttribute(documentType),
                 DomPath.TypeName.FormatAs(classCase),
                 string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode(classCase, propertyCase).Indent())))
                 .Indent();
+        }
+
+        private string GetClassAttribute(DocumentType documentType)
+        {
+            if (documentType == DocumentType.Xml)
+            {
+                return string.Format(@"[XmlRoot(""{0}"")]", DomPath.ElementName.Raw);
+            }
+
+            return "[DataContract]";
         }
 
         public virtual string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
