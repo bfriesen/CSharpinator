@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace CSharpinator
@@ -13,18 +14,21 @@ namespace CSharpinator
         public JArrayDomElement(JArray jArray, string name, IFactory factory)
         {
             _jArray = jArray;
-            _name = name;
+            _name = name; // TODO: pluralize name?
             _factory = factory;
         }
 
         public bool HasElements
         {
-            get { throw new NotImplementedException(); }
+            get { return true; }
         }
 
         public IEnumerable<IDomElement> Elements
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return _jArray.Select(item => _factory.CreateJsonDomElement(item, _name)); // TODO: singularize _name?
+            }
         }
 
         public Property CreateProperty(IClassRepository classRepository)
@@ -34,7 +38,7 @@ namespace CSharpinator
 
         public DomPath GetDomPath(IFactory factory)
         {
-            throw new NotImplementedException();
+            return _jArray.GetDomPath(factory);
         }
     }
 }

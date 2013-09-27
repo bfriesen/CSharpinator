@@ -19,12 +19,12 @@ namespace CSharpinator
 
         public bool HasElements
         {
-            get { throw new NotImplementedException(); }
+            get { return false; }
         }
 
         public IEnumerable<IDomElement> Elements
         {
-            get { throw new NotImplementedException(); }
+            get { yield break; }
         }
 
         public Property CreateProperty(IClassRepository classRepository)
@@ -34,7 +34,7 @@ namespace CSharpinator
 
         public DomPath GetDomPath(IFactory factory)
         {
-            throw new NotImplementedException();
+            return _jValue.GetDomPath(factory);
         }
     }
 }

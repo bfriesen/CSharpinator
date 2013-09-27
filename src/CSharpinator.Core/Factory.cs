@@ -210,21 +210,6 @@ namespace CSharpinator
             return domPath;
         }
 
-        public JObjectDomElement CreateJObjectDomElement(JObject jObject)
-        {
-            return new JObjectDomElement(jObject, this);
-        }
-
-        public JObjectDomElement CreateJObjectDomElement(JProperty jProperty)
-        {
-            if (jProperty.Value.Type != JTokenType.Object)
-            {
-                throw new ArgumentException("A JProperty passed in to CreateJObjectDomElement must have a value of Type JTokenType.Object.", "jProperty");
-            }
-
-            return new JObjectDomElement((JObject)jProperty.Value, jProperty.Name, this);
-        }
-
         public IDomElement CreateJsonDomElement(JToken jToken, string name)
         {
             switch (jToken.Type)
@@ -243,19 +228,12 @@ namespace CSharpinator
                 case JTokenType.TimeSpan:
                     return new JValueDomElement((JValue)jToken, name, this);
                 case JTokenType.Constructor:
-                    break;
                 case JTokenType.Property:
-                    break;
                 case JTokenType.Comment:
-                    break;
                 case JTokenType.Null:
-                    break;
                 case JTokenType.Undefined:
-                    break;
                 case JTokenType.Raw:
-                    break;
                 case JTokenType.Bytes:
-                    break;
                 case JTokenType.None:
                     break;
                 default:
@@ -265,9 +243,9 @@ namespace CSharpinator
             throw new NotImplementedException("Factory.CreateJsonDomElement has not been implemented for JTokenType." + jToken.Type);
         }
 
-        public IDomElement CreateJsonDomElement(JProperty jProperty)
+        public string JsonRootElementName
         {
-            return CreateJsonDomElement(jProperty.Value, jProperty.Name);
+            get { return _configuration.JsonRootElementName; }
         }
     }
 }

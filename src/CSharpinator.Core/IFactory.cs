@@ -23,6 +23,8 @@ namespace CSharpinator
         DomPath GetOrCreateDomPath(string fullPath);
         DomPath GetOrCreateDomPath(string fullPath, int typeNameDepth);
 
-        IDomElement CreateJsonDomElement(JProperty jProperty);
+        IDomElement CreateJsonDomElement(JToken jToken, string name);
+
+        string JsonRootElementName { get; }
     }
 }

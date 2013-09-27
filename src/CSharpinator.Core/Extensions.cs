@@ -9,19 +9,31 @@ namespace CSharpinator
 {
     public static class Extensions
     {
-        public static string GetXPath(this XText text)
+        private static string GetXPath(this XText text)
         {
-            return GetXPath(text.Parent);
+            return text.Parent.GetXPath();
         }
 
-        public static string GetXPath(this XAttribute attribute)
+        private static string GetXPath(this XAttribute attribute)
         {
-            return GetXPath(attribute.Parent) + "/" + attribute.Name.LocalName;
+            return attribute.Parent.GetXPath() + "/" + attribute.Name.LocalName;
         }
 
-        public static string GetXPath(this XElement element)
+        private static string GetXPath(this XElement element)
         {
             return string.Join("/", element.AncestorsAndSelf().Select(x => x.Name.LocalName).Reverse());
+        }
+
+        private static string GetPath(this JToken jToken, string rootElementName)
+        {
+            var path = Regex.Replace(jToken.Path, @"\[\d+\]", "").Replace(".", "/");
+
+            if (string.IsNullOrEmpty(path))
+            {
+                return rootElementName;
+            }
+
+            return rootElementName + "/" + path;
         }
 
         public static DomPath GetDomPath(this XText text, IFactory factory)
@@ -39,9 +51,9 @@ namespace CSharpinator
             return factory.GetOrCreateDomPath(element.GetXPath());
         }
 
-        public static DomPath GetDomPath(this JObject jObject, IFactory factory)
+        public static DomPath GetDomPath(this JToken jToken, IFactory factory)
         {
-            return factory.GetOrCreateDomPath(Regex.Replace(jObject.Path, @"\[\d+\]", ""));
+            return factory.GetOrCreateDomPath(jToken.GetPath(factory.JsonRootElementName));
         }
 
         public static string Indent(this string value)

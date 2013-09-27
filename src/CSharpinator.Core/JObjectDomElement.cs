@@ -11,11 +11,6 @@ namespace CSharpinator
         private readonly string _name;
         private readonly IFactory _factory;
 
-        public JObjectDomElement(JObject jObject, IFactory factory)
-            :this(jObject, "RootObject", factory)
-        {
-        }
-
         public JObjectDomElement(JObject jObject, string name, IFactory factory)
         {
             _jObject = jObject;
@@ -25,10 +20,7 @@ namespace CSharpinator
 
         public bool HasElements
         {
-            get
-            {
-                return _jObject.Properties().Any();
-            }
+            get {  return true; }
         }
 
         public IEnumerable<IDomElement> Elements

@@ -10,5 +10,7 @@ namespace CSharpinator
         {
             get { return _dateTimeFormats; }
         }
+
+        public string JsonRootElementName { get; set; }
     }
 }

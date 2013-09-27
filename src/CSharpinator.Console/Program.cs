@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CSharpinator
 {
@@ -76,7 +78,7 @@ namespace CSharpinator
                 return;
             }
 
-            var configuration = new Configuration();
+            var configuration = new Configuration { JsonRootElementName = "RootElement" }; // TODO: get json root element name from command line, if provided.
             foreach (var dateTimeFormat in dateTimeFormats)
             {
                 configuration.DateTimeFormats.Add(dateTimeFormat);
@@ -213,8 +215,17 @@ namespace CSharpinator
             }
             catch
             {
-                domElement = null;
-                return false;
+                try
+                {
+                    var jToken = JToken.Parse(arg);
+                    domElement = factory.CreateJsonDomElement(jToken);
+                    return true;
+                }
+                catch
+                {
+                    domElement = null;
+                    return false;
+                }
             }
         }
 
@@ -228,8 +239,25 @@ namespace CSharpinator
             }
             catch
             {
-                domElement = null;
-                return false;
+                try
+                {
+                    JToken jToken;
+                    using (var streamReader = new StreamReader(arg))
+                    {
+                        using (var jsonReader = new JsonTextReader(streamReader))
+                        {
+                            jToken = JToken.Load(jsonReader);
+                        }
+                    }
+
+                    domElement = factory.CreateJsonDomElement(jToken);
+                    return true;
+                }
+                catch
+                {
+                    domElement = null;
+                    return false;
+                }
             }
         }
 
