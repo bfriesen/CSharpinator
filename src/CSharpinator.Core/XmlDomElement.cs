@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace CSharpinator
 {
-    [DebuggerDisplay("{Name}")]
+    [DebuggerDisplay("{_element.Name.ToString()}")]
     public class XmlDomElement : IDomElement
     {
         private static readonly Lazy<PluralizationService> _pluralizationService = new Lazy<PluralizationService>(() => PluralizationService.CreateService(new CultureInfo("en")));
@@ -24,16 +24,6 @@ namespace CSharpinator
         public bool HasElements
         {
             get { return _element.HasElements || _element.HasAttributes || !string.IsNullOrEmpty(_element.Value); }
-        }
-
-        public string Value
-        {
-            get { return _element.Value; }
-        }
-
-        public string Name
-        {
-            get { return _element.Name.ToString(); }
         }
 
         public IEnumerable<IDomElement> Elements

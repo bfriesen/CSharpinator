@@ -22,16 +22,6 @@ namespace CSharpinator
             get { throw new NotImplementedException(); }
         }
 
-        public string Value
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public string Name
-        {
-            get { return _name; }
-        }
-
         public IEnumerable<IDomElement> Elements
         {
             get { throw new NotImplementedException(); }

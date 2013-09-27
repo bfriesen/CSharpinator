@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 namespace CSharpinator
 {
-    [DebuggerDisplay("{Name}")]
+    [DebuggerDisplay("{_attribute.Name.ToString()}")]
     public class XmlDomAttribute : IDomElement
     {
         private readonly XAttribute _attribute;
@@ -20,16 +20,6 @@ namespace CSharpinator
         public bool HasElements
         {
             get { return false; }
-        }
-
-        public string Value
-        {
-            get { return _attribute.Value; }
-        }
-
-        public string Name
-        {
-            get { return _attribute.Name.ToString(); }
         }
 
         public IEnumerable<IDomElement> Elements

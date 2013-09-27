@@ -22,22 +22,9 @@ namespace CSharpinator
             get { return false; }
         }
 
-        public string Value
-        {
-            get { return _value; }
-        }
-
-        public string Name
-        {
-            get { return "Value"; }
-        }
-
         public IEnumerable<IDomElement> Elements
         {
-            get
-            {
-                yield break;
-            }
+            get { yield break; }
         }
 
         public Property CreateProperty(IClassRepository classRepository)
@@ -49,7 +36,7 @@ namespace CSharpinator
                 propertyDefinitions.Append(
                 _factory.GetAllBclClasses()
                     .Select(bclClass =>
-                        _factory.CreatePropertyDefinition(bclClass, Name, bclClass.IsLegalValue(_value), true, AttributeProxy.XmlText()))));
+                        _factory.CreatePropertyDefinition(bclClass, "Value", bclClass.IsLegalValue(_value), true, AttributeProxy.XmlText()))));
 
             return property;
         }
