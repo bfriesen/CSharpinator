@@ -36,7 +36,7 @@ namespace CSharpinator
                 propertyDefinitions.Append(
                 _factory.GetAllBclClasses()
                     .Select(bclClass =>
-                        _factory.CreatePropertyDefinition(bclClass, "Value", bclClass.IsLegalValue(_value), true, AttributeProxy.XmlText()))));
+                        _factory.CreatePropertyDefinition(bclClass, "Value", bclClass.IsLegalStringValue(_value), true, AttributeProxy.XmlText()))));
 
             return property;
         }

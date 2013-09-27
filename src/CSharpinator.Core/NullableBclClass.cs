@@ -12,10 +12,11 @@ namespace CSharpinator
         public NullableBclClass(
             string typeName,
             string typeAlias,
-            Func<string, bool> isLegalValue,
+            Func<string, bool> isLegalStringValue,
+            Func<object, bool> isLegalObjectValue,
             string toString,
             string parse)
-            : base(typeName, typeAlias, isLegalValue)
+            : base(typeName, typeAlias, isLegalStringValue, isLegalObjectValue)
         {
             _toString = toString;
             _parse = parse;

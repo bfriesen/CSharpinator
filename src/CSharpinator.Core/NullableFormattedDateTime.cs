@@ -11,7 +11,11 @@ namespace CSharpinator
         private readonly IFactory _factory;
 
         public NullableFormattedDateTime(string format, IFactory factory)
-            : base("NullableFormattedDateTime", "DateTime?", value => { DateTime temp; return value == null || DateTime.TryParseExact(value, format, new CultureInfo("en-US"), DateTimeStyles.None, out temp); })
+            : base(
+                "NullableFormattedDateTime",
+                "DateTime?",
+                value => { DateTime temp; return value == null || DateTime.TryParseExact(value, format, new CultureInfo("en-US"), DateTimeStyles.None, out temp); },
+                value => value == null || value is DateTime)
         {
             _format = format;
             _factory = factory;

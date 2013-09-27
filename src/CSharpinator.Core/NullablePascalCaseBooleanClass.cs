@@ -6,7 +6,7 @@ namespace CSharpinator
     public class NullablePascalCaseBooleanClass : BclClassBase
     {
         public NullablePascalCaseBooleanClass()
-            : base("NullablePascalCaseBoolean", "bool?", value => value == null || value == "True" || value == "False")
+            : base("NullablePascalCaseBoolean", "bool?", value => value == null || value == "True" || value == "False", value => value == null || value is bool)
         {
         }
 

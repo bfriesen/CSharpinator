@@ -52,7 +52,7 @@ namespace CSharpinator
                         propertyDefinitions.Append(
                             _factory.GetAllBclClasses()
                                 .Select(bclClass =>
-                                    _factory.CreatePropertyDefinition(bclClass, _element.Name.ToString(), bclClass.IsLegalValue(_element.Value), true, AttributeProxy.XmlElement(_element.Name.ToString()))));
+                                    _factory.CreatePropertyDefinition(bclClass, _element.Name.ToString(), bclClass.IsLegalStringValue(_element.Value), true, AttributeProxy.XmlElement(_element.Name.ToString()))));
                     }
                     else
                     {

@@ -7,22 +7,35 @@ namespace CSharpinator
     {
         private readonly string _typeName;
         private readonly string _typeAlias;
-        private readonly Func<string, bool> _isLegalValue;
+        private readonly Func<string, bool> _isLegalStringValue;
+        private readonly Func<object, bool> _isLegalObjectValue;
 
-        protected BclClassBase(string typeName, string typeAlias, Func<string, bool> isLegalValue)
+        protected BclClassBase(string typeName, string typeAlias, Func<string, bool> isLegalStringValue, Func<object, bool> isLegalObjectValue)
         {
             _typeName = typeName;
             _typeAlias = typeAlias;
-            _isLegalValue = isLegalValue;
+            _isLegalStringValue = isLegalStringValue;
+            _isLegalObjectValue = isLegalObjectValue;
         }
 
         public string TypeName { get { return _typeName; } }
 
         public string TypeAlias { get { return _typeAlias; } }
 
-        public bool IsLegalValue(string value)
+        public bool IsLegalStringValue(string value)
         {
-            return _isLegalValue(value);
+            return _isLegalStringValue(value);
+        }
+
+        public bool IsLegalObjectValue(object value)
+        {
+            var valueAsString = value as string;
+            if (valueAsString != null)
+            {
+                return _isLegalStringValue(valueAsString) || _isLegalObjectValue(valueAsString);
+            }
+
+            return _isLegalObjectValue(value);
         }
 
         public abstract bool IsNullable { get; }

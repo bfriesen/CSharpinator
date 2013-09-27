@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace CSharpinator
@@ -29,7 +29,18 @@ namespace CSharpinator
 
         public Property CreateProperty(IClassRepository classRepository)
         {
-            throw new NotImplementedException();
+            var property = _factory.CreateProperty(
+                _jValue.GetDomPath(_factory),
+                _jValue.Value != null && (!(_jValue.Value is string) || (string)_jValue.Value != ""));
+
+            property.InitializeDefaultPropertyDefinitionSet(
+                propertyDefinitions =>
+                propertyDefinitions.Append(
+                    _factory.GetAllBclClasses()
+                        .Select(bclClass =>
+                            _factory.CreatePropertyDefinition(bclClass, _name, bclClass.IsLegalObjectValue(_jValue.Value), true, AttributeProxy.DataMember(_name)))));
+
+            return property;
         }
 
         public DomPath GetDomPath(IFactory factory)

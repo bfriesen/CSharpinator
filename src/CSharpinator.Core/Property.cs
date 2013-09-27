@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 
 namespace CSharpinator
 {
-    [DebuggerDisplay("{Id}")]
+    [DebuggerDisplay("{DomPath.FullPath}")]
     public class Property
     {
         private readonly Lazy<PropertyDefinitionSet> _defaultPropertyDefinitionSet;

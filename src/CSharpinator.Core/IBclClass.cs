@@ -5,6 +5,7 @@
         string TypeName { get; }
         string TypeAlias { get; }
         bool IsNullable { get; }
-        bool IsLegalValue(string value);
+        bool IsLegalStringValue(string value);
+        bool IsLegalObjectValue(object value);
     }
 }
