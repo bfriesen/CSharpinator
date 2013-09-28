@@ -35,9 +35,13 @@ namespace CSharpinator
         {
             var property = _factory.CreateProperty(_jObject.GetDomPath(_factory), _jObject.Properties().Any());
 
-            // TODO: call property.InitializeDefaultPropertyDefinitionSet (look at XmlDomElement for an example)
+            property.InitializeDefaultPropertyDefinitionSet(
+                propertyDefinitions =>
+                {
+                    var userDefinedClassPropertyDefinition = _factory.CreatePropertyDefinition(classRepository.GetOrAdd(_jObject.GetDomPath(_factory)), _name, true, true, AttributeProxy.DataMember(_name));
+                    propertyDefinitions.Append(userDefinedClassPropertyDefinition);
+                });
 
-            throw new NotImplementedException("TODO: call property.InitializeDefaultPropertyDefinitionSet (look at XmlDomElement for an example)");
             return property;
         }
 
