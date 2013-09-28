@@ -10,6 +10,7 @@ namespace CSharpinator
 {
     class Program
     {
+        [STAThread]
         static void Main(string[] args)
         {
             bool showHelp = false;
@@ -25,10 +26,10 @@ namespace CSharpinator
             {
                 { "n|namespace=", "The {NAMESPACE} to use for the generated classes.", value => @namespace = value },
                 { "s|skip_namespace", "Whether to skip writing out the namespace declaration and using statements.", value => skipNamespace = value != null },
-                { "o|output=", "The path for the output file. If not provided, output will be written to standard out.", value => output = value },
+                { "o|output=", "Where the output should be written to. If the value passed in is \"clipboard\", then the classes will be copied to the system clipboard. If the value provided is a file path, the classes will be written to that path. If no value is provided, output will be written to console.", value => output = value },
                 { "m|meta=", "The path to the metadata file used to describe the classes. If not provided, no metadata will be saved.", value => meta = value },
-                { "c|class_case=", "The casing to be used for class names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => classCaseString = value },
-                { "p|property_case=", "The casing to be used for property names. Valid values are 'PascalCase', 'camelCase', and 'snake_case'. Default is 'PascalCase'.", value => propertyCaseString = value },
+                { "c|class_case=", "The casing to be used for class names. Valid values are PascalCase, camelCase, and snake_case. Default is PascalCase.", value => classCaseString = value },
+                { "p|property_case=", "The casing to be used for property names. Valid values are PascalCase, camelCase, and snake_case. Default is PascalCase.", value => propertyCaseString = value },
                 { "d|date_time_format=", "A custom date time format string used for the serialization of date time fields.", value => dateTimeFormats.Add(value) },
                 { "h|help", "Show this message and exit.", value => showHelp = value != null },
             };
@@ -104,7 +105,19 @@ namespace CSharpinator
                 }
             }
 
-            var outWriter = output == null ? Console.Out : new StreamWriter(output, false);
+            TextWriter outWriter;
+            if (output == null)
+            {
+                outWriter = Console.Out;
+            }
+            else if (output == "clipboard")
+            {
+                outWriter = new ClipboardWriter();
+            }
+            else
+            {
+                outWriter = new StreamWriter(output, false);
+            }
 
             IDomElement domElement;
             DocumentType documentType;
@@ -178,10 +191,7 @@ namespace CSharpinator
             }
             finally
             {
-                if (outWriter is StreamWriter)
-                {
-                    outWriter.Close();
-                }
+                outWriter.Close();
             }
         }
 
