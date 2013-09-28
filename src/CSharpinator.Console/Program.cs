@@ -21,6 +21,7 @@ namespace CSharpinator
             string classCaseString = "PascalCase";
             string propertyCaseString = "PascalCase";
             var dateTimeFormats = new HashSet<string>();
+            string jsonRootElement = "RootElement";
 
             var p = new OptionSet
             {
@@ -31,6 +32,7 @@ namespace CSharpinator
                 { "c|class_case=", "The casing to be used for class names. Valid values are PascalCase, camelCase, and snake_case. Default is PascalCase.", value => classCaseString = value },
                 { "p|property_case=", "The casing to be used for property names. Valid values are PascalCase, camelCase, and snake_case. Default is PascalCase.", value => propertyCaseString = value },
                 { "d|date_time_format=", "A custom date time format string used for the serialization of date time fields.", value => dateTimeFormats.Add(value) },
+                { "r|root_element=", "When processing a JSON document, specifies the name of the class that corresponds with the top-level JSON object.", value => jsonRootElement = value },
                 { "h|help", "Show this message and exit.", value => showHelp = value != null },
             };
 
@@ -79,7 +81,7 @@ namespace CSharpinator
                 return;
             }
 
-            var configuration = new Configuration { JsonRootElementName = "RootElement" }; // TODO: get json root element name from command line, if provided.
+            var configuration = new Configuration { JsonRootElementName = jsonRootElement };
             foreach (var dateTimeFormat in dateTimeFormats)
             {
                 configuration.DateTimeFormats.Add(dateTimeFormat);
