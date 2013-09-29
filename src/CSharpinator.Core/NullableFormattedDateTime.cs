@@ -39,25 +39,25 @@ namespace CSharpinator
 
             sb.AppendFormat(
                 @"{0}
-public DateTime? {1} {{ get; set; }}", propertyName).AppendLine().AppendLine();
+public DateTime? {1} {{ get; set; }}", ignoreAttribute, propertyName).AppendLine().AppendLine();
 
             foreach (var attribute in attributes)
             {
-                sb.AppendLine(string.Format("{1}", attribute.ToCode()));
+                sb.AppendLine(attribute.ToCode());
             }
 
             sb.AppendFormat(
-                @"public string {1}String
+                @"public string {0}String
 {{
     get
     {{
-        return {1} == null ? null : {1}.Value.ToString(""{2}"", new CultureInfo(""en-US""));
+        return {0} == null ? null : {0}.Value.ToString(""{1}"", new CultureInfo(""en-US""));
     }}
     set
     {{
-        {1} = value == null ? null : (DateTime?)DateTime.ParseExact(value, ""{2}"", new CultureInfo(""en-US""));
+        {0} = value == null ? null : (DateTime?)DateTime.ParseExact(value, ""{1}"", new CultureInfo(""en-US""));
     }}
-}}", ignoreAttribute, propertyName, Format);
+}}", propertyName, Format);
 
             return sb.ToString();
         }

@@ -20,25 +20,25 @@ namespace CSharpinator
 
             sb.AppendFormat(
                 @"{0}
-public bool? {1} {{ get; set; }}", propertyName).AppendLine().AppendLine();
+public bool? {1} {{ get; set; }}", ignoreAttribute, propertyName).AppendLine().AppendLine();
 
             foreach (var attribute in attributes)
             {
-                sb.AppendLine(string.Format("{1}", attribute.ToCode()));
+                sb.AppendLine(attribute.ToCode());
             }
 
             sb.AppendFormat(
-                @"public string {1}String
+                @"public string {0}String
 {{
     get
     {{
-        return {1} == null ? null : {1}.Value ? ""True"" : ""False"";
+        return {0} == null ? null : {0}.Value ? ""True"" : ""False"";
     }}
     set
     {{
-        {1} = value == null ? null : (bool?)bool.Parse(value);
+        {0} = value == null ? null : (bool?)bool.Parse(value);
     }}
-}}", ignoreAttribute, propertyName);
+}}", propertyName);
 
             return sb.ToString();
         }
