@@ -16,7 +16,7 @@ namespace CSharpinator
         {
         }
 
-        public override bool IsNullable { get { return TypeAlias == "string"; } }
+        public override bool IsNullable { get { return TypeAlias == String.TypeAlias; } }
 
         public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
         {
@@ -24,7 +24,7 @@ namespace CSharpinator
 
             foreach (var attribute in attributes)
             {
-                sb.AppendLine(string.Format("{0}", attribute.ToCode()));
+                sb.AppendLine(attribute.ToCode());
             }
 
             sb.AppendFormat("public {0} {1} {{ get; set; }}", TypeAlias, propertyName);
