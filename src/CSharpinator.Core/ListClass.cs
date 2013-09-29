@@ -26,7 +26,7 @@ namespace CSharpinator
             get { return _class; }
         }
 
-        public string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
+        public string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes, DocumentType documentType)
         {
             var typeName =
                 _class is UserDefinedClass

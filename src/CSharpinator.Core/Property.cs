@@ -108,9 +108,9 @@ namespace CSharpinator
             }
         }
 
-        public string GeneratePropertyCode(Case classCase, Case propertyCase)
+        public string GeneratePropertyCode(Case classCase, Case propertyCase, DocumentType documentType)
         {
-            return SelectedPropertyDefinition.GeneratePropertyCode(classCase, propertyCase);
+            return SelectedPropertyDefinition.GeneratePropertyCode(classCase, propertyCase, documentType);
         }
 
         public void MakeNullable()

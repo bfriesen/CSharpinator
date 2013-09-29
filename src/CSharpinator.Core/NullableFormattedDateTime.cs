@@ -31,31 +31,33 @@ namespace CSharpinator
             get { return _format; }
         }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
+        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes, DocumentType documentType)
         {
             var sb = new StringBuilder();
 
+            var ignoreAttribute = documentType == DocumentType.Xml ? "[XmlIgnore]" : "[IgnoreDataMember]"; 
+
             sb.AppendFormat(
-                @"[XmlIgnore]
-public DateTime? {0} {{ get; set; }}", propertyName).AppendLine().AppendLine();
+                @"{0}
+public DateTime? {1} {{ get; set; }}", propertyName).AppendLine().AppendLine();
 
             foreach (var attribute in attributes)
             {
-                sb.AppendLine(string.Format("{0}", attribute.ToCode()));
+                sb.AppendLine(string.Format("{1}", attribute.ToCode()));
             }
 
             sb.AppendFormat(
-                @"public string {0}String
+                @"public string {1}String
 {{
     get
     {{
-        return {0} == null ? null : {0}.Value.ToString(""{1}"", new CultureInfo(""en-US""));
+        return {1} == null ? null : {1}.Value.ToString(""{2}"", new CultureInfo(""en-US""));
     }}
     set
     {{
-        {0} = value == null ? null : (DateTime?)DateTime.ParseExact(value, ""{1}"", new CultureInfo(""en-US""));
+        {1} = value == null ? null : (DateTime?)DateTime.ParseExact(value, ""{2}"", new CultureInfo(""en-US""));
     }}
-}}", propertyName, Format);
+}}", ignoreAttribute, propertyName, Format);
 
             return sb.ToString();
         }

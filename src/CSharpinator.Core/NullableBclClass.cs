@@ -24,8 +24,13 @@ namespace CSharpinator
 
         public override bool IsNullable { get { return true; } }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
+        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes, DocumentType documentType)
         {
+            if (documentType != DocumentType.Xml)
+            {
+                return base.GeneratePropertyCode(propertyName, classCase, attributes, documentType);
+            }
+
             var sb = new StringBuilder();
 
             sb.AppendFormat(
@@ -34,7 +39,7 @@ public {0} {1} {{ get; set; }}", TypeAlias, propertyName).AppendLine().AppendLin
 
             foreach (var attribute in attributes)
             {
-                sb.AppendLine(string.Format("{0}", attribute.ToCode()));
+                sb.AppendLine(attribute.ToCode());
             }
 
             sb.AppendFormat(

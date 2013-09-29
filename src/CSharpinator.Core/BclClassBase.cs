@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace CSharpinator
 {
@@ -40,7 +41,19 @@ namespace CSharpinator
 
         public abstract bool IsNullable { get; }
 
-        public abstract string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes);
+        public virtual string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes, DocumentType documentType)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var attribute in attributes)
+            {
+                sb.AppendLine(attribute.ToCode());
+            }
+
+            sb.AppendFormat("public {0} {1} {{ get; set; }}", TypeAlias, propertyName);
+
+            return sb.ToString();
+        }
 
         public override bool Equals(object other)
         {

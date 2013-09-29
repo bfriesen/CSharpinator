@@ -22,9 +22,9 @@ namespace CSharpinator
         public bool IsLegal { get; set; }
         public bool IsEnabled { get; set; }
 
-        public string GeneratePropertyCode(Case classCase, Case propertyCase)
+        public string GeneratePropertyCode(Case classCase, Case propertyCase, DocumentType documentType)
         {
-            return Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase, Attributes);
+            return Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase, Attributes, documentType);
         }
 
         public override string ToString()

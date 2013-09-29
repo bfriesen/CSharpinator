@@ -18,20 +18,6 @@ namespace CSharpinator
 
         public override bool IsNullable { get { return TypeAlias == String.TypeAlias; } }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
-        {
-            var sb = new StringBuilder();
-
-            foreach (var attribute in attributes)
-            {
-                sb.AppendLine(attribute.ToCode());
-            }
-
-            sb.AppendFormat("public {0} {1} {{ get; set; }}", TypeAlias, propertyName);
-
-            return sb.ToString();
-        }
-
         #region
         public static IBclClass String
         {

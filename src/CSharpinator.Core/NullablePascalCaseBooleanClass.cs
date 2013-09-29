@@ -12,31 +12,33 @@ namespace CSharpinator
 
         public override bool IsNullable { get { return true; } }
 
-        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes)
+        public override string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes, DocumentType documentType)
         {
             var sb = new StringBuilder();
 
+            var ignoreAttribute = documentType == DocumentType.Xml ? "[XmlIgnore]" : "[IgnoreDataMember]"; 
+
             sb.AppendFormat(
-                @"[XmlIgnore]
-public bool? {0} {{ get; set; }}", propertyName).AppendLine().AppendLine();
+                @"{0}
+public bool? {1} {{ get; set; }}", propertyName).AppendLine().AppendLine();
 
             foreach (var attribute in attributes)
             {
-                sb.AppendLine(string.Format("{0}", attribute.ToCode()));
+                sb.AppendLine(string.Format("{1}", attribute.ToCode()));
             }
 
             sb.AppendFormat(
-                @"public string {0}String
+                @"public string {1}String
 {{
     get
     {{
-        return {0} == null ? null : {0}.Value ? ""True"" : ""False"";
+        return {1} == null ? null : {1}.Value ? ""True"" : ""False"";
     }}
     set
     {{
-        {0} = value == null ? null : (bool?)bool.Parse(value);
+        {1} = value == null ? null : (bool?)bool.Parse(value);
     }}
-}}", propertyName);
+}}", ignoreAttribute, propertyName);
 
             return sb.ToString();
         }
