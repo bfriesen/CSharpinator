@@ -39,6 +39,18 @@ namespace CSharpinator
             // If JTokenType.Null, then no JTokenType is able to contain the values of all the other elements.
             // Else, we have a JTokenType that can contain all the values of the other elements.
 
+            // The 'else' condition is the happy path. We'll want to create a property custom tailored for
+            // bestFitType. When (or if) it gets merged, the merge mechanism will ensure that we end up with
+            // the best type for the property. This should be relatively easy to implement.
+
+            // As for the sad paths, which won't be as easy to implement...
+
+            // There's a strong possibility that we'll need to be able to determine whether a property should
+            // even be added to its parent class. If there were no elements in the json array, should we
+            // do anything with that array? I don't think so. And what about if no single type exists that
+            // could hold all the elements? Should we do anything with *that* array? Or throw an exception?
+            // Questions to ponder...
+
             throw new NotImplementedException();
         }
 
