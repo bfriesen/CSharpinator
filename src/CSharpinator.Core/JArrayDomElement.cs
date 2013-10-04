@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Design.PluralizationServices;
+using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -7,6 +9,8 @@ namespace CSharpinator
 {
     public class JArrayDomElement : IDomElement
     {
+        private static readonly Lazy<PluralizationService> _pluralizationService = new Lazy<PluralizationService>(() => PluralizationService.CreateService(new CultureInfo("en")));
+
         private readonly JArray _jArray;
         private readonly string _name;
         private readonly IFactory _factory;
@@ -20,19 +24,29 @@ namespace CSharpinator
 
         public bool HasElements
         {
-            get { return false; }
+            get { return _jArray.All(x => x.Type == JTokenType.Object); }
         }
 
         public IEnumerable<IDomElement> Elements
         {
             get
             {
-                yield break;
+                return 
+                    HasElements
+                        ? _jArray.Select(item => _factory.CreateJsonDomElement(item, _pluralizationService.Value.Singularize(_name)))
+                        : Enumerable.Empty<IDomElement>();
             }
+        }
+
+        public bool ActsAsRootElement 
+        {
+            get { return true; }
         }
 
         public Property CreateProperty(IClassRepository classRepository)
         {
+            var property = _factory.CreateProperty(_jArray.GetDomPath(_factory), _jArray.Count > 0);
+
             var bestFitType = GetBestFitType();
 
             // If JTokenType.None, then there weren't any elements.
@@ -51,7 +65,69 @@ namespace CSharpinator
             // could hold all the elements? Should we do anything with *that* array? Or throw an exception?
             // Questions to ponder...
 
-            throw new NotImplementedException();
+            switch (bestFitType)
+            {
+                case JTokenType.Null:
+                case JTokenType.None:
+                {
+                    throw new NotImplementedException();
+                }
+                case JTokenType.Object:
+                {
+                    property.InitializeDefaultPropertyDefinitionSet(
+                        propertyDefinitions =>
+                        propertyDefinitions.Append(
+                            _factory.CreatePropertyDefinition(
+                                ListClass.FromClass(classRepository.GetOrAdd(_jArray.GetDomPath(_factory))),
+                                _pluralizationService.Value.Pluralize(_name),
+                                true,
+                                true,
+                                AttributeProxy.DataMember(_name))));
+                    break;
+                }
+                case JTokenType.Array:
+                {
+                    throw new NotImplementedException();
+                }
+                case JTokenType.Integer:
+                case JTokenType.Float:
+                case JTokenType.String:
+                case JTokenType.Boolean:
+                case JTokenType.Date:
+                case JTokenType.Guid:
+                case JTokenType.Uri:
+                case JTokenType.TimeSpan:
+                {
+                    property.InitializeDefaultPropertyDefinitionSet(propertyDefinitions => {});
+
+                    foreach (var item in _jArray.OfType<JValue>())
+                    {
+                        var mergeProperty = _factory.CreateProperty(_jArray.GetDomPath(_factory), _jArray.Count > 0);
+
+                        mergeProperty.InitializeDefaultPropertyDefinitionSet(
+                            propertyDefinitions =>
+                            propertyDefinitions.Append(
+                                _factory.GetAllBclClasses()
+                                        .Select(
+                                            bclClass =>
+                                            _factory.CreatePropertyDefinition(
+                                                ListClass.FromClass(bclClass),
+                                                _pluralizationService.Value.Pluralize(_name),
+                                                bclClass.IsLegalObjectValue(item.Value),
+                                                true,
+                                                AttributeProxy.DataMember(_name)))));
+
+                        property.MergeWith(mergeProperty);
+                    }
+                    break;
+                }
+                default:
+                {
+                    throw new InvalidOperationException("Unsupported item in json array: " + bestFitType);
+                }
+            }
+
+            return property;
         }
 
         public DomPath GetDomPath(IFactory factory)

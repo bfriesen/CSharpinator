@@ -31,6 +31,11 @@ namespace CSharpinator
             }
         }
 
+        public bool ActsAsRootElement
+        {
+            get { return false; }
+        }
+
         public Property CreateProperty(IClassRepository classRepository)
         {
             var property = _factory.CreateProperty(_jObject.GetDomPath(_factory), _jObject.Properties().Any());

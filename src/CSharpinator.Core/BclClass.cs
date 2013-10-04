@@ -150,7 +150,7 @@ namespace CSharpinator
                         typeName,
                         "decimal",
                         value => { decimal temp; return decimal.TryParse(value, out temp); },
-                        value => value is decimal || value is double || value is float));
+                        value => value is decimal || value is double || value is float || IsIntegerType(value)));
             }
         }
 
@@ -164,7 +164,7 @@ namespace CSharpinator
                         typeName,
                         "decimal?",
                         value => { decimal temp; return string.IsNullOrEmpty(value) || decimal.TryParse(value, out temp); },
-                        value => value == null || value is decimal || value is double || value is float,
+                        value => value == null || value is decimal || value is double || value is float || IsIntegerType(value),
                         ".ToString()",
                         "decimal.Parse(value)"));
             }

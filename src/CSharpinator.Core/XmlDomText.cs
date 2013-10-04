@@ -27,6 +27,11 @@ namespace CSharpinator
             get { yield break; }
         }
 
+        public bool ActsAsRootElement
+        {
+            get { return false; }
+        }
+
         public Property CreateProperty(IClassRepository classRepository)
         {
             var property = _factory.CreateProperty(_text.GetDomPath(_factory), !string.IsNullOrEmpty(_value));

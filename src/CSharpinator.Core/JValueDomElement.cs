@@ -22,6 +22,11 @@ namespace CSharpinator
             get { return false; }
         }
 
+        public bool ActsAsRootElement
+        {
+            get { return false; }
+        }
+
         public IEnumerable<IDomElement> Elements
         {
             get { yield break; }

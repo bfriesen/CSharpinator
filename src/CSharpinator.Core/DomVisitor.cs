@@ -33,10 +33,11 @@ namespace CSharpinator
                 }
 
                 currentClass = _classRepository.GetOrAdd(element.GetDomPath(_factory), out isNew);
+                isRoot = element.ActsAsRootElement;
 
                 foreach (var childElement in element.Elements)
                 {
-                    Visit(childElement, currentClass, isNew, false, metaExists);
+                    Visit(childElement, currentClass, isNew, isRoot, metaExists);
                 }
 
                 foreach (var orphanedProperty in
