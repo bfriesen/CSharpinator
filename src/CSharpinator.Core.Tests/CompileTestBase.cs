@@ -1,21 +1,56 @@
 ﻿using Microsoft.CSharp;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using System;
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace CSharpinator.Core.Tests
 {
     public abstract class CompileTestBase
     {
-        private static readonly string[] DefaultAssemblies = { "System.dll", "System.Core.dll", "System.Data.dll", "System.Xml.dll", "System.Xml.Linq.dll" };
+        private static readonly string[] DefaultAssemblies = { "System.dll", "System.Core.dll", "System.Data.dll", "System.Xml.dll", "System.Xml.Linq.dll", "System.Runtime.Serialization.dll" };
 
-        protected static dynamic CreateObject(string sourceCode, string typeName, params string[] referencedAssemblies)
+        protected const string _rootElementName = "RootElement";
+
+        protected static readonly JsonSerializer _jsonSerializer = JsonSerializer.Create();
+
+        protected IFactory _factory;
+        protected IClassRepository _repository;
+        protected DomVisitor _visitor;
+        protected ClassGenerator _classGenerator;
+
+        protected IDomElement _rootElement;
+        protected DocumentType _documentType;
+
+        [SetUp]
+        public void Setup()
         {
+            var configuration = new Configuration { JsonRootElementName = _rootElementName };
+
+            _factory = new Factory(configuration);
+            _repository = new ClassRepository();
+
+            _visitor = new DomVisitor(_repository, _factory);
+            _classGenerator = new ClassGenerator(_repository);
+        }
+
+        protected string SerializeJson(object instance)
+        {
+            var writer = new StringWriter();
+            _jsonSerializer.Serialize(writer, instance);
+            return writer.GetStringBuilder().ToString();
+        }
+
+        protected dynamic CreateObjectFromJson(string jsonDocument)
+        {
+            var sourceCode = GetSourceCode(jsonDocument);
+
+            var typeName = "DefaultNamespace." + _rootElementName;
+
             CompilerErrorCollection compileErrors;
 
             compileErrors = new CompilerErrorCollection();
@@ -25,7 +60,6 @@ namespace CSharpinator.Core.Tests
 
             parameters.TreatWarningsAsErrors = false;
             parameters.ReferencedAssemblies.AddRange(DefaultAssemblies);
-            parameters.ReferencedAssemblies.AddRange(referencedAssemblies);
             parameters.GenerateInMemory = true;
 
             CompilerResults results = provider.CompileAssemblyFromSource(parameters, sourceCode);
@@ -40,13 +74,15 @@ namespace CSharpinator.Core.Tests
 
             if (compileErrors.Count > 0)
             {
+                Console.WriteLine(string.Join(Environment.NewLine, compileErrors.Cast<CompilerError>()));
                 throw new CompileException(string.Join(Environment.NewLine, compileErrors));
             }
 
             dynamic instance;
             try
             {
-                instance = results.CompiledAssembly.CreateInstance(typeName);
+                var type = results.CompiledAssembly.GetType(typeName);
+                instance = _jsonSerializer.Deserialize(new StringReader(jsonDocument), type);
             }
             catch (Exception ex)
             {
@@ -54,6 +90,50 @@ namespace CSharpinator.Core.Tests
             }
 
             return instance;
+        }
+
+        private string GetSourceCode(string document)
+        {
+            SetRootElement(document);
+            _visitor.Visit(_rootElement, false);
+            var writer = new StringWriter();
+            _classGenerator.Write("DefaultNamespace", Case.PascalCase, Case.PascalCase, writer, false, _documentType);
+            return writer.GetStringBuilder().ToString();
+        }
+
+        private void SetRootElement(string document)
+        {
+            if (!ParseDocument(document, _factory, out _rootElement, out _documentType))
+            {
+                throw new InvalidOperationException("Unable to create root element from document.");
+            }
+        }
+
+        private static bool ParseDocument(string document, IFactory factory, out IDomElement domElement, out DocumentType documentType)
+        {
+            try
+            {
+                var xDocument = XDocument.Parse(document);
+                domElement = factory.CreateXmlDomElement(xDocument.Root);
+                documentType = DocumentType.Xml;
+                return true;
+            }
+            catch
+            {
+                try
+                {
+                    var jToken = JToken.Parse(document);
+                    domElement = factory.CreateJsonDomElement(jToken);
+                    documentType = DocumentType.Json;
+                    return true;
+                }
+                catch
+                {
+                    domElement = null;
+                    documentType = DocumentType.Invalid;
+                    return false;
+                }
+            }
         }
 
         public class CompileException : Exception

@@ -1,28 +1,18 @@
 ﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CSharpinator.Core.Tests
 {
     public class JsonTests : CompileTestBase
     {
         [Test]
-        public void HiThere()
+        public void ExampleRoundTripTest()
         {
-            var instance = CreateObject("namespace n{public class c{public int i;}}", "n.c");
-            instance.i = 100;
-            Assert.That(instance.i, Is.EqualTo(100));
-        }
+            var document = "{\"foo\":\"bar\"}";
 
-        [Test]
-        public void HiThereAgain()
-        {
-            var instance = CreateObject("namespace n{public class c{public int i;}}", "n.c");
-            instance.i = -100;
-            Assert.That(instance.i, Is.EqualTo(-100));
+            var instance = CreateObjectFromJson(document);
+
+            Assert.That(instance.Foo, Is.EqualTo("bar"));
+            Assert.That(SerializeJson(instance), Is.EqualTo(document));
         }
     }
 }
