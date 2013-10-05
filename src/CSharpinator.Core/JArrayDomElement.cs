@@ -18,7 +18,7 @@ namespace CSharpinator
         public JArrayDomElement(JArray jArray, string name, IFactory factory)
         {
             _jArray = jArray;
-            _name = name; // TODO: pluralize name?
+            _name = name;
             _factory = factory;
         }
 
