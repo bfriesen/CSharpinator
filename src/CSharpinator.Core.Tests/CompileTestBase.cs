@@ -4,8 +4,10 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using System;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace CSharpinator.Core.Tests
@@ -14,46 +16,70 @@ namespace CSharpinator.Core.Tests
     {
         private static readonly string[] DefaultAssemblies = { "System.dll", "System.Core.dll", "System.Data.dll", "System.Xml.dll", "System.Xml.Linq.dll", "System.Runtime.Serialization.dll" };
 
-        protected const string _rootElementName = "RootElement";
+        public const string JsonRootElementName = "RootElement";
+        public const string Namespace = "DefaultNamespace";
 
-        protected static readonly JsonSerializer _jsonSerializer = JsonSerializer.Create();
+        private static readonly JsonSerializer _jsonSerializer = JsonSerializer.Create();
 
-        protected IFactory _factory;
-        protected IClassRepository _repository;
-        protected DomVisitor _visitor;
-        protected ClassGenerator _classGenerator;
+        private Lazy<IFactory> _factory;
+        private Lazy<IClassRepository> _repository;
+        private Lazy<DomVisitor> _visitor;
+        private Lazy<ClassGenerator> _classGenerator;
 
-        protected IDomElement _rootElement;
-        protected DocumentType _documentType;
+        private IDomElement _rootElement;
+        private DocumentType _documentType;
+        private IList<CompilerError> _compileErrors;
+
+        public static string JsonRootElementFullName { get { return Namespace + "." + JsonRootElementName; } }
+
+        public static JsonSerializer Serializer { get { return _jsonSerializer; } }
+
+        public IFactory Factory { get { return _factory.Value; } }
+        public IClassRepository Repository { get { return _repository.Value; } }
+        public DomVisitor Visitor { get { return _visitor.Value; } }
+        public ClassGenerator ClassGenerator { get { return _classGenerator.Value; } }
+
+        public IDomElement RootElement { get { return _rootElement; } }
+        public DocumentType DocumentType { get { return _documentType; } }
+        public IEnumerable<CompilerError> CompileErrors { get { return _compileErrors; } }
 
         [SetUp]
         public void Setup()
         {
-            var configuration = new Configuration { JsonRootElementName = _rootElementName };
+            _factory = new Lazy<IFactory>(() => new Factory(new Configuration { JsonRootElementName = JsonRootElementName }));
+            _repository = new Lazy<IClassRepository>(() => new ClassRepository());
 
-            _factory = new Factory(configuration);
-            _repository = new ClassRepository();
-
-            _visitor = new DomVisitor(_repository, _factory);
-            _classGenerator = new ClassGenerator(_repository);
+            _visitor = new Lazy<DomVisitor>(() => new DomVisitor(Repository, Factory));
+            _classGenerator = new Lazy<ClassGenerator>(() => new ClassGenerator(Repository));
         }
 
-        protected string SerializeJson(object instance)
+        protected string StripWhitespace(string document)
+        {
+            return Regex.Replace(document, @"\s", "");
+        }
+
+        protected string SerializeToJson(object instance)
         {
             var writer = new StringWriter();
             _jsonSerializer.Serialize(writer, instance);
             return writer.GetStringBuilder().ToString();
         }
 
-        protected dynamic CreateObjectFromJson(string jsonDocument)
+        protected dynamic CreateFromJson(string jsonDocument)
         {
             var sourceCode = GetSourceCode(jsonDocument);
+            var instance = CreateFromJson(jsonDocument, sourceCode);
 
-            var typeName = "DefaultNamespace." + _rootElementName;
+            Assert.That(instance, Is.Not.Null);
+            Assert.That(instance.GetType().FullName, Is.EqualTo(JsonRootElementFullName));
+            Assert.That(SerializeToJson(instance), Is.EqualTo(jsonDocument));
 
-            CompilerErrorCollection compileErrors;
-
-            compileErrors = new CompilerErrorCollection();
+            return instance;
+        }
+        
+        private dynamic CreateFromJson(string jsonDocument, string sourceCode)
+        {
+            var compileErrors = new List<CompilerError>();
             CSharpCodeProvider provider = new CSharpCodeProvider();
 
             CompilerParameters parameters = new CompilerParameters();
@@ -74,20 +100,22 @@ namespace CSharpinator.Core.Tests
 
             if (compileErrors.Count > 0)
             {
-                Console.WriteLine(string.Join(Environment.NewLine, compileErrors.Cast<CompilerError>()));
+                Console.WriteLine(string.Join(Environment.NewLine, compileErrors));
                 throw new CompileException(string.Join(Environment.NewLine, compileErrors));
             }
 
             dynamic instance;
             try
             {
-                var type = results.CompiledAssembly.GetType(typeName);
+                var type = results.CompiledAssembly.GetType(JsonRootElementFullName);
                 instance = _jsonSerializer.Deserialize(new StringReader(jsonDocument), type);
             }
             catch (Exception ex)
             {
-                throw new CompileException("Error creating instance with type name: " + typeName, ex);
+                throw new CompileException("Error creating instance with type name: " + JsonRootElementFullName, ex);
             }
+
+            _compileErrors = compileErrors;
 
             return instance;
         }
@@ -95,26 +123,26 @@ namespace CSharpinator.Core.Tests
         private string GetSourceCode(string document)
         {
             SetRootElement(document);
-            _visitor.Visit(_rootElement, false);
+            Visitor.Visit(_rootElement, false);
             var writer = new StringWriter();
-            _classGenerator.Write("DefaultNamespace", Case.PascalCase, Case.PascalCase, writer, false, _documentType);
+            ClassGenerator.Write(Namespace, Case.PascalCase, Case.PascalCase, writer, false, _documentType);
             return writer.GetStringBuilder().ToString();
         }
 
         private void SetRootElement(string document)
         {
-            if (!ParseDocument(document, _factory, out _rootElement, out _documentType))
+            if (!ParseDocument(document, Factory, out _rootElement, out _documentType))
             {
                 throw new InvalidOperationException("Unable to create root element from document.");
             }
         }
 
-        private static bool ParseDocument(string document, IFactory factory, out IDomElement domElement, out DocumentType documentType)
+        private static bool ParseDocument(string document, IFactory factory, out IDomElement rootElement, out DocumentType documentType)
         {
             try
             {
                 var xDocument = XDocument.Parse(document);
-                domElement = factory.CreateXmlDomElement(xDocument.Root);
+                rootElement = factory.CreateXmlDomElement(xDocument.Root);
                 documentType = DocumentType.Xml;
                 return true;
             }
@@ -123,13 +151,13 @@ namespace CSharpinator.Core.Tests
                 try
                 {
                     var jToken = JToken.Parse(document);
-                    domElement = factory.CreateJsonDomElement(jToken);
+                    rootElement = factory.CreateJsonDomElement(jToken);
                     documentType = DocumentType.Json;
                     return true;
                 }
                 catch
                 {
-                    domElement = null;
+                    rootElement = null;
                     documentType = DocumentType.Invalid;
                     return false;
                 }
