@@ -132,7 +132,7 @@ namespace CSharpinator
 
             foreach (var childClass in @class.Properties
                 .Select(x => x.SelectedPropertyDefinition)
-                .Where(x => x.Class.IsUserDefinedClass())
+                .Where(x => x != null && x.Class.IsUserDefinedClass())
                 .Select(x => x.Class.AsUserDefinedClass()))
             {
                 foreach (var grandchildClass in GetUserDefinedClassesImpl(childClass))

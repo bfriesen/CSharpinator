@@ -26,6 +26,8 @@ namespace CSharpinator
             get { return _class; }
         }
 
+        public bool IsPlural { get { return true; } }
+
         public string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes, DocumentType documentType)
         {
             var typeName =

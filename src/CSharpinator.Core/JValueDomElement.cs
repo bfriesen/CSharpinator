@@ -38,12 +38,19 @@ namespace CSharpinator
                 _jValue.GetDomPath(_factory),
                 _jValue.Value != null && (!(_jValue.Value is string) || (string)_jValue.Value != ""));
 
-            property.InitializeDefaultPropertyDefinitionSet(
-                propertyDefinitions =>
-                propertyDefinitions.Append(
-                    _factory.GetAllBclClasses()
-                        .Select(bclClass =>
-                            _factory.CreatePropertyDefinition(bclClass, _name, bclClass.IsLegalObjectValue(_jValue.Value), true, AttributeProxy.DataMember(_name)))));
+            if (_jValue.Type == JTokenType.Null)
+            {
+                property.InitializeDefaultPropertyDefinitionSet(_ => {});
+            }
+            else
+            {
+                property.InitializeDefaultPropertyDefinitionSet(
+                    propertyDefinitions =>
+                    propertyDefinitions.Append(
+                        _factory.GetAllBclClasses()
+                            .Select(bclClass =>
+                                _factory.CreatePropertyDefinition(bclClass, _name, bclClass.IsLegalObjectValue(_jValue.Value), true, AttributeProxy.DataMember(_name)))));
+            }
 
             return property;
         }

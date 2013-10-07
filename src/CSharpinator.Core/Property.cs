@@ -99,11 +99,6 @@ namespace CSharpinator
                     return bclClass == null || !bclClass.IsNullable || HasHadNonEmptyValue || bclClass.TypeAlias == "string";
                 });
 
-                if (selectedPropertyDefinition == null)
-                {
-                    throw new InvalidOperationException(string.Format("No potential property definition qualifies to be selected: " + DomPath.FullPath));
-                }
-
                 return selectedPropertyDefinition;
             }
         }

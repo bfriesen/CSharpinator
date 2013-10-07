@@ -49,14 +49,14 @@ namespace CSharpinator
 
         public IEnumerable<IBclClass> GetAllBclClasses()
         {
-            yield return GetOrCreateFormattedDateTime("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK");
-            yield return GetOrCreateNullableFormattedDateTime("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK");
-
             foreach (var dateTimeFormat in _configuration.DateTimeFormats)
             {
                 yield return GetOrCreateFormattedDateTime(dateTimeFormat);
                 yield return GetOrCreateNullableFormattedDateTime(dateTimeFormat);
             }
+
+            yield return GetOrCreateFormattedDateTime("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK");
+            yield return GetOrCreateNullableFormattedDateTime("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK");
 
             yield return BclClass.Int32;
             yield return BclClass.NullableInt32;
@@ -226,11 +226,11 @@ namespace CSharpinator
                 case JTokenType.Guid:
                 case JTokenType.Uri:
                 case JTokenType.TimeSpan:
+                case JTokenType.Null:
                     return new JValueDomElement((JValue)jToken, name, this);
                 case JTokenType.Constructor:
                 case JTokenType.Property:
                 case JTokenType.Comment:
-                case JTokenType.Null:
                 case JTokenType.Undefined:
                 case JTokenType.Raw:
                 case JTokenType.Bytes:

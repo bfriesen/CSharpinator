@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Design.PluralizationServices;
-using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -9,8 +7,6 @@ namespace CSharpinator
 {
     public class JArrayDomElement : IDomElement
     {
-        private static readonly Lazy<PluralizationService> _pluralizationService = new Lazy<PluralizationService>(() => PluralizationService.CreateService(new CultureInfo("en")));
-
         private readonly JArray _jArray;
         private readonly string _name;
         private readonly IFactory _factory;
@@ -33,7 +29,7 @@ namespace CSharpinator
             {
                 return 
                     HasElements
-                        ? _jArray.Select(item => _factory.CreateJsonDomElement(item, _pluralizationService.Value.Singularize(_name)))
+                        ? _jArray.Select(item => _factory.CreateJsonDomElement(item, _name))
                         : Enumerable.Empty<IDomElement>();
             }
         }
@@ -79,7 +75,7 @@ namespace CSharpinator
                         propertyDefinitions.Append(
                             _factory.CreatePropertyDefinition(
                                 ListClass.FromClass(classRepository.GetOrAdd(_jArray.GetDomPath(_factory))),
-                                _pluralizationService.Value.Pluralize(_name),
+                                _name,
                                 true,
                                 true,
                                 AttributeProxy.DataMember(_name))));
@@ -112,7 +108,7 @@ namespace CSharpinator
                                             bclClass =>
                                             _factory.CreatePropertyDefinition(
                                                 ListClass.FromClass(bclClass),
-                                                _pluralizationService.Value.Pluralize(_name),
+                                                _name,
                                                 bclClass.IsLegalObjectValue(item.Value),
                                                 true,
                                                 AttributeProxy.DataMember(_name)))));

@@ -24,7 +24,7 @@ namespace CSharpinator
 
         public string GeneratePropertyCode(Case classCase, Case propertyCase, DocumentType documentType)
         {
-            return Class.GeneratePropertyCode(Name.FormatAs(propertyCase), classCase, Attributes, documentType);
+            return Class.GeneratePropertyCode(Name.FormatAs(propertyCase, Class.IsPlural), classCase, Attributes, documentType);
         }
 
         public override string ToString()

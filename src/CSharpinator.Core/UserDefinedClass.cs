@@ -54,7 +54,7 @@ public partial class {1}
 }}",
                 GetClassAttribute(documentType),
                 DomPath.TypeName.FormatAs(classCase),
-                string.Join("\r\n\r\n", Properties.Select(x => x.GeneratePropertyCode(classCase, propertyCase, documentType).Indent())))
+                string.Join("\r\n\r\n", Properties.Where(x => x.SelectedPropertyDefinition != null).Select(x => x.GeneratePropertyCode(classCase, propertyCase, documentType).Indent())))
                 .Indent();
         }
 
@@ -67,6 +67,8 @@ public partial class {1}
 
             return "[DataContract]";
         }
+
+        public bool IsPlural { get { return false; } }
 
         public virtual string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes, DocumentType documentType)
         {

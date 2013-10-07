@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity.Design.PluralizationServices;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -11,7 +8,6 @@ namespace CSharpinator
     [DebuggerDisplay("{_element.Name.ToString()}")]
     public class XmlDomElement : IDomElement
     {
-        private static readonly Lazy<PluralizationService> _pluralizationService = new Lazy<PluralizationService>(() => PluralizationService.CreateService(new CultureInfo("en")));
         private readonly XElement _element;
         private readonly IFactory _factory;
 
@@ -91,7 +87,7 @@ namespace CSharpinator
                             var xmlArrayListPropertyDefinition =
                                     _factory.CreatePropertyDefinition(
                                         ListClass.FromClass(classRepository.GetOrAdd(first.GetDomPath(_factory))),
-                                        _pluralizationService.Value.Pluralize(first.Name.ToString()),
+                                        first.Name.ToString(),
                                         true,
                                         true,
                                         AttributeProxy.XmlArray(_element.Name.ToString()),
@@ -133,7 +129,7 @@ namespace CSharpinator
                         .Select(x =>
                             _factory.CreatePropertyDefinition(
                                 ListClass.FromClass(x.Class),
-                                _pluralizationService.Value.Pluralize(_element.Name.ToString()),
+                                _element.Name.ToString(),
                                 x.IsLegal,
                                 x.IsEnabled,
                                 AttributeProxy.XmlElement(_element.Name.ToString()))
