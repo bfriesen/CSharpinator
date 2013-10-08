@@ -32,7 +32,7 @@ namespace CSharpinator
             get { yield break; }
         }
 
-        public Property CreateProperty(IClassRepository classRepository)
+        public Property CreateProperty(IRepository repository)
         {
             var property = _factory.CreateProperty(
                 _jValue.GetDomPath(_factory),

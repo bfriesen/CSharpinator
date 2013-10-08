@@ -25,12 +25,12 @@ namespace CSharpinator
             return ListClassProxy.FromListClass((ListClass)@class);
         }
 
-        public IClass ToClass(IClassRepository classRepository, IFactory factory)
+        public IClass ToClass(IRepository repository, IFactory factory)
         {
             var userDefinedClassProxy = this as UserDefinedClassProxy;
             if (userDefinedClassProxy != null)
             {
-                return classRepository.GetOrAdd(userDefinedClassProxy.GetDomPath(factory));
+                return repository.GetOrAdd(userDefinedClassProxy.GetDomPath(factory));
             }
 
             var bclClassProxy = this as BclClassProxy;
@@ -39,7 +39,7 @@ namespace CSharpinator
                 return BclClassProxy.ToBclClass(bclClassProxy, factory);
             }
 
-            return ListClassProxy.ToListClass((ListClassProxy)this, classRepository, factory);
+            return ListClassProxy.ToListClass((ListClassProxy)this, repository, factory);
         }
     }
 }

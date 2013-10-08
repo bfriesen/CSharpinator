@@ -10,6 +10,7 @@ namespace CSharpinator
     {
         [XmlAttribute]
         public string DomPath { get; set; }
+
         [XmlElement("Property")]
         public List<PropertyProxy> Properties { get; set; }
 
@@ -31,20 +32,6 @@ namespace CSharpinator
                 DomPath = string.Format("{0}:{1}", userDefinedClass.DomPath.FullPath, userDefinedClass.DomPath.TypeNameDepth),
                 Properties = userDefinedClass.Properties.Select(PropertyProxy.FromProperty).ToList()
             };
-        }
-
-        public UserDefinedClass ToUserDefinedClass(IClassRepository classRepository, IFactory factory)
-        {
-            var domPath = GetDomPath(factory);
-            var userDefinedClass = classRepository.GetOrAdd(domPath);
-
-            foreach (var propertyProxy in Properties)
-            {
-                // We're sending 'true' for the isParentClassNew parameter, since we don't want to mark anything as nullable.
-                userDefinedClass.AddProperty(propertyProxy.ToProperty(classRepository, factory), true, true);
-            }
-
-            return userDefinedClass;
         }
     }
 }

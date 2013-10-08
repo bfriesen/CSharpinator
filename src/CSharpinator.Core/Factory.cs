@@ -12,11 +12,11 @@ namespace CSharpinator
         private readonly ConcurrentDictionary<string, FormattedDateTime> _formattedDateTimes = new ConcurrentDictionary<string, FormattedDateTime>();
         private readonly ConcurrentDictionary<string, NullableFormattedDateTime> _nullableFormattedDateTimes = new ConcurrentDictionary<string, NullableFormattedDateTime>();
 
-        private readonly IConfiguration _configuration;
+        private readonly IRepository _repository;
 
-        public Factory(IConfiguration configuration)
+        public Factory(IRepository repository)
         {
-            _configuration = configuration;
+            _repository = repository;
         }
 
         public XmlDomElement CreateXmlDomElement(XElement element)
@@ -49,7 +49,7 @@ namespace CSharpinator
 
         public IEnumerable<IBclClass> GetAllBclClasses()
         {
-            foreach (var dateTimeFormat in _configuration.DateTimeFormats)
+            foreach (var dateTimeFormat in _repository.DateTimeFormats)
             {
                 yield return GetOrCreateFormattedDateTime(dateTimeFormat);
                 yield return GetOrCreateNullableFormattedDateTime(dateTimeFormat);
@@ -245,7 +245,7 @@ namespace CSharpinator
 
         public string JsonRootElementName
         {
-            get { return _configuration.JsonRootElementName; }
+            get { return _repository.JsonRootElementName; }
         }
     }
 }

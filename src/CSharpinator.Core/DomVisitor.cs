@@ -4,12 +4,12 @@ namespace CSharpinator
 {
     public class DomVisitor
     {
-        private readonly IClassRepository _classRepository;
+        private readonly IRepository _repository;
         private readonly IFactory _factory;
 
-        public DomVisitor(IClassRepository classRepository, IFactory factory)
+        public DomVisitor(IRepository repository, IFactory factory)
         {
-            _classRepository = classRepository;
+            _repository = repository;
             _factory = factory;
         }
 
@@ -18,7 +18,7 @@ namespace CSharpinator
         public void Visit(IDomElement element, bool metaExists)
         {
             bool isNew;
-            _classRepository.GetOrAdd(element.GetDomPath(_factory), out isNew);
+            _repository.GetOrAdd(element.GetDomPath(_factory), out isNew);
             Visit(element, null, isNew, true, metaExists);
         }
 
@@ -28,11 +28,11 @@ namespace CSharpinator
             {
                 if (!isRoot) // if this is not the root element
                 {
-                    var property = element.CreateProperty(_classRepository);
+                    var property = element.CreateProperty(_repository);
                     currentClass.AddProperty(property, isNew, metaExists);
                 }
 
-                currentClass = _classRepository.GetOrAdd(element.GetDomPath(_factory), out isNew);
+                currentClass = _repository.GetOrAdd(element.GetDomPath(_factory), out isNew);
                 isRoot = element.ActsAsRootElement;
 
                 foreach (var childElement in element.Elements)
@@ -53,11 +53,11 @@ namespace CSharpinator
                 if (isRoot) // if this is the root element
                 {
                     // Make sure a class exists for the root element, no matter what.
-                    _classRepository.GetOrAdd(element.GetDomPath(_factory));
+                    _repository.GetOrAdd(element.GetDomPath(_factory));
                 }
                 else
                 {
-                    var property = element.CreateProperty(_classRepository);
+                    var property = element.CreateProperty(_repository);
                     currentClass.AddProperty(property, isNew, metaExists);
                 }
                 
@@ -66,7 +66,7 @@ namespace CSharpinator
                     // If we're refining, and this element has no children, there is a
                     // possibility that it had previous contained children. Make those
                     // children nullable.
-                    currentClass = _classRepository.GetOrAdd(element.GetDomPath(_factory));
+                    currentClass = _repository.GetOrAdd(element.GetDomPath(_factory));
                     foreach (var property in currentClass.Properties)
                     {
                         property.MakeNullable();

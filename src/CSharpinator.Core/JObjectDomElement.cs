@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -36,14 +35,14 @@ namespace CSharpinator
             get { return false; }
         }
 
-        public Property CreateProperty(IClassRepository classRepository)
+        public Property CreateProperty(IRepository repository)
         {
             var property = _factory.CreateProperty(_jObject.GetDomPath(_factory), _jObject.Properties().Any());
 
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
                 {
-                    var userDefinedClassPropertyDefinition = _factory.CreatePropertyDefinition(classRepository.GetOrAdd(_jObject.GetDomPath(_factory)), _name, true, true, AttributeProxy.DataMember(_name));
+                    var userDefinedClassPropertyDefinition = _factory.CreatePropertyDefinition(repository.GetOrAdd(_jObject.GetDomPath(_factory)), _name, true, true, AttributeProxy.DataMember(_name));
                     propertyDefinitions.Append(userDefinedClassPropertyDefinition);
                 });
 

@@ -15,9 +15,9 @@ namespace CSharpinator
             };
         }
 
-        public static ListClass ToListClass(ListClassProxy listClassProxy, IClassRepository classRepository, IFactory factory)
+        public static ListClass ToListClass(ListClassProxy listClassProxy, IRepository repository, IFactory factory)
         {
-            return ListClass.FromClass(listClassProxy.Class.ToClass(classRepository, factory));
+            return ListClass.FromClass(listClassProxy.Class.ToClass(repository, factory));
         }
     }
 }

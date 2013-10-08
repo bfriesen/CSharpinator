@@ -39,7 +39,7 @@ namespace CSharpinator
             get { return true; }
         }
 
-        public Property CreateProperty(IClassRepository classRepository)
+        public Property CreateProperty(IRepository repository)
         {
             var property = _factory.CreateProperty(_jArray.GetDomPath(_factory), _jArray.Count > 0);
 
@@ -74,7 +74,7 @@ namespace CSharpinator
                         propertyDefinitions =>
                         propertyDefinitions.Append(
                             _factory.CreatePropertyDefinition(
-                                ListClass.FromClass(classRepository.GetOrAdd(_jArray.GetDomPath(_factory))),
+                                ListClass.FromClass(repository.GetOrAdd(_jArray.GetDomPath(_factory))),
                                 _name,
                                 true,
                                 true,

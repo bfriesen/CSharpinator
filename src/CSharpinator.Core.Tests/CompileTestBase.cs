@@ -22,7 +22,7 @@ namespace CSharpinator.Core.Tests
         private static readonly JsonSerializer _jsonSerializer = JsonSerializer.Create();
 
         private Lazy<IFactory> _factory;
-        private Lazy<IClassRepository> _repository;
+        private Lazy<IRepository> _repository;
         private Lazy<DomVisitor> _visitor;
         private Lazy<ClassGenerator> _classGenerator;
 
@@ -35,7 +35,7 @@ namespace CSharpinator.Core.Tests
         public static JsonSerializer Serializer { get { return _jsonSerializer; } }
 
         public IFactory Factory { get { return _factory.Value; } }
-        public IClassRepository Repository { get { return _repository.Value; } }
+        public IRepository Repository { get { return _repository.Value; } }
         public DomVisitor Visitor { get { return _visitor.Value; } }
         public ClassGenerator ClassGenerator { get { return _classGenerator.Value; } }
 
@@ -46,8 +46,8 @@ namespace CSharpinator.Core.Tests
         [SetUp]
         public void Setup()
         {
-            _factory = new Lazy<IFactory>(() => new Factory(new Configuration { JsonRootElementName = JsonRootElementName }));
-            _repository = new Lazy<IClassRepository>(() => new ClassRepository());
+            _repository = new Lazy<IRepository>(() => new Repository { JsonRootElementName = JsonRootElementName });
+            _factory = new Lazy<IFactory>(() => new Factory(_repository.Value));
 
             _visitor = new Lazy<DomVisitor>(() => new DomVisitor(Repository, Factory));
             _classGenerator = new Lazy<ClassGenerator>(() => new ClassGenerator(Repository));

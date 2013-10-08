@@ -41,7 +41,7 @@ namespace CSharpinator
             get { return false; }
         }
 
-        public Property CreateProperty(IClassRepository classRepository)
+        public Property CreateProperty(IRepository repository)
         {
             var property = _factory.CreateProperty(_element.GetDomPath(_factory), _element.HasElements || _element.HasAttributes || !string.IsNullOrEmpty(_element.Value));
 
@@ -64,7 +64,7 @@ namespace CSharpinator
                     }
 
                     var userDefinedClassPropertyDefinition =
-                        _factory.CreatePropertyDefinition(classRepository.GetOrAdd(_element.GetDomPath(_factory)), _element.Name.ToString(), true, true, AttributeProxy.XmlElement(_element.Name.ToString()));
+                        _factory.CreatePropertyDefinition(repository.GetOrAdd(_element.GetDomPath(_factory)), _element.Name.ToString(), true, true, AttributeProxy.XmlElement(_element.Name.ToString()));
 
                     if (_element.HasElements || _element.HasAttributes)
                     {
@@ -86,7 +86,7 @@ namespace CSharpinator
 
                             var xmlArrayListPropertyDefinition =
                                     _factory.CreatePropertyDefinition(
-                                        ListClass.FromClass(classRepository.GetOrAdd(first.GetDomPath(_factory))),
+                                        ListClass.FromClass(repository.GetOrAdd(first.GetDomPath(_factory))),
                                         first.Name.ToString(),
                                         true,
                                         true,

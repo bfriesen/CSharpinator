@@ -7,7 +7,7 @@ namespace CSharpinator
         bool HasElements { get; }
         IEnumerable<IDomElement> Elements { get; }
         bool ActsAsRootElement { get; }
-        Property CreateProperty(IClassRepository classRepository);
+        Property CreateProperty(IRepository repository);
         DomPath GetDomPath(IFactory factory);
     }
 }

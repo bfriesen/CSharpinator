@@ -32,7 +32,7 @@ namespace CSharpinator
             get { return false; }
         }
 
-        public Property CreateProperty(IClassRepository classRepository)
+        public Property CreateProperty(IRepository repository)
         {
             var property = _factory.CreateProperty(_text.GetDomPath(_factory), !string.IsNullOrEmpty(_value));
             

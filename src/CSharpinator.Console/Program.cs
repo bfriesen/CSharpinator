@@ -81,29 +81,17 @@ namespace CSharpinator
                 return;
             }
 
-            var configuration = new Configuration { JsonRootElementName = jsonRootElement };
-            foreach (var dateTimeFormat in dateTimeFormats)
-            {
-                configuration.DateTimeFormats.Add(dateTimeFormat);
-            }
-
-            var factory = new Factory(configuration);
-            var classRepository = new ClassRepository();
-            var serializer = new XmlSerializer(typeof(ClassDefinitions));
+            var repository = new Repository { JsonRootElementName = jsonRootElement };
+            var factory = new Factory(repository);
+            var serializer = new XmlSerializer(typeof(Metadata));
 
             var metaExists = meta != null && File.Exists(meta);
             if (metaExists)
             {
                 using (var reader = new StreamReader(meta))
                 {
-                    var classDefinitions = (ClassDefinitions)serializer.Deserialize(reader);
-
-                    foreach (var dateTimeFormat in classDefinitions.DateTimeFormats)
-                    {
-                        configuration.DateTimeFormats.Add(dateTimeFormat);
-                    }
-
-                    classDefinitions.LoadToRepository(classRepository, factory);
+                    var metadata = (Metadata)serializer.Deserialize(reader);
+                    repository.LoadFromMetadata(metadata, factory);
                 }
             }
 
@@ -133,7 +121,7 @@ namespace CSharpinator
                 return;
             }
 
-            var domVisitor = new DomVisitor(classRepository, factory);
+            var domVisitor = new DomVisitor(repository, factory);
 
             try
             {
@@ -149,16 +137,12 @@ namespace CSharpinator
             {
                 try
                 {
-                    var classDefinitions = ClassDefinitions.FromClasses(classRepository.GetAll());
-                    foreach (var dateTimeFormat in configuration.DateTimeFormats)
-                    {
-                        classDefinitions.DateTimeFormats.Add(dateTimeFormat);
-                    }
+                    var metadata = repository.CreateMetadata();
 
                     string tempFileName;
                     using (var writer = new StreamWriter(tempFileName = Path.GetTempFileName()))
                     {
-                        serializer.Serialize(writer, classDefinitions);
+                        serializer.Serialize(writer, metadata);
                     }
 
                     var metaContents = File.ReadAllText(tempFileName);
@@ -174,7 +158,7 @@ namespace CSharpinator
                 }
             }
 
-            var classGenerator = new ClassGenerator(classRepository);
+            var classGenerator = new ClassGenerator(repository);
 
             try
             {

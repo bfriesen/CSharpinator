@@ -116,7 +116,7 @@ namespace CSharpinator
             return false;
         }
 
-        public static IEnumerable<UserDefinedClass> GetUsedClasses(this IClassRepository repository)
+        public static IEnumerable<UserDefinedClass> GetUsedClasses(this IRepository repository)
         {
             return repository.GetAll().First().GetUsedClasses();
         }

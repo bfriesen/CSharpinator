@@ -32,7 +32,7 @@ namespace CSharpinator
             };
         }
 
-        public Property ToProperty(IClassRepository classRepository, IFactory factory)
+        public Property ToProperty(IRepository repository, IFactory factory)
         {
             var split = DomPath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
             var domPath = factory.GetOrCreateDomPath(split[0], int.Parse(split[1]));
@@ -40,11 +40,11 @@ namespace CSharpinator
 
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>
-                propertyDefinitions.Append(DefaultPropertyDefinitionSet.PropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository, factory))));
+                propertyDefinitions.Append(DefaultPropertyDefinitionSet.PropertyDefinitions.Select(x => x.ToPropertyDefinition(repository, factory))));
 
             foreach (var proxySet in ExtraPropertyDefinitionSets)
             {
-                var set = proxySet.ToPropertyDefinitionSet(classRepository, factory);
+                var set = proxySet.ToPropertyDefinitionSet(repository, factory);
                 property.AddOrUpdateExtraPropertyDefinitionSet(set);
             }
 

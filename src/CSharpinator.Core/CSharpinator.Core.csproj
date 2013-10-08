@@ -50,7 +50,6 @@
     <Compile Include="BclClassBase.cs" />
     <Compile Include="BclClassProxy.cs" />
     <Compile Include="Case.cs" />
-    <Compile Include="Configuration.cs" />
     <Compile Include="DocumentType.cs" />
     <Compile Include="DomPath.cs" />
     <Compile Include="Factory.cs" />
@@ -59,14 +58,13 @@
     <Compile Include="FormattedDateTimeProxy.cs" />
     <Compile Include="IBclClass.cs" />
     <Compile Include="IClass.cs" />
-    <Compile Include="ClassDefinitions.cs" />
+    <Compile Include="Metadata.cs" />
     <Compile Include="ClassGenerator.cs" />
     <Compile Include="ClassProxy.cs" />
-    <Compile Include="ClassRepository.cs" />
+    <Compile Include="Repository.cs" />
     <Compile Include="DomVisitor.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="IClassRepository.cs" />
-    <Compile Include="IConfiguration.cs" />
+    <Compile Include="IRepository.cs" />
     <Compile Include="IdentifierName.cs" />
     <Compile Include="IDomElement.cs" />
     <Compile Include="IFactory.cs" />

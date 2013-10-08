@@ -174,9 +174,9 @@ namespace CSharpinator
             };
         }
 
-        public PropertyDefinition ToPropertyDefinition(IClassRepository classRepository, IFactory factory)
+        public PropertyDefinition ToPropertyDefinition(IRepository repository, IFactory factory)
         {
-            var @class = Class.ToClass(classRepository, factory);
+            var @class = Class.ToClass(repository, factory);
             var propertyDefinition = factory.CreatePropertyDefinition(@class, Name, IsLegal, IsEnabled, Attributes.ToArray());
             return propertyDefinition;
         }

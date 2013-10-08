@@ -29,14 +29,14 @@ namespace CSharpinator
             };
         }
 
-        public PropertyDefinitionSet ToPropertyDefinitionSet(IClassRepository classRepository, IFactory factory)
+        public PropertyDefinitionSet ToPropertyDefinitionSet(IRepository repository, IFactory factory)
         {
             return new PropertyDefinitionSet
             {
                 Name = Name,
                 Order = Order,
                 IsEnabled = IsEnabled,
-                PropertyDefinitions = PropertyDefinitions.Select(x => x.ToPropertyDefinition(classRepository, factory)).ToList()
+                PropertyDefinitions = PropertyDefinitions.Select(x => x.ToPropertyDefinition(repository, factory)).ToList()
             };
         }
     }
