@@ -81,7 +81,8 @@ namespace CSharpinator
                 return;
             }
 
-            var repository = new Repository { JsonRootElementName = jsonRootElement };
+            var repository = new Repository(dateTimeFormats, jsonRootElement);
+
             var factory = new Factory(repository);
             var serializer = new XmlSerializer(typeof(Metadata));
 

@@ -30,10 +30,20 @@ namespace CSharpinator
 
         public string GeneratePropertyCode(string propertyName, Case classCase, IEnumerable<AttributeProxy> attributes, DocumentType documentType)
         {
-            var typeName =
-                _class is UserDefinedClass
-                    ? ((UserDefinedClass)_class).TypeName.FormatAs(classCase)
-                    : ((IBclClass)_class).TypeAlias;
+            string typeName;
+
+            var userDefinedClass = _class as UserDefinedClass;
+            if (userDefinedClass != null)
+            {
+                typeName =
+                    string.IsNullOrEmpty(userDefinedClass.CustomName)
+                        ? userDefinedClass.TypeName.FormatAs(classCase)
+                        : userDefinedClass.CustomName;
+            }
+            else
+            {
+                typeName = ((IBclClass)_class).TypeAlias;
+            }
 
             var sb = new StringBuilder();
 

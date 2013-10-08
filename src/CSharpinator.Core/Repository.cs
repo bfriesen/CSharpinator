@@ -11,6 +11,16 @@ namespace CSharpinator
         private readonly HashSet<string> _references = new HashSet<string>();
         private readonly HashSet<string> _usings = new HashSet<string>();
 
+        public Repository(IEnumerable<string> dateTimeFormats, string jsonRootClassElement)
+        {
+            foreach (var dateTimeFormat in dateTimeFormats)
+            {
+                _dateTimeFormats.Add(dateTimeFormat);
+            }
+
+            JsonRootElementName = jsonRootClassElement;
+        }
+
         public IEnumerable<UserDefinedClass> GetAll()
         {
             return _classes.Values.OrderBy(x => x.Order);
@@ -43,6 +53,7 @@ namespace CSharpinator
             {
                 var domPath = classProxy.GetDomPath(factory);
                 var userDefinedClass = GetOrAdd(domPath);
+                userDefinedClass.CustomName = classProxy.CustomName;
 
                 foreach (var propertyProxy in classProxy.Properties)
                 {

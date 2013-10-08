@@ -11,6 +11,9 @@ namespace CSharpinator
         [XmlAttribute]
         public string DomPath { get; set; }
 
+        [XmlAttribute]
+        public string CustomName { get; set; }
+
         [XmlElement("Property")]
         public List<PropertyProxy> Properties { get; set; }
 
@@ -30,7 +33,8 @@ namespace CSharpinator
             return new UserDefinedClassProxy
             {
                 DomPath = string.Format("{0}:{1}", userDefinedClass.DomPath.FullPath, userDefinedClass.DomPath.TypeNameDepth),
-                Properties = userDefinedClass.Properties.Select(PropertyProxy.FromProperty).ToList()
+                Properties = userDefinedClass.Properties.Select(PropertyProxy.FromProperty).ToList(),
+                CustomName = userDefinedClass.CustomName
             };
         }
     }

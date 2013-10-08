@@ -6,9 +6,9 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace CSharpinator.Core.Tests
 {
@@ -46,7 +46,7 @@ namespace CSharpinator.Core.Tests
         [SetUp]
         public void Setup()
         {
-            _repository = new Lazy<IRepository>(() => new Repository { JsonRootElementName = JsonRootElementName });
+            _repository = new Lazy<IRepository>(() => new Repository(Enumerable.Empty<string>(), JsonRootElementName));
             _factory = new Lazy<IFactory>(() => new Factory(_repository.Value));
 
             _visitor = new Lazy<DomVisitor>(() => new DomVisitor(Repository, Factory));

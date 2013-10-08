@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace CSharpinator
 {
@@ -29,7 +30,27 @@ namespace CSharpinator
                 ? Name.FormatAs(propertyCase, Class.IsPlural)
                 : customPropertyName;
 
+            var userDefinedClass = Class as UserDefinedClass;
+            if (userDefinedClass != null && !string.IsNullOrEmpty(userDefinedClass.CustomName))
+            {
+                return GenerateCustomClassNameProperty(userDefinedClass.CustomName, propertyName);
+            }
+
             return Class.GeneratePropertyCode(propertyName, classCase, Attributes, documentType);
+        }
+
+        private string GenerateCustomClassNameProperty(string customClassName, string propertyName)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var attribute in Attributes)
+            {
+                sb.AppendLine(attribute.ToCode());
+            }
+
+            sb.AppendFormat("public {0} {1} {{ get; set; }}", customClassName, propertyName);
+
+            return sb.ToString();
         }
 
         public override string ToString()

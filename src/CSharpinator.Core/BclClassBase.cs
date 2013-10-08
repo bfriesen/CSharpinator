@@ -20,7 +20,6 @@ namespace CSharpinator
         }
 
         public string TypeName { get { return _typeName; } }
-
         public string TypeAlias { get { return _typeAlias; } }
 
         public bool IsLegalStringValue(string value)
