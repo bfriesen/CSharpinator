@@ -9,6 +9,9 @@ namespace CSharpinator
     public class PropertyProxy
     {
         [XmlAttribute]
+        public string CustomName { get; set; }
+
+        [XmlAttribute]
         public string DomPath { get; set; }
 
         [XmlAttribute]
@@ -25,6 +28,7 @@ namespace CSharpinator
         {
             return new PropertyProxy
             {
+                CustomName = property.CustomName,
                 DomPath = string.Format("{0}:{1}", property.DomPath.FullPath, property.DomPath.TypeNameDepth),
                 HasHadNonEmptyValue = property.HasHadNonEmptyValue,
                 DefaultPropertyDefinitionSet = PropertyDefinitionSetProxy.FromPropertyDefinitionSet(property.DefaultPropertyDefinitionSet),
@@ -37,6 +41,8 @@ namespace CSharpinator
             var split = DomPath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
             var domPath = factory.GetOrCreateDomPath(split[0], int.Parse(split[1]));
             var property = factory.CreateProperty(domPath, HasHadNonEmptyValue);
+
+            property.CustomName = CustomName;
 
             property.InitializeDefaultPropertyDefinitionSet(
                 propertyDefinitions =>

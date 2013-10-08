@@ -27,6 +27,7 @@ namespace CSharpinator
 
         public DomPath DomPath { get { return _domPath; } }
         public bool HasHadNonEmptyValue { get; set; }
+        public string CustomName { get; set; }
 
         public PropertyDefinitionSet DefaultPropertyDefinitionSet
         {
@@ -105,7 +106,7 @@ namespace CSharpinator
 
         public string GeneratePropertyCode(Case classCase, Case propertyCase, DocumentType documentType)
         {
-            return SelectedPropertyDefinition.GeneratePropertyCode(classCase, propertyCase, documentType);
+            return SelectedPropertyDefinition.GeneratePropertyCode(classCase, propertyCase, documentType, CustomName);
         }
 
         public void MakeNullable()
