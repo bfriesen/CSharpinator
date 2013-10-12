@@ -16,5 +16,7 @@ namespace CSharpinator
         IEnumerable<string> DateTimeFormats { get; }
 
         string JsonRootElementName { get; }
+
+        void SetDocumentType(DocumentType documentType);
     }
 }

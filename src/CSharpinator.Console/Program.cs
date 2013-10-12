@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace CSharpinator
 {
@@ -55,9 +55,9 @@ namespace CSharpinator
                 return;
             }
 
-            if (extra.Count != 1)
+            if (extra.Count != 1 && string.IsNullOrEmpty(meta))
             {
-                Console.WriteLine("Error: no document provided.");
+                Console.WriteLine("Error: no document or metadata provided.");
                 Console.WriteLine();
                 ShowHelp(p);
                 return;
@@ -110,35 +110,43 @@ namespace CSharpinator
                 outWriter = new StreamWriter(output, false);
             }
 
-            IDomElement domElement;
-            DocumentType documentType;
-            try
-            {
-                domElement = GetRootElement(extra[0], factory, out documentType);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Unable to create valid document: " + ex.Message);
-                return;
-            }
+            var documentType = DocumentType.Invalid;
 
-            var domVisitor = new DomVisitor(repository, factory);
-
-            try
+            if (extra.Count == 1)
             {
-                domVisitor.Visit(domElement, metaExists);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Unable to process document: " + ex.Message);
-                return;
-            }
+                IDomElement domElement;
+                try
+                {
+                    domElement = GetRootElement(extra[0], factory, out documentType);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Unable to create valid document: " + ex.Message);
+                    return;
+                }
 
+                repository.SetDocumentType(documentType);
+
+                var domVisitor = new DomVisitor(repository, factory);
+
+                try
+                {
+                    domVisitor.Visit(domElement, metaExists);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Unable to process document: " + ex.Message);
+                    return;
+                }
+            }
+                
             if (meta != null)
             {
                 try
                 {
                     var metadata = repository.CreateMetadata();
+
+                    documentType = metadata.DocumentType;
 
                     string tempFileName;
                     using (var writer = new StreamWriter(tempFileName = Path.GetTempFileName()))

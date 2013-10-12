@@ -10,6 +10,9 @@ namespace CSharpinator
             DateTimeFormats = new HashSet<string>();
         }
 
+        [XmlElement("DocumentType")]
+        public DocumentType DocumentType { get; set; }
+
         [XmlArray("References")]
         [XmlArrayItem("Reference")]
         public HashSet<string> References { get; set; }

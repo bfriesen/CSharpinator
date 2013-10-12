@@ -6,6 +6,7 @@ namespace CSharpinator
 {
     public class Repository : IRepository
     {
+        private DocumentType _documentType;
         private readonly ConcurrentDictionary<DomPath, UserDefinedClass> _classes = new ConcurrentDictionary<DomPath, UserDefinedClass>();
         private readonly HashSet<string> _dateTimeFormats = new HashSet<string>();
         private readonly HashSet<string> _references = new HashSet<string>();
@@ -62,6 +63,8 @@ namespace CSharpinator
                 }
             }
 
+            _documentType = metadata.DocumentType;
+
             if (metadata.References != null)
             {
                 foreach (var reference in metadata.References)
@@ -91,6 +94,7 @@ namespace CSharpinator
         {
             var metadata = new Metadata
             {
+                DocumentType = _documentType,
                 Classes = GetAll().Select(UserDefinedClassProxy.FromUserDefinedClass).ToList(),
                 DateTimeFormats = _dateTimeFormats,
                 References = _references,
@@ -100,6 +104,8 @@ namespace CSharpinator
             return metadata;
         }
 
+        public DocumentType DocumentType { get { return _documentType; } }
+
         public IEnumerable<string> References { get { return _references; } }
 
         public IEnumerable<string> Usings { get { return _usings; } }
@@ -107,5 +113,10 @@ namespace CSharpinator
         public IEnumerable<string> DateTimeFormats { get { return _dateTimeFormats; } }
 
         public string JsonRootElementName { get; set; }
+
+        public void SetDocumentType(DocumentType documentType)
+        {
+            _documentType = documentType;
+        }
     }
 }
